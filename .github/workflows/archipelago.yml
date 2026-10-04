@@ -107,9 +107,30 @@ jobs:
           name: RE4-UHD-Archipelago
           path: out/
 
+      - uses: actions/checkout@v4
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        with:
+          path: src
+          sparse-checkout: archipelago/apworld/re4uhd/archipelago.json
+
+      - name: Release version
+        id: ver
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        run: echo "tag=v$(python3 -c "import json;print(json.load(open('src/archipelago/apworld/re4uhd/archipelago.json'))['world_version'])")" >> "$GITHUB_OUTPUT"
+
+      # Publishes on a pushed v* tag, or when the workflow is run by hand (Actions tab > Run workflow);
+      # the release is tagged with the APWorld's world_version.
       - name: Publish GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: RE4 UHD Archipelago ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.ver.outputs.tag }}
+          body: |
+            Download all three files below. Setup steps: see TUTORIAL.md in the repository.
+            - `re4uhd.apworld` - double-click to install into Archipelago (0.6.7+)
+            - `RE4-UHD-Archipelago.zip` - extract into the game's Bin32 folder
+            - `Resident Evil 4 UHD.yaml` - your player settings
           files: out/*
           prerelease: true
