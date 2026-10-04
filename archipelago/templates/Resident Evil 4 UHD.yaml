@@ -28,9 +28,16 @@ Resident Evil 4 UHD:
   # Pesetas at the start: 0-100000
   starting_pesetas: 0
 
-  # Turn on if you also use re_duke's RE4 Enemy/Merchant Randomizer (moddb.com/mods/re4randomizer).
-  # Turns off Merchant checks, boss checks and the medallion reward, which that mod changes.
-  enemy_randomizer_compat: false
+  # --- re_duke's RE4 PC Randomizer (install it yourself inside the game folder; see the tutorial) ---
+  # Random enemies / enemy health / Merchant / loadout from re_duke's randomizer, set up by the client's /setup.
+  # Doors and item randomization stay off there (Archipelago places the items).
+  # Turns off Merchant checks, boss checks and the medallion reward.
+  re_duke_randomizer: false
+  re_duke_preset: default        # default, normal, hard
+  re_duke_enemies: true
+  re_duke_enemy_health: true
+  re_duke_merchant: true
+  re_duke_starting_loadout: false
 
   # When you die, everyone with DeathLink dies, and vice versa. Experimental.
   death_link: false

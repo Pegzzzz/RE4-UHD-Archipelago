@@ -1,4 +1,7 @@
-from typing import Any, Callable, Dict, List
+import zlib
+from typing import Any, Callable, ClassVar, Dict, List
+
+import settings
 
 from BaseClasses import CollectionState, Item, ItemClassification, Location, Region, Tutorial
 from worlds.AutoWorld import WebWorld, World
@@ -6,7 +9,8 @@ from worlds.LauncherComponents import Component, Type, components, launch as lau
 
 from .data_loader import (CHAPTER_GATES, CHAPTERS, GAME_NAME, ITEM_BASE_ID, ITEM_NAME_TO_ID, ITEMS,
                           ITEMS_BY_NAME, LOCATION_BASE_ID, LOCATION_NAME_TO_ID, LOCATIONS)
-from .options import RE4Options
+from .options import OPTION_GROUPS, RE4Options
+from .rando_bridge import rando_settings
 
 
 def launch_client(*args: str) -> None:
@@ -19,8 +23,18 @@ components.append(Component("Resident Evil 4 UHD Client", func=launch_client,
                             supports_uri=True))
 
 
+class RE4Settings(settings.Group):
+    class GameFolder(settings.OptionalUserFolderPath):
+        """Resident Evil 4 game folder (the one that contains Bin32). Steam installs are found automatically;
+        the client's /setup command fills this in."""
+        description = "Resident Evil 4 game folder"
+
+    game_folder: GameFolder = GameFolder("")
+
+
 class RE4Web(WebWorld):
     theme = "stone"
+    option_groups = OPTION_GROUPS
     tutorials = [Tutorial(
         "Multiworld Setup Guide",
         "How to install the RE4 UHD Archipelago mod and connect to a multiworld.",
@@ -83,6 +97,8 @@ class RE4World(World):
     web = RE4Web()
     options_dataclass = RE4Options
     options: RE4Options
+    settings_key = "re4uhd_options"
+    settings: ClassVar[RE4Settings]
     topology_present = False
 
     item_name_to_id = ITEM_NAME_TO_ID
@@ -103,7 +119,7 @@ class RE4World(World):
 
     def _location_enabled(self, loc: Dict[str, Any]) -> bool:
         kind = loc["kind"]
-        if self.options.enemy_randomizer_compat and kind in ("merchant", "boss", "medallion_reward"):
+        if self.re_duke and kind in ("merchant", "boss", "medallion_reward"):
             return False
         if kind == "pickup" and loc.get("consumable"):
             return bool(self.options.consumable_checks)
@@ -114,6 +130,10 @@ class RE4World(World):
         if kind == "bottle_cap":
             return bool(self.options.shooting_gallery_checks)
         return True
+
+    @property
+    def re_duke(self) -> bool:
+        return bool(self.options.re_duke_randomizer or self.options.enemy_randomizer_compat)
 
     def generate_early(self) -> None:
         self.enabled_locations = [l for l in LOCATIONS if self._location_enabled(l)]
@@ -237,7 +257,14 @@ class RE4World(World):
             "version": 1,
             "death_link": bool(self.options.death_link),
             "location_base": LOCATION_BASE_ID,
-            "enemy_randomizer_compat": bool(self.options.enemy_randomizer_compat),
+            "enemy_randomizer_compat": self.re_duke,
+            "re_duke": rando_settings(
+                self.options.re_duke_preset.value, bool(self.options.re_duke_enemies),
+                bool(self.options.re_duke_enemy_health), bool(self.options.re_duke_merchant),
+                bool(self.options.re_duke_starting_loadout),
+                # same enemies every time this slot regenerates; kept small for the randomizer's number box
+                1 + zlib.crc32(f"{self.multiworld.seed_name}:{self.player}".encode()) % 99,
+            ) if self.re_duke else None,
             "locations": locs,
             "items": items,
         }

@@ -130,6 +130,11 @@ jobs:
           mkdir -p out
           (cd dl/game-files && zip -r ../../out/RE4-UHD-Archipelago.zip .)
           cp dl/apworld/ap/build/apworlds/re4uhd.apworld out/
+          # all-in-one: the client's /setup installs the game mod from inside the apworld
+          mkdir -p inject/re4uhd/game_files
+          cp -r dl/game-files/. inject/re4uhd/game_files/
+          (cd inject && zip -r ../out/re4uhd.apworld re4uhd/game_files)
+          python3 -c "import zipfile;z=zipfile.ZipFile('out/re4uhd.apworld');n=z.namelist();assert 're4uhd/game_files/dinput8.dll' in n and 're4uhd/archipelago.json' in n;print(len(n),'files in apworld')"
           cp "dl/apworld/archipelago/templates/Resident Evil 4 UHD.yaml" out/
           ls -la out
 
@@ -160,8 +165,8 @@ jobs:
           name: RE4 UHD Archipelago ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.ver.outputs.tag }}
           body: |
             Download all three files below. Setup steps: see TUTORIAL.md in the repository.
-            - `re4uhd.apworld` - double-click to install into Archipelago (0.6.7+)
-            - `RE4-UHD-Archipelago.zip` - extract into the game's Bin32 folder
+            - `re4uhd.apworld` - double-click to install into Archipelago (0.6.7+); it includes the game mod, which the client's `/setup` command installs
+            - `RE4-UHD-Archipelago.zip` - the same game mod, for installing by hand into the game's Bin32 folder
             - `Resident Evil 4 UHD.yaml` - your player settings
           files: out/*
           prerelease: true

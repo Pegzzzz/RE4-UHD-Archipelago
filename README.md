@@ -16,7 +16,8 @@ re4_tweaks README follows below.
 |---|---|
 | `dllmain/Archipelago.cpp` | Game-side module: localhost bridge, check detection, item delivery, overlay |
 | `archipelago/apworld/re4uhd/` | The APWorld (items, locations, logic, options) and the launcher client |
-| `archipelago/tools/` | Research data, `build_data.py` (regenerates the location table), packaging scripts |
+| `archipelago/apworld/re4uhd/rando_bridge.py` | `/setup`: finds the game, installs the mod, drives re_duke's randomizer (separate download) |
+| `archipelago/tools/` | Research data, `build_data.py` (regenerates the location table), packaging scripts, `pattern_scan.py` (checks re4_tweaks hooks against a given bio4.exe) |
 | `.github/workflows/archipelago.yml` | Builds `dinput8.dll` and `re4uhd.apworld`, tags `v*` publish a release |
 
 Location data comes from community research (Evil Resource, StrategyWiki) mapped to the game's internal room ids.

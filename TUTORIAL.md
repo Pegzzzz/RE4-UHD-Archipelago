@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.2).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.3).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -16,11 +16,14 @@ It takes about 15 minutes the first time.
 | Archipelago **0.6.7 or newer** | [Archipelago releases](https://github.com/ArchipelagoMW/Archipelago/releases) — install it like any program |
 | This mod's release files | The [**Releases** page](https://github.com/Pegzzzz/RE4-UHD-Archipelago/releases) of this repository |
 
-From the latest release, download these three files:
+From the latest release, download:
 
-- `re4uhd.apworld` — teaches Archipelago about RE4
-- `RE4-UHD-Archipelago.zip` — the game mod
+- `re4uhd.apworld` — teaches Archipelago about RE4, and contains the game mod
 - `Resident.Evil.4.UHD.yaml` — your settings file (GitHub swaps the spaces for dots; the name doesn't matter)
+- *(only for installing by hand)* `RE4-UHD-Archipelago.zip` — the same game mod as a zip
+
+**Optional:** [re_duke's RE4 PC Randomizer](https://www.moddb.com/mods/re4randomizer) (or the newer build from
+re_duke's Patreon), for random enemies, enemy health and Merchant. See [section 3b](#3b-optional-re_dukes-randomizer-random-enemies).
 
 ---
 
@@ -36,17 +39,56 @@ usually `C:\ProgramData\Archipelago\custom_worlds`.)
 
 ## 3. Install the game mod
 
-1. In Steam, right-click **Resident Evil 4** → **Manage** → **Browse local files**.
-2. Open the **Bin32** folder.
-3. *(Recommended)* Make a backup copy of the Bin32 folder somewhere safe.
-4. Extract everything from `RE4-UHD-Archipelago.zip` into **Bin32**. Say **yes** if Windows asks to replace files.
+**Easy way (recommended):**
 
-You should now see `dinput8.dll`, `dinput8.ini` and a `re4_tweaks` folder inside Bin32.
+1. Open the **Archipelago Launcher** → **Resident Evil 4 UHD Client**.
+2. Type `/setup` and press Enter.
+
+The client finds your Steam copy of Resident Evil 4 and installs the game mod into its **Bin32** folder. Your old
+`dinput8.dll`, if there was one, is kept as `dinput8.dll.pre-archipelago`. If the game isn't found automatically, give
+the folder yourself (the one that contains `Bin32`):
+
+```
+/setup "C:\Program Files (x86)\Steam\steamapps\common\Resident Evil 4"
+```
+
+**By hand:** in Steam, right-click **Resident Evil 4** → **Manage** → **Browse local files**, open **Bin32**, and
+extract everything from `RE4-UHD-Archipelago.zip` there (say **yes** to replace files).
 
 > The mod is built on [re4_tweaks](https://github.com/nipkownix/re4_tweaks), so you also get all of its fixes.
 > If you already used re4_tweaks or the HD Project, this replaces their `dinput8.dll`. Everything else keeps working.
 
-**To uninstall:** delete `dinput8.dll` from Bin32 (or restore your backup).
+**To uninstall:** delete `dinput8.dll` from Bin32 and rename `dinput8.dll.pre-archipelago` back to `dinput8.dll`
+(or verify the game files in Steam).
+
+---
+
+## 3b. Optional: re_duke's randomizer (random enemies)
+
+[re_duke's RE4 PC Randomizer](https://www.moddb.com/mods/re4randomizer) randomizes enemies, bosses, enemy health,
+the Merchant and more. It's a separate project (not included here); this mod sets it up to work with Archipelago.
+
+1. Install it the normal way: extract its zip **into the Resident Evil 4 folder** (not Bin32), so you have
+   `Resident Evil 4\RE4_PC_Randomizer\RE4RND_v2.exe`. Follow its own setup guide for anything else.
+2. In your YAML, set `re_duke_randomizer: true` (and pick the `re_duke_…` options you like, see section 4).
+3. After you generate the multiworld, connect the client to the room, then type `/setup`.
+   - The client installs our game mod (step 3) and writes an **"Archipelago"** profile for the randomizer, made from
+     your own copy's presets with your YAML choices.
+   - It then opens the randomizer. Check that the settings are loaded, click **Generate Seed**, and wait for
+     *"Seed generated correctly"*.
+4. Start the game and play as in step 6. Each time you connect, the client checks that the last randomizer seed
+   is safe for Archipelago and matches your slot. `/rando` writes the profile and opens the randomizer again.
+
+**What's different with it on:**
+
+- **Doors, item and key-item randomization are always off** in the Archipelago profile. Archipelago places the
+  items, and its logic needs the normal room layout. (If you turn them back on in the randomizer, the client will
+  warn you.)
+- Merchant checks, boss checks and the blue medallion reward are turned off, because the randomizer changes those.
+- The same slot always gets the same enemies (the client sets the randomizer's seed number from your slot).
+- The randomizer replaces `bio4.exe` with its own patched version and keeps its own settings in `dinput8.ini`; our
+  `dinput8.dll` works with both. If you reinstall the randomizer later, run `/setup` again, since its zip contains
+  an older `dinput8.dll`.
 
 ---
 
@@ -68,7 +110,12 @@ The YAML file holds your name and your choices for the randomizer.
 | `starting_weapon` | An extra weapon at the start, with 2 boxes of its ammo: `vanilla` (none), `random_handgun` (Red9, Blacktail or Punisher) or `random_weapon` (any). | `vanilla` |
 | `starting_supplies` | 0–10 random supplies (ammo, herbs, grenades, sprays) at the start. | `0` |
 | `starting_pesetas` | 0–100000 pesetas at the start. | `0` |
-| `enemy_randomizer_compat` | Turn on if you also use re_duke's enemy randomizer (see [below](#7b-combining-with-re_dukes-enemy-randomizer)). | `false` |
+| `re_duke_randomizer` | Use re_duke's randomizer for random enemies (see [3b](#3b-optional-re_dukes-randomizer-random-enemies)). Turns off Merchant/boss checks. | `false` |
+| `re_duke_preset` | The randomizer preset to start from: `default`, `normal` or `hard`. | `default` |
+| `re_duke_enemies` | Random enemies. | `true` |
+| `re_duke_enemy_health` | Random enemy health. | `true` |
+| `re_duke_merchant` | Random Merchant stock, prices and weapon upgrades. | `true` |
+| `re_duke_starting_loadout` | Let the randomizer also roll a random starting loadout. | `false` |
 | `death_link` | When you die, everyone with DeathLink dies too (and vice versa). Experimental. | `false` |
 
 **Goal:** defeat Saddler.
@@ -147,30 +194,14 @@ You can also ask the host to use `!release` / `!collect`.
 
 ---
 
-## 7b. Combining with re_duke's enemy randomizer
-
-For random enemies and bosses, you can play this together with
-[re_duke's RE4 Enemy/Merchant Randomizer](https://www.moddb.com/mods/re4randomizer) (not part of this project).
-
-1. Install re_duke's randomizer first, following its readme.
-2. Then extract `RE4-UHD-Archipelago.zip` into **Bin32** as in step 3 (our `dinput8.dll` already includes
-   re4_tweaks, which that randomizer recommends).
-3. Set `enemy_randomizer_compat: true` in your YAML.
-
-That mod changes the Merchant's stock and swaps boss fights, so this option turns off Merchant checks, boss checks
-and the blue medallion reward. The goal then triggers when you reach the jet-ski escape after Saddler.
-
-> This combination hasn't been tested in game yet. If something breaks, try without the enemy randomizer and
-> report it.
-
----
-
 ## 8. Client commands
 
 Type these in the Resident Evil 4 UHD Client:
 
 | Command | What it does |
 |---|---|
+| `/setup` | Installs the game mod and, if your YAML uses it, sets up re_duke's randomizer. `/setup "<game folder>"` if the game isn't found |
+| `/rando` | Writes the Archipelago profile for re_duke's randomizer and opens it |
 | `/game` | Shows whether the game mod is connected |
 | `/bindsave` | Links the save you have loaded to this multiworld (see below) |
 | `!hint <item>` | Asks where an item is |
@@ -197,6 +228,15 @@ it couldn't match to a log file.
 
 **The game crashes on start after installing**
 Make sure you're on the Steam UHD version and that you extracted into **Bin32**. Restore your backup to undo.
+
+**With re_duke's randomizer: crashes or odd behaviour**
+First check the randomizer's own setup guide and FAQ (most crashes come from its enemy settings, overlays like
+Discord, or missing `X3DAudio1_7.dll`). To tell whose problem it is, try once without our mod: rename `dinput8.dll` to
+`dinput8.dll.off` and put `dinput8.dll.pre-archipelago` back as `dinput8.dll`.
+
+**"re_duke randomizer: … turned on, which breaks Archipelago's item logic"**
+The last seed was generated with doors or items randomized. Type `/rando`, keep the Archipelago profile, and click
+Generate Seed again.
 
 ---
 

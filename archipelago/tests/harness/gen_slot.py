@@ -9,14 +9,26 @@ from worlds.re4uhd.data_loader import LOCATIONS, LOCATION_NAME_TO_ID
 from BaseClasses import MultiWorld
 from worlds.re4uhd.options import RE4Options
 import types
-w = RE4World.__new__(RE4World)
-class O: pass
-o = O()
-for k in ("shuffle_key_items","consumable_checks","merchant_checks","boss_checks","shooting_gallery_checks"): setattr(o,k,1)
-o.death_link=1
-o.enemy_randomizer_compat=0
-w.options=o
-w.generate_early()
+# a real (one-player) generation, so slot_data comes from exactly the code players run
+from BaseClasses import CollectionState
+from Generate import get_seed_name
+from worlds import AutoWorld
+from worlds.AutoWorld import call_all
+from argparse import Namespace
+from test.general import gen_steps
+mw = MultiWorld(1)
+mw.game[1] = RE4World.game
+mw.player_name = {1: "Leon"}
+mw.set_seed(1)
+mw.seed_name = "harness"
+args = Namespace()
+for name, option in RE4World.options_dataclass.type_hints.items():
+    setattr(args, name, {1: option.from_any(option.default)})
+args.death_link = {1: RE4World.options_dataclass.type_hints["death_link"].from_any(1)}
+mw.set_options(args)
+for step in gen_steps:
+    call_all(mw, step)
+w = mw.worlds[1]
 sd = w.fill_slot_data()
 out=sys.argv[1]
 out = os.path.abspath(out) if os.path.isabs(out) else os.path.join(HDIR, out)

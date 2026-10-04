@@ -20,6 +20,9 @@ game -> client
 """
 import asyncio
 import json
+import os
+import sys
+import zipfile
 import zlib
 from typing import Any, Dict, List, Optional
 
@@ -28,10 +31,56 @@ from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser
                           logger, server_loop)
 from NetUtils import ClientStatus, NetworkItem
 
+from . import rando_bridge
+
 GAME_NAME = "Resident Evil 4 UHD"
 GAME_HOST = "127.0.0.1"
 GAME_PORT = 46400
 PROTOCOL_VERSION = 1
+
+
+def get_game_folder_setting() -> Optional[str]:
+    try:
+        from settings import get_settings
+        value = get_settings()["re4uhd_options"]["game_folder"]
+        return str(value) if value else None
+    except Exception:
+        return None
+
+
+def set_game_folder_setting(folder: str) -> None:
+    try:
+        from settings import get_settings
+        s = get_settings()
+        s["re4uhd_options"]["game_folder"] = folder
+        s.save()
+    except Exception as e:
+        logger.debug(f"couldn't save the game folder to host.yaml: {e}")
+
+
+def bundled_game_files() -> Optional[str]:
+    """The game mod files shipped inside this APWorld (release builds), as a folder on disk."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    folder = os.path.join(here, "game_files")
+    if os.path.isdir(folder):
+        return folder
+    # packaged .apworld: extract once to a cache folder
+    apworld = os.path.dirname(here)
+    if not zipfile.is_zipfile(apworld):
+        return None
+    with zipfile.ZipFile(apworld) as z:
+        names = [n for n in z.namelist() if n.startswith("re4uhd/game_files/") and not n.endswith("/")]
+        if not names:
+            return None
+        stamp = str(zlib.crc32(b"".join(z.getinfo(n).CRC.to_bytes(4, "little") for n in names)))
+        cache = Utils.user_path("re4uhd_game_files", stamp)
+        if not os.path.isdir(cache):
+            for n in names:
+                target = os.path.join(cache, *n[len("re4uhd/game_files/"):].split("/"))
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with z.open(n) as src, open(target, "wb") as dst:
+                    dst.write(src.read())
+        return cache
 
 
 def save_tag(seed_name: str, slot: int, team: int) -> int:
@@ -45,6 +94,20 @@ class RE4CommandProcessor(ClientCommandProcessor):
         if isinstance(self.ctx, RE4Context):
             state = "connected" if self.ctx.game_writer else "not connected"
             logger.info(f"Game mod: {state}. Save received-item index: {self.ctx.game_received}")
+        return True
+
+    def _cmd_setup(self, folder: str = "") -> bool:
+        """Set up the game: install the Archipelago game mod, and (if your YAML uses re_duke_randomizer)
+        prepare re_duke's randomizer and open it so you can click Generate Seed.
+        Optional: the game folder, if it isn't found automatically (the folder that contains Bin32)."""
+        if isinstance(self.ctx, RE4Context):
+            self.ctx.run_setup(folder.strip().strip('"') or None)
+        return True
+
+    def _cmd_rando(self) -> bool:
+        """Write the Archipelago profile for re_duke's randomizer and open it (then click Generate Seed)."""
+        if isinstance(self.ctx, RE4Context):
+            self.ctx.prepare_rando(launch=True)
         return True
 
     def _cmd_bindsave(self) -> bool:
@@ -68,6 +131,99 @@ class RE4Context(CommonContext):
         self.game_task: Optional[asyncio.Task] = None
         self.goal_sent = False
         self.goal_pending = False
+        self.known_game_folder: Optional[str] = None
+
+    # ---- local setup -------------------------------------------------------------
+    def game_folder(self, explicit: Optional[str] = None) -> Optional[str]:
+        stored = get_game_folder_setting()
+        folder = rando_bridge.find_game_folder(explicit or self.known_game_folder or stored)
+        if folder:
+            self.known_game_folder = folder
+            if folder != stored:
+                set_game_folder_setting(folder)
+        return folder
+
+    def run_setup(self, explicit: Optional[str] = None) -> None:
+        game = self.game_folder(explicit)
+        if not game:
+            logger.error("Couldn't find Resident Evil 4. Type /setup followed by the game folder, for example:\n"
+                         '  /setup "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resident Evil 4"')
+            return
+        logger.info(f"Game folder: {game}")
+        files = bundled_game_files()
+        if files:
+            try:
+                written = rando_bridge.install_mod(game, files)
+                logger.info(f"Installed the Archipelago game mod into Bin32 ({len(written)} files). "
+                            "Your previous dinput8.dll, if any, was kept as dinput8.dll.pre-archipelago.")
+            except OSError as e:
+                logger.error(f"Couldn't install the game mod (is the game running?): {e}")
+                return
+        elif not rando_bridge.mod_installed(game):
+            logger.warning("The game mod isn't installed: extract RE4-UHD-Archipelago.zip into Bin32 "
+                           "(this APWorld build doesn't include the game files).")
+        else:
+            logger.info("Archipelago game mod is installed.")
+        if self.slot_data.get("re_duke"):
+            self.prepare_rando(launch=True, game=game)
+        elif not self.slot_data:
+            logger.info("Connect to the room to also set up re_duke's randomizer, if your YAML uses it.")
+
+    def prepare_rando(self, launch: bool, game: Optional[str] = None) -> bool:
+        settings = self.slot_data.get("re_duke")
+        if not settings:
+            logger.info("Your slot doesn't use re_duke's randomizer (re_duke_randomizer: false).")
+            return False
+        game = game or self.game_folder()
+        if not game:
+            logger.error("Couldn't find Resident Evil 4; run /setup with the game folder first.")
+            return False
+        rando = rando_bridge.rando_folder(game)
+        if not rando:
+            logger.error(f"re_duke's randomizer isn't in the game folder. Extract it there so that "
+                         f"{os.path.join(game, rando_bridge.RANDO_FOLDER, rando_bridge.RANDO_EXE)} exists "
+                         "(get it from moddb.com/mods/re4randomizer or re_duke's Patreon), then run /rando.")
+            return False
+        try:
+            unknown = rando_bridge.apply_profile(rando, settings)
+        except OSError as e:
+            logger.error(f"Couldn't write the randomizer profile: {e}")
+            return False
+        if unknown:
+            logger.warning("This randomizer version doesn't know these settings (they'll be ignored): "
+                           + ", ".join(unknown))
+        logger.info("Wrote the 'Archipelago' profile for re_duke's randomizer: random enemies etc. as in your "
+                    "YAML; doors, items and key items OFF (Archipelago places the items).")
+        if launch:
+            if sys.platform != "win32":
+                logger.info(f"Open {rando_bridge.RANDO_EXE} yourself and click Generate Seed.")
+            else:
+                try:
+                    rando_bridge.launch_rando(rando)
+                    logger.info("Opened the randomizer. Check that the 'Archipelago' settings are loaded, click "
+                                "Generate Seed, wait for 'Seed generated correctly', then start the game. "
+                                "Type /rando again any time to redo this.")
+                except OSError as e:
+                    logger.error(f"Couldn't start the randomizer: {e}")
+        return True
+
+    def check_local_setup(self) -> None:
+        game = self.game_folder()
+        if not game:
+            logger.info("Tip: type /setup to install the game mod (and set up re_duke's randomizer).")
+            return
+        if not rando_bridge.mod_installed(game):
+            logger.warning("The Archipelago game mod isn't installed in this game folder. Type /setup to install it.")
+        settings = self.slot_data.get("re_duke")
+        if settings:
+            rando = rando_bridge.rando_folder(game)
+            if not rando:
+                logger.warning("Your YAML uses re_duke's randomizer, but it isn't in the game folder. "
+                               "See the tutorial, then type /setup.")
+                return
+            status, message = rando_bridge.check_generated(rando, settings)
+            (logger.info if status == "ok" else logger.warning)("re_duke randomizer: " + message +
+                                                               ("" if status == "ok" else " Type /rando."))
 
     # ---- Archipelago side ------------------------------------------------------
     async def server_auth(self, password_requested: bool = False) -> None:
@@ -89,6 +245,10 @@ class RE4Context(CommonContext):
             self.send_config()
             self.send_items()
             self.send_checked()
+            try:
+                self.check_local_setup()
+            except Exception as e:  # never let a local-file problem break the connection
+                logger.debug(f"local setup check failed: {e}")
         elif cmd == "ReceivedItems":
             self.send_items()
         elif cmd == "RoomUpdate":

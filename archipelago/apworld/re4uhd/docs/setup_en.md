@@ -12,7 +12,8 @@ If you already use re4_tweaks or the HD Project, this build replaces their `dinp
 ## Installing
 
 1. Double-click `re4uhd.apworld`. Archipelago installs it into its `custom_worlds` folder.
-2. Open your game folder (Steam: right-click the game > Manage > Browse local files) and go into `Bin32`.
+2. Open the Resident Evil 4 UHD Client from the Archipelago Launcher and type `/setup`: it finds the game and
+   installs the game mod. Or, by hand: open your game folder (Steam: right-click the game > Manage > Browse local files) and go into `Bin32`.
 3. Extract `RE4-UHD-Archipelago.zip` there, replacing files if asked. You should now have `Bin32\dinput8.dll`,
    `Bin32\dinput8.ini` and a `Bin32\re4_tweaks` folder.
 
@@ -46,10 +47,11 @@ The village, castle and island each lock behind you. If an item you need is stuc
 reach, press **F1** to open the re4_tweaks menu, go to the **Trainer** tab and use **Area Jump** to go back.
 You can also ask the host to `!release`/`!collect`.
 
-## Random enemies
+## Random enemies (re_duke's randomizer)
 
-To also randomize enemies and bosses, install re_duke's RE4 Enemy/Merchant Randomizer
-(moddb.com/mods/re4randomizer) first, then this mod's files, and set `enemy_randomizer_compat: true` in your YAML.
+Install re_duke's RE4 PC Randomizer inside the game folder (moddb.com/mods/re4randomizer), set
+`re_duke_randomizer: true` in your YAML, connect the client to the room and type `/setup`. The client writes an
+"Archipelago" profile for the randomizer (doors and item randomization off) and opens it; click Generate Seed.
 
 ## Troubleshooting
 

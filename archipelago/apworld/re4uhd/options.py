@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, DeathLink, DefaultOnToggle, PerGameCommonOptions, Range, Toggle
+from Options import Choice, DeathLink, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, Toggle, Visibility
 
 
 class ShuffleKeyItems(DefaultOnToggle):
@@ -59,11 +59,50 @@ class StartingPesetas(Range):
     default = 0
 
 
+class ReDukeRandomizer(Toggle):
+    """Also use re_duke's RE4 PC Randomizer (Patreon / moddb.com/mods/re4randomizer, installed separately inside
+    the game folder) for random enemies, enemy health, Merchant stock/prices/upgrades and starting loadout.
+    The RE4 UHD Client's /setup command writes an Archipelago-safe settings profile for it and opens it:
+    doors, item and key-item randomization are always turned off there, because Archipelago places the items.
+    This turns off Merchant checks, boss checks and the blue medallion reward (that mod changes them);
+    the goal also triggers when you reach the jet-ski escape."""
+    display_name = "re_duke Randomizer"
+
+
+class ReDukePreset(Choice):
+    """Which of the randomizer's own presets to start from (Hard has more and tougher enemy types)."""
+    display_name = "re_duke Randomizer Preset"
+    option_default = 0
+    option_normal = 1
+    option_hard = 2
+    default = 0
+
+
+class ReDukeEnemies(DefaultOnToggle):
+    """Randomize enemies (needs re_duke_randomizer)."""
+    display_name = "re_duke: Random Enemies"
+
+
+class ReDukeEnemyHealth(DefaultOnToggle):
+    """Randomize enemy health within the preset's ranges (needs re_duke_randomizer)."""
+    display_name = "re_duke: Random Enemy Health"
+
+
+class ReDukeMerchant(DefaultOnToggle):
+    """Randomize the Merchant's stock, prices and weapon upgrades (needs re_duke_randomizer)."""
+    display_name = "re_duke: Random Merchant"
+
+
+class ReDukeLoadout(Toggle):
+    """Let the randomizer also roll a random starting loadout, on top of this world's starting options
+    (needs re_duke_randomizer)."""
+    display_name = "re_duke: Random Starting Loadout"
+
+
 class EnemyRandomizerCompat(Toggle):
-    """Turn this on if you also play with re_duke's RE4 Enemy/Merchant Randomizer (moddb.com/mods/re4randomizer).
-    That mod changes the Merchant's stock and replaces boss fights, so Merchant checks, boss checks and the
-    blue medallion reward are turned off. The goal then triggers when you reach the jet-ski escape."""
-    display_name = "Enemy Randomizer Compatibility"
+    """Deprecated (0.2.0): same as re_duke_randomizer: true."""
+    display_name = "Enemy Randomizer Compatibility (deprecated)"
+    visibility = Visibility.none
 
 
 @dataclass
@@ -76,5 +115,19 @@ class RE4Options(PerGameCommonOptions):
     starting_weapon: StartingWeapon
     starting_supplies: StartingSupplies
     starting_pesetas: StartingPesetas
+    re_duke_randomizer: ReDukeRandomizer
+    re_duke_preset: ReDukePreset
+    re_duke_enemies: ReDukeEnemies
+    re_duke_enemy_health: ReDukeEnemyHealth
+    re_duke_merchant: ReDukeMerchant
+    re_duke_starting_loadout: ReDukeLoadout
     enemy_randomizer_compat: EnemyRandomizerCompat
     death_link: DeathLink
+
+
+OPTION_GROUPS = [
+    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, MerchantChecks, BossChecks, ShootingGalleryChecks]),
+    OptionGroup("Starting Inventory", [StartingWeapon, StartingSupplies, StartingPesetas]),
+    OptionGroup("re_duke Randomizer", [ReDukeRandomizer, ReDukePreset, ReDukeEnemies, ReDukeEnemyHealth,
+                                       ReDukeMerchant, ReDukeLoadout]),
+]
