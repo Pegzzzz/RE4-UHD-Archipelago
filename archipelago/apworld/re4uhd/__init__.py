@@ -195,6 +195,7 @@ class RE4World(World):
         return {
             "version": 1,
             "death_link": bool(self.options.death_link),
+            "location_base": LOCATION_BASE_ID,
             "locations": locs,
             "items": items,
         }

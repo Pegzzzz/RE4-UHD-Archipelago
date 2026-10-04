@@ -184,6 +184,7 @@ for g, caps in CAPS.items():
 for i, l in enumerate(locations):
     l["offset"] = i
 assert len({l["name"] for l in locations}) == len(locations)
+assert len(locations) <= 256, "the game save stores collected locations in a 256-bit set"
 
 # ---- AP items ---------------------------------------------------------------------
 KEY_ITEMS = ["Emblem (Left half)", "Emblem (Right half)", "Insignia Key", "Round Insignia",

@@ -9,8 +9,10 @@
 //    doing when an item appeared (item pickup screen, Merchant, shooting gallery), plus boss HP.
 //  - The vanilla item from a shuffled location is removed again; Archipelago delivers whatever the
 //    location really holds through the normal received-items stream.
-//  - The index of the next item to apply is stored inside the game's own save work
-//    (GLOBAL_WK::save_free_work), so dying/continuing or loading an older save re-applies items correctly.
+//  - Per-save state lives inside the game's own save work (GLOBAL_WK::save_free_work), so dying,
+//    continuing or loading an older save keeps items and checks consistent:
+//      [52..59] bitset of locations collected in this save (by location offset)
+//      [60] magic  [61] seed tag  [62] index of the next received item to apply  [63] flags (bit0 = goal)
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -43,21 +45,31 @@ namespace ap
 	constexpr uint16_t kPort = 46400;
 	constexpr int kProtocolVersion = 1;
 
-	// save_free_work slots we use (GLOBAL_WK::save_free_work_5310[64], stored inside the game save)
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
+	constexpr int kSlotBits = 52;   // 8 slots = 256 location bits
+	constexpr int kBitSlots = 8;
 	constexpr int kSlotMagic = 60;
 	constexpr int kSlotTag = 61;
 	constexpr int kSlotIndex = 62;
+	constexpr int kSlotFlags = 63;
+	constexpr uint32_t kFlagGoal = 1;
 
-	constexpr int kPickupWindowFrames = 120; // item may be added shortly after the pickup screen flag drops
+	constexpr int kPickupWindowFrames = 120;
 	constexpr int kShopWindowFrames = 10;
 	constexpr int kGrantCooldownFrames = 20;
+	constexpr int kGrantGiveUpFrames = 90; // case-full screen closed without the item: player discarded it
 
-	enum class Kind { Pickup, Boss, Merchant, MedallionReward, Medallion, BottleCap, Unknown };
+	constexpr uint16_t kRoomStart = 0x100;
+	constexpr uint16_t kRoomOpening = 0x120;
+	constexpr uint16_t kRoomSaddler = 0x332;
+	constexpr uint16_t kRoomJetski = 0x333;
+
+	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Unknown };
 
 	struct LocationDef
 	{
 		int64_t id = 0;
+		int offset = -1;   // bit index in the save bitset
 		Kind kind = Kind::Unknown;
 		int room = -1;
 		int em = -1;
@@ -94,26 +106,30 @@ namespace ap
 	std::atomic<bool> clientConnected{ false };
 	std::atomic<bool> clientJustConnected{ false };
 
-	// ---------------- UI state (shared with render thread) ----------------------------------
+	// ---------------- UI / log state (shared) -----------------------------------------------
 	std::mutex toastMutex;
 	std::deque<Toast> toasts;
-	std::atomic<int> uiStatus{ 0 }; // 0 = waiting for client, 1 = connected/no config, 2 = ready, 3 = save mismatch
+	std::atomic<int> uiStatus{ 0 }; // 0 waiting for client, 1 waiting for server, 2 ready, 3 save mismatch, 4 save not linked
+	std::mutex logMutex;
+	std::deque<std::string> consoleQueue; // lines for con.log, flushed on the main thread
+	std::filesystem::path logFile;
 
 	// ---------------- main-thread state -------------------------------------------------------
 	bool configured = false;
 	bool deathLink = false;
 	uint32_t saveTag = 0;
+	int64_t locationBase = 0;
 	std::vector<LocationDef> locations;
 	std::unordered_map<int64_t, ItemDef> itemDefs;
 	std::vector<ReceivedItem> received;
 	std::unordered_set<int64_t> serverChecked;
-	std::unordered_set<int64_t> localChecked;
 	std::vector<int64_t> pendingChecks;
 	std::unordered_set<int> bossEmIds;
 
 	uint64_t frame = 0;
 	bool resetSnapshot = true;
 	std::unordered_map<uint16_t, uint32_t> prevInv;
+	std::unordered_set<cItem*> prevPtrs;
 	int prevGold = 0;
 	int prevCaseSize = -1;
 	uint16_t prevRoom = 0xFFFF;
@@ -123,31 +139,50 @@ namespace ap
 	uint64_t lastKillFrame = 0;
 	bool wasDead = false;
 	bool pendingKill = false;
-	bool goalSent = false;
-	bool saveBound = false;
+	bool goalReported = false;
+	int saveState = 0; // 0 unknown, 1 bound to this seed, 2 other seed, 3 not linked
 
-	struct Removal { uint16_t id; uint32_t count; };
+	struct Removal { uint16_t id; uint32_t count; std::vector<cItem*> fresh; };
 	std::vector<Removal> pendingRemovals;
-	std::unordered_map<uint16_t, int> expectedGrants; // items we added that may show up a bit later (case-full UI)
+
+	// A received item that went to the "case full" screen and hasn't appeared in the inventory yet
+	struct PendingGrant { bool active = false; uint16_t id = 0; uint32_t index = 0; uint64_t closedSince = 0; };
+	PendingGrant pendingGrant;
 
 	struct TrackedEm { uint32_t guid; uint8_t id; };
 	std::unordered_map<uint32_t, TrackedEm> trackedBosses; // key: index in EmMgr
-
-	std::filesystem::path logFile;
+	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
 
 	// =============================================================================== logging
+	// Safe from any thread: writes the file directly, console lines are queued for the main thread.
 	void Log(const std::string& text)
 	{
-		con.log("[AP] %s", text.c_str());
+		std::lock_guard<std::mutex> lock(logMutex);
+		consoleQueue.push_back(text);
+		while (consoleQueue.size() > 64)
+			consoleQueue.pop_front();
 		try
 		{
 			std::ofstream f(logFile, std::ios::app);
 			auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			std::tm tmNow{};
+			localtime_s(&tmNow, &now);
 			char buf[32];
-			std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
+			std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmNow);
 			f << buf << "  " << text << "\n";
 		}
 		catch (...) {}
+	}
+
+	void FlushConsole()
+	{
+		std::deque<std::string> lines;
+		{
+			std::lock_guard<std::mutex> lock(logMutex);
+			lines.swap(consoleQueue);
+		}
+		for (auto& l : lines)
+			con.log("[AP] %s", l.c_str());
 	}
 
 	void AddToast(const std::string& text)
@@ -156,6 +191,13 @@ namespace ap
 		toasts.push_back({ text, std::chrono::steady_clock::now() });
 		while (toasts.size() > 8)
 			toasts.pop_front();
+	}
+
+	std::string Hex(int v)
+	{
+		char b[16];
+		sprintf_s(b, "%x", v);
+		return b;
 	}
 
 	// =============================================================================== network
@@ -223,6 +265,8 @@ namespace ap
 
 			BOOL nodelay = TRUE;
 			setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (const char*)&nodelay, sizeof(nodelay));
+			DWORD sendTimeout = 2000; // never block the game thread for long if the client stops reading
+			setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (const char*)&sendTimeout, sizeof(sendTimeout));
 
 			{
 				std::lock_guard<std::mutex> lock(sockMutex);
@@ -243,6 +287,8 @@ namespace ap
 				if (n <= 0)
 					break;
 				buffer.append(chunk, n);
+				if (buffer.size() > 16 * 1024 * 1024)
+					break; // garbage, drop the connection
 				size_t pos;
 				while ((pos = buffer.find('\n')) != std::string::npos)
 				{
@@ -253,6 +299,8 @@ namespace ap
 					try
 					{
 						json msg = json::parse(line);
+						if (!msg.is_object())
+							continue;
 						std::lock_guard<std::mutex> lock(inboxMutex);
 						inbox.push_back(std::move(msg));
 					}
@@ -290,6 +338,12 @@ namespace ap
 		return g && ItemMgr && SubScreenWk && g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::MainLoop);
 	}
 
+	bool IsMainGame()
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		return g && g->curRoomId_4FAC < 0x400; // 0x4xx Mercenaries/Assignment Ada, 0x5xx Separate Ways
+	}
+
 	bool IsLeon()
 	{
 		GLOBAL_WK* g = GlobalPtr();
@@ -298,7 +352,10 @@ namespace ap
 
 	bool PickupContext()
 	{
-		return (SubScreenWk->open_flag_2C & SS_OPEN_ITEM) != 0 || SubScreenWk->item_get_flag_40 || Status(Flags_STATUS::STA_ITEM_GET);
+		if ((SubScreenWk->open_flag_2C & SS_OPEN_ITEM) != 0 || SubScreenWk->item_get_flag_40 || Status(Flags_STATUS::STA_ITEM_GET))
+			return true;
+		// a picked-up item going through the "organize" screen because the case is full
+		return (SubScreenWk->open_flag_2C & SS_OPEN_PZZL) != 0 && SubScreenWk->get_item_id_2F6 != 0 && !pendingGrant.active;
 	}
 
 	bool ShopContext()
@@ -306,11 +363,14 @@ namespace ap
 		return (SubScreenWk->open_flag_2C & SS_OPEN_SHOP) != 0 || Status(Flags_STATUS::STA_INTO_SHOP);
 	}
 
-	// Safe moment to change Leon's inventory: normal gameplay, no menus, no cutscenes
+	// Safe moment to change Leon's inventory: same gate as the re4_tweaks trainer, plus no cutscenes
 	bool SafeForInventory()
 	{
 		GLOBAL_WK* g = GlobalPtr();
-		if (!InMainLoop() || !IsLeon())
+		if (!InMainLoop() || !IsLeon() || !IsMainGame())
+			return false;
+		cPlayer* pl = PlayerPtr();
+		if (!pl || !pl->subScrCheck() || OptionOpenFlag())
 			return false;
 		if (SubScreenWk->open_flag_2C != SS_OPEN_NULL || SubScreenWk->item_get_flag_40)
 			return false;
@@ -340,49 +400,81 @@ namespace ap
 		}
 	}
 
-	std::unordered_map<uint16_t, uint32_t> TakeSnapshot()
+	void TakeSnapshot(std::unordered_map<uint16_t, uint32_t>& inv, std::unordered_set<cItem*>& ptrs)
 	{
-		std::unordered_map<uint16_t, uint32_t> inv;
+		inv.clear();
+		ptrs.clear();
 		ForEachItem([&](cItem* item) {
 			uint16_t num = item->num_2 ? item->num_2 : 1;
 			inv[uint16_t(item->id_0)] += num;
+			ptrs.insert(item);
 			return true;
 		});
-		return inv;
 	}
 
-	void RemoveItem(uint16_t id, uint32_t count)
+	void Resnapshot()
 	{
-		while (count > 0)
-		{
-			cItem* found = nullptr;
+		TakeSnapshot(prevInv, prevPtrs);
+	}
+
+	uint32_t CountOf(uint16_t id)
+	{
+		uint32_t total = 0;
+		ForEachItem([&](cItem* item) {
+			if (uint16_t(item->id_0) == id)
+				total += item->num_2 ? item->num_2 : 1;
+			return true;
+		});
+		return total;
+	}
+
+	// Remove `count` of an item, taking the copies that just appeared first, never the equipped weapon
+	void RemoveItem(const Removal& r)
+	{
+		uint32_t count = r.count;
+		auto stillValid = [&](cItem* p) {
+			bool ok = false;
 			ForEachItem([&](cItem* item) {
-				if (uint16_t(item->id_0) == id)
+				if (item == p)
 				{
-					found = item;
+					ok = uint16_t(item->id_0) == r.id;
 					return false;
 				}
 				return true;
 			});
-			if (!found)
-				return;
-			if (found == ItemMgr->m_pWep_C)
-			{
-				Log("Not removing currently equipped weapon " + std::to_string(id));
-				return;
-			}
-			uint16_t num = found->num_2 ? found->num_2 : 1;
+			return ok;
+		};
+
+		std::vector<cItem*> order;
+		for (cItem* p : r.fresh)
+			if (stillValid(p))
+				order.push_back(p);
+		ForEachItem([&](cItem* item) {
+			if (uint16_t(item->id_0) == r.id && std::find(order.begin(), order.end(), item) == order.end())
+				order.push_back(item);
+			return true;
+		});
+
+		for (cItem* item : order)
+		{
+			if (count == 0)
+				break;
+			if (item == ItemMgr->m_pWep_C)
+				continue;
+			uint16_t num = item->num_2 ? item->num_2 : 1;
 			if (num > count)
 			{
-				found->num_2 = uint16_t(num - count);
+				item->num_2 = uint16_t(num - count);
 				count = 0;
 			}
 			else
 			{
-				ItemMgr->erase(found);
+				ItemMgr->erase(item);
 				count -= num;
 			}
 		}
+		if (count > 0)
+			Log("Could not remove " + std::to_string(count) + " of item " + std::to_string(r.id));
 	}
 
 	const char* ItemName(int id)
@@ -392,11 +484,45 @@ namespace ap
 		return "?";
 	}
 
-	// =============================================================================== save binding
+	bool IsInterestingType(int id)
+	{
+		ITEM_INFO info;
+		bio4::itemInfo(ITEM_ID(id), &info);
+		switch (info.type_2)
+		{
+		case ITEM_TYPE_WEAPON:
+		case ITEM_TYPE_TREASURE:
+		case ITEM_TYPE_KEY_ITEM:
+		case ITEM_TYPE_WEAPON_MOD:
+		case ITEM_TYPE_TREASURE_GEM:
+		case ITEM_TYPE_IMPORTANT:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	// =============================================================================== save state
 	uint32_t* SaveWork()
 	{
 		GLOBAL_WK* g = GlobalPtr();
 		return g ? g->save_free_work_5310 : nullptr;
+	}
+
+	bool SaveBit(int offset)
+	{
+		uint32_t* w = SaveWork();
+		if (!w || offset < 0 || offset >= kBitSlots * 32)
+			return false;
+		return (w[kSlotBits + offset / 32] >> (offset % 32)) & 1;
+	}
+
+	void SetSaveBit(int offset)
+	{
+		uint32_t* w = SaveWork();
+		if (!w || offset < 0 || offset >= kBitSlots * 32)
+			return;
+		w[kSlotBits + offset / 32] |= (1u << (offset % 32));
 	}
 
 	uint32_t AppliedIndex()
@@ -416,49 +542,76 @@ namespace ap
 		uint32_t* w = SaveWork();
 		if (!w)
 			return;
-		if (w[kSlotMagic] != 0 || w[kSlotTag] != 0 || w[kSlotIndex] != 0)
-			Log("Save work before binding: " + std::to_string(w[kSlotMagic]) + " " + std::to_string(w[kSlotTag]) + " " + std::to_string(w[kSlotIndex]));
+		bool dirty = false;
+		for (int i = kSlotBits; i < 64; i++)
+			dirty |= w[i] != 0;
+		if (dirty)
+			Log("Save work before binding was not empty (slots 52-63); overwriting");
+		for (int i = kSlotBits; i < 64; i++)
+			w[i] = 0;
 		w[kSlotMagic] = kSaveMagic;
 		w[kSlotTag] = saveTag;
-		w[kSlotIndex] = 0;
 		Log("Save linked to this Archipelago seed");
 		AddToast("Save linked to this Archipelago seed");
 	}
 
+	// Returns true when the loaded save belongs to the connected seed
 	bool CheckSaveBinding()
 	{
 		uint32_t* w = SaveWork();
-		if (!w)
+		GLOBAL_WK* g = GlobalPtr();
+		if (!w || !g)
 			return false;
+
+		int state;
 		if (w[kSlotMagic] != kSaveMagic)
-			BindSave();
-		bool ok = w[kSlotTag] == saveTag;
-		if (ok != saveBound)
 		{
-			saveBound = ok;
-			if (!ok)
+			// only a brand new game is linked automatically
+			bool freshGame = (g->curRoomId_4FAC == kRoomStart || g->curRoomId_4FAC == kRoomOpening);
+			if (freshGame)
+			{
+				BindSave();
+				state = 1;
+			}
+			else
+				state = 3;
+		}
+		else
+			state = w[kSlotTag] == saveTag ? 1 : 2;
+
+		if (state != saveState)
+		{
+			saveState = state;
+			if (state == 2)
 			{
 				Log("Loaded save belongs to a different seed");
 				AddToast("This save belongs to a different Archipelago seed! Type /bindsave in the client to relink it.");
 			}
+			else if (state == 3)
+			{
+				Log("Loaded save is not linked to Archipelago");
+				AddToast("This save isn't linked to Archipelago. Start a New Game, or type /bindsave in the client.");
+			}
 		}
-		uiStatus = ok ? 2 : 3;
-		return ok;
+		uiStatus = state == 1 ? 2 : (state == 2 ? 3 : 4);
+		return state == 1;
 	}
 
 	// =============================================================================== checks
-	bool IsChecked(int64_t id)
+	void SendCheck(const LocationDef& loc, const std::string& why)
 	{
-		return serverChecked.count(id) || localChecked.count(id);
+		SetSaveBit(loc.offset);
+		if (serverChecked.count(loc.id))
+			return;
+		if (std::find(pendingChecks.begin(), pendingChecks.end(), loc.id) == pendingChecks.end())
+			pendingChecks.push_back(loc.id);
+		Log("Check " + std::to_string(loc.id) + " (" + why + ")");
 	}
 
-	void MarkChecked(const LocationDef& loc, const std::string& why)
+	// For one-shot events (merchant/boss/cap) "already done" means done in this save or on the server
+	bool EventDone(const LocationDef& loc)
 	{
-		if (IsChecked(loc.id))
-			return;
-		localChecked.insert(loc.id);
-		pendingChecks.push_back(loc.id);
-		Log("Check " + std::to_string(loc.id) + " (" + why + ")");
+		return SaveBit(loc.offset) || serverChecked.count(loc.id);
 	}
 
 	void FlushChecks()
@@ -469,6 +622,18 @@ namespace ap
 		pendingChecks.clear();
 	}
 
+	void ReportGoal()
+	{
+		if (uint32_t* w = SaveWork())
+			w[kSlotFlags] |= kFlagGoal;
+		if (!goalReported)
+		{
+			goalReported = true;
+			AddToast("Goal complete!");
+		}
+		Send({ {"cmd", "goal"} });
+	}
+
 	bool HasItem(const LocationDef& loc, int id)
 	{
 		for (int i : loc.items)
@@ -477,74 +642,65 @@ namespace ap
 		return false;
 	}
 
-	// Returns true if the item came from a shuffled location (and must be removed)
+	// Matches a picked-up item to a location. Locations already collected *in this save* are skipped,
+	// so re-collecting after a death maps to the same location again instead of farming the next one.
+	// Returns true if the item came from a shuffled location and must be removed.
 	bool HandlePickup(uint16_t id, uint16_t room, bool onlyCutscene)
 	{
-		const LocationDef* checkedMatch = nullptr;
-		// exact room, not yet checked
-		for (auto& loc : locations)
-		{
-			if (loc.kind != Kind::Pickup || loc.room != room || !HasItem(loc, id))
-				continue;
-			if (onlyCutscene && !loc.cut)
-				continue;
-			if (!IsChecked(loc.id))
+		auto pass = [&](bool loosePass) -> int {
+			bool sawMatch = false;
+			for (auto& loc : locations)
 			{
-				MarkChecked(loc, std::string("picked up ") + ItemName(id));
-				return true;
+				if (loc.kind != Kind::Pickup || !HasItem(loc, id))
+					continue;
+				if (onlyCutscene && !loc.cut)
+					continue;
+				if (loosePass ? (!loc.loose || (loc.room >> 8) != (room >> 8) || loc.room == room) : loc.room != room)
+					continue;
+				sawMatch = true;
+				if (!SaveBit(loc.offset))
+				{
+					if (loosePass)
+						SendLog("Matched " + std::string(ItemName(id)) + " in room r" + Hex(room) + " to location " +
+							std::to_string(loc.id) + " by stage (room data needs fixing)");
+					SendCheck(loc, std::string("picked up ") + ItemName(id));
+					return 1;
+				}
 			}
-			checkedMatch = &loc;
-		}
-		if (checkedMatch)
-			return true; // picked up again (reloaded save): still remove the vanilla item
-		// room not verified: same stage
-		for (auto& loc : locations)
-		{
-			if (loc.kind != Kind::Pickup || !loc.loose || (loc.room >> 8) != (room >> 8) || !HasItem(loc, id))
-				continue;
-			if (onlyCutscene && !loc.cut)
-				continue;
-			if (!IsChecked(loc.id))
-			{
-				SendLog("Matched " + std::string(ItemName(id)) + " in room r" + [&] { char b[8]; sprintf_s(b, "%x", room); return std::string(b); }() +
-					" to location " + std::to_string(loc.id) + " by stage (room data needs fixing)");
-				MarkChecked(loc, std::string("picked up ") + ItemName(id));
-				return true;
-			}
-		}
-		if (!onlyCutscene)
-		{
-			char b[160];
-			sprintf_s(b, "Unmapped pickup: %s (id %d) in room r%x", ItemName(id), id, room);
-			SendLog(b);
-		}
+			return sawMatch ? 0 : -1;
+		};
+
+		int r = pass(false);
+		if (r < 0)
+			r = pass(true);
+		if (r >= 0)
+			return true; // matched (new check, or every matching location already collected in this save)
+
+		if (!onlyCutscene && IsInterestingType(id))
+			SendLog("Unmapped pickup: " + std::string(ItemName(id)) + " (id " + std::to_string(id) + ") in room r" + Hex(room));
 		return false;
 	}
 
-	void HandleNewItem(uint16_t id, uint32_t count, int goldDelta)
+	void HandleNewItem(uint16_t id, uint32_t count, int goldDelta, const std::vector<cItem*>& fresh)
 	{
 		GLOBAL_WK* g = GlobalPtr();
 		uint16_t room = g->curRoomId_4FAC;
 
-		// 1. items we granted ourselves (delayed by the case-full screen)
-		auto exp = expectedGrants.find(id);
-		if (exp != expectedGrants.end() && exp->second > 0)
+		// 1. a received item that went through the "case full" screen
+		if (pendingGrant.active && pendingGrant.id == id)
 		{
-			int take = std::min<int>(exp->second, int(count));
-			exp->second -= take;
-			count -= take;
-			if (exp->second <= 0)
-				expectedGrants.erase(exp);
-			if (count == 0)
-				return;
+			SetAppliedIndex(pendingGrant.index + 1);
+			Send({ {"cmd", "received"}, {"received", pendingGrant.index + 1} });
+			pendingGrant = {};
+			return;
 		}
 
 		// 2. bottle caps
 		if (id >= 220 && id <= 243)
 		{
 			for (auto& loc : locations)
-				if (loc.kind == Kind::BottleCap && HasItem(loc, id))
-					MarkChecked(loc, std::string("won cap ") + ItemName(id));
+				if (loc.kind == Kind::BottleCap && HasItem(loc, id) && !EventDone(loc))
+					SendCheck(loc, std::string("won cap ") + ItemName(id));
 			return;
 		}
 
@@ -557,41 +713,38 @@ namespace ap
 			if (id == 33 && goldDelta >= 0) // Punisher handed over for free: blue medallion reward
 			{
 				for (auto& loc : locations)
-					if (loc.kind == Kind::MedallionReward)
-						MarkChecked(loc, "medallion reward");
+					if (loc.kind == Kind::MedallionReward && !EventDone(loc))
+						SendCheck(loc, "medallion reward");
 				return;
 			}
 			for (auto& loc : locations)
-				if (loc.kind == Kind::Merchant && HasItem(loc, id))
-					MarkChecked(loc, std::string("bought ") + ItemName(id));
+				if (loc.kind == Kind::Merchant && HasItem(loc, id) && !EventDone(loc))
+					SendCheck(loc, std::string("bought ") + ItemName(id));
 			return;
 		}
 
-		// 4. world pickups
-		bool remove = false;
+		// 4. world pickups (or cutscene/puzzle rewards)
 		uint32_t removeCount = 0;
 		for (uint32_t i = 0; i < count; i++)
-		{
 			if (HandlePickup(id, room, !pickup))
-			{
-				remove = true;
 				removeCount++;
-			}
-		}
-		if (remove)
-			pendingRemovals.push_back({ id, removeCount });
+		if (removeCount)
+			pendingRemovals.push_back({ id, removeCount, fresh });
 	}
 
 	void DiffInventory()
 	{
 		GLOBAL_WK* g = GlobalPtr();
-		auto cur = TakeSnapshot();
+		std::unordered_map<uint16_t, uint32_t> cur;
+		std::unordered_set<cItem*> curPtrs;
+		TakeSnapshot(cur, curPtrs);
 		int gold = g->goldAmount_4FA8;
 		int caseSize = SubScreenWk->board_size_2AA;
 
 		if (resetSnapshot)
 		{
 			prevInv = std::move(cur);
+			prevPtrs = std::move(curPtrs);
 			prevGold = gold;
 			prevCaseSize = caseSize;
 			resetSnapshot = false;
@@ -605,8 +758,13 @@ namespace ap
 			auto it = prevInv.find(id);
 			if (it != prevInv.end())
 				before = it->second;
-			if (num > before)
-				HandleNewItem(id, num - before, goldDelta);
+			if (num <= before)
+				continue;
+			std::vector<cItem*> fresh;
+			for (cItem* p : curPtrs)
+				if (!prevPtrs.count(p) && uint16_t(p->id_0) == id)
+					fresh.push_back(p);
+			HandleNewItem(id, num - before, goldDelta, fresh);
 		}
 
 		// Attache case bought from the Merchant (case size changes instead of an item appearing)
@@ -614,11 +772,12 @@ namespace ap
 		{
 			int caseItem = 124 + caseSize;
 			for (auto& loc : locations)
-				if (loc.kind == Kind::Merchant && HasItem(loc, caseItem))
-					MarkChecked(loc, std::string("bought ") + ItemName(caseItem));
+				if (loc.kind == Kind::Merchant && HasItem(loc, caseItem) && !EventDone(loc))
+					SendCheck(loc, std::string("bought ") + ItemName(caseItem));
 		}
 
-		prevInv = TakeSnapshot();
+		prevInv = std::move(cur);
+		prevPtrs = std::move(curPtrs);
 		prevGold = gold;
 		prevCaseSize = caseSize;
 	}
@@ -628,46 +787,40 @@ namespace ap
 		if (pendingRemovals.empty() || !SafeForInventory())
 			return;
 		for (auto& r : pendingRemovals)
-			RemoveItem(r.id, r.count);
+			RemoveItem(r);
 		pendingRemovals.clear();
-		prevInv = TakeSnapshot();
+		Resnapshot();
 	}
 
 	// =============================================================================== bosses
 	void DefeatedBoss(uint8_t emId, uint16_t room)
 	{
-		char b[96];
-		sprintf_s(b, "Boss defeated: em %02X in room r%x", emId, room);
-		Log(b);
+		Log("Boss defeated: em " + Hex(emId) + " in room r" + Hex(room));
 
-		if (emId == 0x31 || emId == 0x3F) // Saddler
+		if (emId == 0x31 || emId == 0x3F) // Saddler: only counts in his arena
 		{
-			if (!goalSent)
-			{
-				goalSent = true;
-				Send({ {"cmd", "goal"} });
-				AddToast("Saddler defeated - goal complete!");
-			}
+			if (room == kRoomSaddler)
+				ReportGoal();
 			return;
 		}
 
 		const LocationDef* fallback = nullptr;
 		for (auto& loc : locations)
 		{
-			if (loc.kind != Kind::Boss || loc.em != emId || IsChecked(loc.id))
+			if (loc.kind != Kind::Boss || loc.em != emId || EventDone(loc))
 				continue;
 			if (loc.room == room)
 			{
-				MarkChecked(loc, "boss");
+				SendCheck(loc, "boss");
 				return;
 			}
-			if (!fallback)
+			if (!fallback && (loc.room >> 8) == (room >> 8))
 				fallback = &loc;
 		}
 		if (fallback)
 		{
-			SendLog("Boss matched by type only, room data may be off");
-			MarkChecked(*fallback, "boss");
+			SendLog("Boss em " + Hex(emId) + " in room r" + Hex(room) + " matched by type, room data may be off");
+			SendCheck(*fallback, "boss");
 		}
 	}
 
@@ -679,24 +832,27 @@ namespace ap
 			return;
 		uint16_t room = g->curRoomId_4FAC;
 
-		// tracked bosses that died or vanished this frame
+		// A boss counts only when it is seen with HP <= 0 while still valid (not when it is despawned)
 		for (auto it = trackedBosses.begin(); it != trackedBosses.end();)
 		{
+			if (it->first >= mgr->m_nArray_8)
+			{
+				it = trackedBosses.erase(it);
+				continue;
+			}
 			cEm* em = mgr->get(it->first);
 			bool gone = !em->IsValid() || em->guid_F8 != it->second.guid;
-			bool dead = !gone && em->hp_324 <= 0;
-			if ((gone || dead) && g->playerHpCur_4FB4 > 0)
+			if (gone)
+				it = trackedBosses.erase(it);
+			else if (em->hp_324 <= 0 && g->playerHpCur_4FB4 > 0)
 			{
 				DefeatedBoss(it->second.id, room);
 				it = trackedBosses.erase(it);
 			}
-			else if (gone)
-				it = trackedBosses.erase(it);
 			else
 				++it;
 		}
 
-		// start tracking live bosses
 		for (uint32_t i = 0; i < mgr->m_nArray_8; i++)
 		{
 			cEm* em = mgr->get(i);
@@ -709,7 +865,6 @@ namespace ap
 
 	// Research aid: in the farm and graveyard (blue medallion rooms), log every object/enemy that dies or
 	// vanishes so the medallions' em id can be identified from a play session.
-	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
 	void DiscoveryLog()
 	{
 		cEmMgr* mgr = EmMgrPtr();
@@ -724,13 +879,12 @@ namespace ap
 		}
 		for (auto it = discoveryEms.begin(); it != discoveryEms.end();)
 		{
-			cEm* em = mgr->get(it->first);
-			bool gone = !em->IsValid() || em->guid_F8 != it->second.guid;
+			cEm* em = it->first < mgr->m_nArray_8 ? mgr->get(it->first) : nullptr;
+			bool gone = !em || !em->IsValid() || em->guid_F8 != it->second.guid;
 			if (gone || em->hp_324 <= 0)
 			{
-				char b[128];
-				sprintf_s(b, "[discovery] r%x: em %02X type %d %s", room, it->second.id, gone ? -1 : int(em->type_101), gone ? "vanished" : "died");
-				Log(b);
+				Log("[discovery] r" + Hex(room) + ": em " + Hex(it->second.id) + " type " +
+					std::to_string(gone ? -1 : int(em->type_101)) + (gone ? " vanished" : " died"));
 				it = discoveryEms.erase(it);
 			}
 			else
@@ -745,67 +899,95 @@ namespace ap
 	}
 
 	// =============================================================================== received items
-	void ApplyItem(const ReceivedItem& item)
+	// Returns false if the item is waiting in the "case full" screen (index advances once it lands)
+	bool ApplyItem(const ReceivedItem& item, uint32_t index)
 	{
 		GLOBAL_WK* g = GlobalPtr();
 		auto defIt = itemDefs.find(item.id);
 		std::string label = item.name.empty() ? std::to_string(item.id) : item.name;
+		std::string toast = item.from.empty() ? ("Received " + label) : ("Received " + label + " from " + item.from);
 		if (defIt == itemDefs.end())
 		{
 			SendLog("Unknown item id " + std::to_string(item.id));
-			return;
+			return true;
 		}
 		const ItemDef& def = defIt->second;
+		bool done = true;
 
 		if (def.kind == "pesetas")
 		{
 			g->goldAmount_4FA8 = std::min(g->goldAmount_4FA8 + def.amount, 999999);
-			prevGold = g->goldAmount_4FA8;
 			bio4::SndCall(0, 0x10, 0, 0, 0, 0);
 		}
 		else if (def.kind == "attache_case")
 		{
 			int next = SubScreenWk->board_size_2AA + 1;
 			if (next <= 3)
-			{
 				InventoryItemAdd(ITEM_ID(124 + next), 1, false, true);
-				prevCaseSize = SubScreenWk->board_size_2AA;
-			}
 			else
-			{
 				g->goldAmount_4FA8 = std::min(g->goldAmount_4FA8 + 10000, 999999);
-				prevGold = g->goldAmount_4FA8;
-			}
 		}
 		else if (def.kind == "game" && def.game >= 0)
 		{
 			ITEM_INFO info;
 			bio4::itemInfo(ITEM_ID(def.game), &info);
-			uint32_t count = info.defNum_3 ? info.defNum_3 : 1;
-			auto before = TakeSnapshot();
+			uint32_t count = (info.maxNum_4 <= 1 || info.defNum_3 == 0) ? 1 : info.defNum_3;
+			uint16_t gid = uint16_t(def.game);
+			uint32_t before = CountOf(gid);
 			InventoryItemAdd(ITEM_ID(def.game), count, false, true);
-			auto after = TakeSnapshot();
-			uint32_t b = before.count(uint16_t(def.game)) ? before[uint16_t(def.game)] : 0;
-			uint32_t a = after.count(uint16_t(def.game)) ? after[uint16_t(def.game)] : 0;
-			if (a <= b)
-				expectedGrants[uint16_t(def.game)] += int(count); // went to the "case full" screen
+			if (CountOf(gid) <= before)
+			{
+				if (SubScreenWk->open_flag_2C & SS_OPEN_PZZL)
+				{
+					// case full: the game shows the organize screen and adds the item when the player places it
+					pendingGrant = { true, gid, index, 0 };
+					done = false;
+				}
+				else
+					SendLog("Item " + label + " could not be added (game refused it)");
+			}
 		}
 
-		prevInv = TakeSnapshot();
-		AddToast(item.from.empty() ? ("Received " + label) : ("Received " + label + " from " + item.from));
+		prevGold = g->goldAmount_4FA8;
+		prevCaseSize = SubScreenWk->board_size_2AA;
+		Resnapshot();
+		AddToast(toast);
+		return done;
 	}
 
 	void ApplyReceivedItems()
 	{
+		if (pendingGrant.active)
+		{
+			// organize screen closed but the item never landed: the player left it behind
+			if (SafeForInventory())
+			{
+				if (!pendingGrant.closedSince)
+					pendingGrant.closedSince = frame;
+				else if (frame - pendingGrant.closedSince > kGrantGiveUpFrames)
+				{
+					Log("Received item was left behind in the organize screen");
+					SetAppliedIndex(pendingGrant.index + 1);
+					Send({ {"cmd", "received"}, {"received", pendingGrant.index + 1} });
+					pendingGrant = {};
+				}
+			}
+			else
+				pendingGrant.closedSince = 0;
+			return;
+		}
+
 		if (!SafeForInventory() || frame - lastGrantFrame < kGrantCooldownFrames)
 			return;
 		uint32_t index = AppliedIndex();
 		if (index >= received.size())
 			return;
-		ApplyItem(received[index]);
-		SetAppliedIndex(index + 1);
 		lastGrantFrame = frame;
-		Send({ {"cmd", "received"}, {"received", index + 1} });
+		if (ApplyItem(received[index], index))
+		{
+			SetAppliedIndex(index + 1);
+			Send({ {"cmd", "received"}, {"received", index + 1} });
+		}
 	}
 
 	// =============================================================================== death link
@@ -815,6 +997,8 @@ namespace ap
 		bool dead = g->playerHpCur_4FB4 <= 0 || Status(Flags_STATUS::STA_DIEDEMO);
 		if (dead && !wasDead)
 		{
+			pendingRemovals.clear(); // the game is about to roll back to the last checkpoint
+			pendingGrant = {};
 			if (deathLink && frame - lastKillFrame > 600)
 				Send({ {"cmd", "death"} });
 		}
@@ -835,21 +1019,42 @@ namespace ap
 		if (k == "boss") return Kind::Boss;
 		if (k == "merchant") return Kind::Merchant;
 		if (k == "medallion_reward") return Kind::MedallionReward;
-		if (k == "medallion") return Kind::Medallion;
 		if (k == "bottle_cap") return Kind::BottleCap;
 		return Kind::Unknown;
+	}
+
+	void ResetSessionState()
+	{
+		serverChecked.clear();
+		pendingChecks.clear();
+		pendingRemovals.clear();
+		received.clear();
+		trackedBosses.clear();
+		pendingGrant = {};
+		goalReported = false;
+		saveState = 0;
+		resetSnapshot = true;
 	}
 
 	void HandleConfig(const json& msg)
 	{
 		const json& sd = msg.value("slot_data", json::object());
+		uint32_t newTag = msg.value("save_tag", uint32_t(0));
+		if (newTag != saveTag)
+		{
+			ResetSessionState();
+			saveTag = newTag;
+		}
+
 		locations.clear();
 		itemDefs.clear();
 		bossEmIds = { 0x31, 0x3F };
+		locationBase = sd.value("location_base", int64_t(0));
 		for (auto& l : sd.value("locations", json::array()))
 		{
 			LocationDef d;
 			d.id = l.value("id", int64_t(0));
+			d.offset = int(d.id - locationBase);
 			d.kind = ParseKind(l.value("k", std::string()));
 			d.room = l.value("room", -1);
 			d.em = l.value("em_id", -1);
@@ -857,6 +1062,11 @@ namespace ap
 			d.cut = l.value("cut", 0) != 0;
 			for (auto& i : l.value("items", json::array()))
 				d.items.push_back(i.get<int>());
+			if (d.offset < 0 || d.offset >= kBitSlots * 32)
+			{
+				Log("Location offset out of range: " + std::to_string(d.id));
+				continue;
+			}
 			if (d.kind == Kind::Boss && d.em >= 0)
 				bossEmIds.insert(d.em);
 			locations.push_back(std::move(d));
@@ -870,17 +1080,25 @@ namespace ap
 			itemDefs[i.value("id", int64_t(0))] = d;
 		}
 		deathLink = sd.value("death_link", false);
-		uint32_t newTag = msg.value("save_tag", uint32_t(0));
-		if (newTag != saveTag)
-		{
-			saveTag = newTag;
-			saveBound = false;
-			goalSent = false;
-			localChecked.clear();
-		}
 		configured = true;
 		Log("Configured: " + std::to_string(locations.size()) + " locations, slot " + msg.value("slot", std::string()));
 		AddToast("Archipelago: connected as " + msg.value("slot", std::string()));
+	}
+
+	// Re-send everything this save has collected that the server hasn't confirmed (e.g. done while offline)
+	void ResendFromSave()
+	{
+		if (!configured || saveState != 1)
+			return;
+		std::vector<int64_t> missing;
+		for (auto& loc : locations)
+			if (SaveBit(loc.offset) && !serverChecked.count(loc.id))
+				missing.push_back(loc.id);
+		if (!missing.empty())
+			Send({ {"cmd", "check"}, {"locations", missing} });
+		if (uint32_t* w = SaveWork())
+			if (w[kSlotFlags] & kFlagGoal)
+				Send({ {"cmd", "goal"} });
 	}
 
 	void ProcessInbox()
@@ -893,11 +1111,15 @@ namespace ap
 
 		for (auto& msg : msgs)
 		{
-			std::string cmd = msg.value("cmd", std::string());
+			std::string cmd;
 			try
 			{
+				cmd = msg.value("cmd", std::string());
 				if (cmd == "config")
+				{
 					HandleConfig(msg);
+					ResendFromSave();
+				}
 				else if (cmd == "items")
 				{
 					received.clear();
@@ -906,6 +1128,7 @@ namespace ap
 				}
 				else if (cmd == "checked")
 				{
+					serverChecked.clear();
 					for (auto& id : msg.value("locations", json::array()))
 						serverChecked.insert(id.get<int64_t>());
 				}
@@ -921,10 +1144,11 @@ namespace ap
 				}
 				else if (cmd == "bind_save")
 				{
-					if (configured && InMainLoop())
+					if (configured && InMainLoop() && IsMainGame())
 					{
 						BindSave();
-						saveBound = false;
+						saveState = 0;
+						resetSnapshot = true;
 					}
 				}
 			}
@@ -938,53 +1162,57 @@ namespace ap
 	void SendHello()
 	{
 		uint32_t* w = SaveWork();
-		json hello = { {"cmd", "hello"}, {"version", kProtocolVersion},
-			{"save_tag", w && w[kSlotMagic] == kSaveMagic ? w[kSlotTag] : 0},
-			{"received", w && w[kSlotMagic] == kSaveMagic ? int(w[kSlotIndex]) : -1} };
-		Send(hello);
-
-		// re-send checks the server may not have seen (sent while the client was away)
-		std::vector<int64_t> resend;
-		for (auto id : localChecked)
-			if (!serverChecked.count(id))
-				resend.push_back(id);
-		if (!resend.empty())
-			Send({ {"cmd", "check"}, {"locations", resend} });
+		bool linked = w && w[kSlotMagic] == kSaveMagic;
+		Send({ {"cmd", "hello"}, {"version", kProtocolVersion},
+			{"save_tag", linked ? w[kSlotTag] : 0},
+			{"received", linked ? int(w[kSlotIndex]) : -1} });
 	}
 
 	void Tick()
 	{
 		frame++;
+		FlushConsole();
 		ProcessInbox();
 
 		if (clientJustConnected.exchange(false))
 			SendHello();
 
-		if (!configured || !InMainLoop())
+		GLOBAL_WK* g = GlobalPtr();
+		if (!configured || !InMainLoop() || !IsMainGame())
 		{
 			resetSnapshot = true;
-			pendingRemovals.clear();
 			trackedBosses.clear();
 			discoveryEms.clear();
+			// Title screen / new load: anything queued belongs to a game state that no longer exists
+			if (!g || g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::Init) || g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::StageInit))
+			{
+				pendingRemovals.clear();
+				pendingGrant = {};
+				saveState = 0;
+			}
 			return;
 		}
 
-		GLOBAL_WK* g = GlobalPtr();
 		if (g->curRoomId_4FAC != prevRoom)
 		{
 			prevRoom = g->curRoomId_4FAC;
 			trackedBosses.clear();
-			if (prevRoom == 0x333 && !goalSent) // reached the jet-ski escape
-			{
-				goalSent = true;
-				Send({ {"cmd", "goal"} });
-			}
 		}
 
+		int oldState = saveState;
 		if (!CheckSaveBinding())
 		{
 			resetSnapshot = true;
 			return;
+		}
+		if (oldState != 1)
+			ResendFromSave();
+
+		if (prevRoom == kRoomJetski)
+		{
+			uint32_t* w = SaveWork();
+			if (w && !(w[kSlotFlags] & kFlagGoal))
+				ReportGoal();
 		}
 
 		if (!IsLeon())
@@ -1033,7 +1261,8 @@ void Archipelago_Render()
 	}
 
 	int status = ap::uiStatus;
-	bool inGame = GlobalPtr() && GlobalPtr()->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::MainLoop);
+	GLOBAL_WK* g = GlobalPtr();
+	bool inGame = g && g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::MainLoop) && g->curRoomId_4FAC < 0x400;
 	bool showStatus = inGame && status != 2;
 	if (lines.empty() && !showStatus)
 		return;
@@ -1046,9 +1275,11 @@ void Archipelago_Render()
 	{
 		if (showStatus)
 		{
-			const char* text = status == 0 ? "Archipelago: waiting for the RE4 UHD Client" :
+			const char* text =
+				status == 0 ? "Archipelago: waiting for the RE4 UHD Client" :
 				status == 1 ? "Archipelago: client connected, waiting for server" :
-				"Archipelago: this save belongs to another seed (/bindsave)";
+				status == 3 ? "Archipelago: this save belongs to another seed (/bindsave)" :
+				"Archipelago: save not linked - start a New Game or /bindsave";
 			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.3f, 1.0f), "%s", text);
 		}
 		for (auto& [text, alpha] : lines)

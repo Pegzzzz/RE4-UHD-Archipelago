@@ -67,6 +67,7 @@ class RE4Context(CommonContext):
         self.game_received = -1
         self.game_task: Optional[asyncio.Task] = None
         self.goal_sent = False
+        self.goal_pending = False
 
     # ---- Archipelago side ------------------------------------------------------
     async def server_auth(self, password_requested: bool = False) -> None:
@@ -83,6 +84,8 @@ class RE4Context(CommonContext):
             Utils.async_start(self.send_msgs([{
                 "cmd": "LocationScouts", "locations": list(self.missing_locations | self.checked_locations),
                 "create_as_hint": 0}]))
+            self.goal_sent = False
+            Utils.async_start(self.send_goal())
             self.send_config()
             self.send_items()
             self.send_checked()
@@ -159,10 +162,8 @@ class RE4Context(CommonContext):
                 for l in locations:
                     self.announce_location(l)
         elif cmd == "goal":
-            if not self.goal_sent and self.server and self.server.socket:
-                self.goal_sent = True
-                await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
-                logger.info("Goal complete!")
+            self.goal_pending = True
+            await self.send_goal()
         elif cmd == "death":
             if self.slot_data.get("death_link"):
                 await self.send_death(f"{self.player_names.get(self.slot, 'Leon')} died in Spain.")
@@ -170,6 +171,12 @@ class RE4Context(CommonContext):
             self.game_received = msg.get("received", self.game_received)
         elif cmd == "log":
             logger.info(f"[game] {msg.get('text', '')}")
+
+    async def send_goal(self) -> None:
+        if self.goal_pending and not self.goal_sent and self.slot is not None and self.server and self.server.socket:
+            self.goal_sent = True
+            await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+            logger.info("Goal complete!")
 
     def announce_location(self, location_id: int) -> None:
         info = self.locations_info.get(location_id)
