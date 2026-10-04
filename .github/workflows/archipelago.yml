@@ -27,7 +27,7 @@ jobs:
       - name: Get Archipelago ${{ env.AP_VERSION }}
         run: |
           git clone --depth 1 --branch "$AP_VERSION" https://github.com/ArchipelagoMW/Archipelago.git ap
-          pip install -r ap/requirements.txt pytest
+          pip install -r ap/requirements.txt -r ap/WebHostLib/requirements.txt pytest
           cp -r archipelago/apworld/re4uhd ap/worlds/re4uhd
 
       - name: Test world
