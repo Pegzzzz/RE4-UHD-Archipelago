@@ -14,6 +14,7 @@ class O: pass
 o = O()
 for k in ("shuffle_key_items","consumable_checks","merchant_checks","boss_checks","shooting_gallery_checks"): setattr(o,k,1)
 o.death_link=1
+o.enemy_randomizer_compat=0
 w.options=o
 w.generate_early()
 sd = w.fill_slot_data()
@@ -32,10 +33,16 @@ want = {
     "L_GIGANTE_QUARRY": "Defeat El Gigante (Quarry)", "L_BUY_CASE_M": "Merchant: Buy Attache Case M",
     "L_BUY_RED9": "Merchant: Buy Red9", "L_BUY_PUNISHER": "Merchant: Buy Punisher",
     "L_MEDALLION": "Blue Medallions: Merchant Reward", "L_CAP_HANDGUN": "Shooting Gallery A: Leon w/ handgun Cap",
+    "L_SADDLER_SHELLS": "Final Saddler arena: Shotgun Shells",
 }
 from worlds.re4uhd.data_loader import LOCATION_BASE_ID
 with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") as f:
     lines = [f"{k} = {LOCATION_NAME_TO_ID[v]}" for k, v in want.items()]
     f.write("constexpr int64_t " + ",\n\t".join(lines) + ";\n")
+    from worlds.re4uhd.data_loader import ITEM_NAME_TO_ID
+    items_want = {"IT_GREEN_HERB": "Green Herb", "IT_RED9": "Red9", "IT_HANDGUN_AMMO": "Handgun Ammo",
+                  "IT_GRENADE": "Hand Grenade", "IT_P1000": "1000 Pesetas", "IT_SPRAY": "First Aid Spray"}
+    f.write("constexpr int64_t " + ",\n\t".join(f"{k} = {ITEM_NAME_TO_ID[v]}" for k, v in items_want.items()) + ";\n")
+    f.write(f"constexpr int OFF_SADDLER_SHELLS = {LOCATION_NAME_TO_ID[want['L_SADDLER_SHELLS']] - LOCATION_BASE_ID};\n")
     f.write(f"constexpr int OFF_FARM_SPINEL1 = {LOCATION_NAME_TO_ID[want['L_FARM_SPINEL1']] - LOCATION_BASE_ID}, "
             f"OFF_FARM_SPINEL2 = {LOCATION_NAME_TO_ID[want['L_FARM_SPINEL2']] - LOCATION_BASE_ID};\n")

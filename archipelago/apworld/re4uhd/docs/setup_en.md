@@ -46,6 +46,11 @@ The village, castle and island each lock behind you. If an item you need is stuc
 reach, press **F1** to open the re4_tweaks menu, go to the **Trainer** tab and use **Area Jump** to go back.
 You can also ask the host to `!release`/`!collect`.
 
+## Random enemies
+
+To also randomize enemies and bosses, install re_duke's RE4 Enemy/Merchant Randomizer
+(moddb.com/mods/re4randomizer) first, then this mod's files, and set `enemy_randomizer_compat: true` in your YAML.
+
 ## Troubleshooting
 
 - **"waiting for the RE4 UHD Client"**: the client isn't running or isn't connected to the game. Check the client

@@ -56,6 +56,19 @@ EXTRA_USEFUL = ["Red9", "Blacktail", "Punisher", "Riot Gun", "Striker", "Rifle (
                 "Yellow Herb", "Yellow Herb", "Yellow Herb"]
 
 
+STARTING_HANDGUNS = ["Red9", "Blacktail", "Punisher"]
+STARTING_WEAPONS = STARTING_HANDGUNS + ["Shotgun", "Riot Gun", "Striker", "TMP", "Rifle", "Rifle (semi-auto)",
+                                        "Broken Butterfly", "Killer7", "Mine Thrower"]
+WEAPON_AMMO = {
+    "Red9": "Handgun Ammo", "Blacktail": "Handgun Ammo", "Punisher": "Handgun Ammo",
+    "Shotgun": "Shotgun Shells", "Riot Gun": "Shotgun Shells", "Striker": "Shotgun Shells",
+    "TMP": "TMP Ammo", "Rifle": "Rifle Ammo", "Rifle (semi-auto)": "Rifle Ammo",
+    "Broken Butterfly": "Magnum Ammo", "Killer7": "Magnum Ammo", "Mine Thrower": "Mine-Darts",
+}
+STARTING_SUPPLIES = ["Handgun Ammo", "Shotgun Shells", "Green Herb", "Red Herb", "Yellow Herb", "First Aid Spray",
+                     "Hand Grenade", "Incendiary Grenade", "Flash Grenade"]
+
+
 def _requirement(req: str, player: int) -> Callable[[CollectionState], bool]:
     options = req.split("|")
     return lambda state: any(state.has(o, player) for o in options)
@@ -90,6 +103,8 @@ class RE4World(World):
 
     def _location_enabled(self, loc: Dict[str, Any]) -> bool:
         kind = loc["kind"]
+        if self.options.enemy_randomizer_compat and kind in ("merchant", "boss", "medallion_reward"):
+            return False
         if kind == "pickup" and loc.get("consumable"):
             return bool(self.options.consumable_checks)
         if kind == "boss":
@@ -171,6 +186,26 @@ class RE4World(World):
             pool.append(self.create_item(self.get_filler_item_name()))
             extra -= 1
         self.multiworld.itempool += pool
+        self._push_starting_inventory()
+
+    def _push_starting_inventory(self) -> None:
+        start: List[str] = []
+        if self.options.starting_weapon == self.options.starting_weapon.option_random_handgun:
+            weapon = self.random.choice(STARTING_HANDGUNS)
+        elif self.options.starting_weapon == self.options.starting_weapon.option_random_weapon:
+            weapon = self.random.choice(STARTING_WEAPONS)
+        else:
+            weapon = None
+        if weapon:
+            start += [weapon, WEAPON_AMMO[weapon], WEAPON_AMMO[weapon]]
+        start += [self.random.choice(STARTING_SUPPLIES) for _ in range(self.options.starting_supplies.value)]
+        pesetas = self.options.starting_pesetas.value // 1000 * 1000
+        for amount in (20000, 10000, 5000, 1000):
+            while pesetas >= amount:
+                start.append(f"{amount} Pesetas")
+                pesetas -= amount
+        for name in start:
+            self.multiworld.push_precollected(self.create_item(name))
 
     def fill_slot_data(self) -> Dict[str, Any]:
         locs = []
@@ -202,6 +237,7 @@ class RE4World(World):
             "version": 1,
             "death_link": bool(self.options.death_link),
             "location_base": LOCATION_BASE_ID,
+            "enemy_randomizer_compat": bool(self.options.enemy_randomizer_compat),
             "locations": locs,
             "items": items,
         }

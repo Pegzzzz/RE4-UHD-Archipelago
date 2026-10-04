@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.1).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.2).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -65,11 +65,23 @@ The YAML file holds your name and your choices for the randomizer.
 | `merchant_checks` | The first time you buy each Merchant item, you also send a check. You keep what you bought. | `true` |
 | `boss_checks` | Beating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks. | `true` |
 | `shooting_gallery_checks` | Each of the 24 bottle caps from the shooting gallery is a check. | `true` |
+| `starting_weapon` | An extra weapon at the start, with 2 boxes of its ammo: `vanilla` (none), `random_handgun` (Red9, Blacktail or Punisher) or `random_weapon` (any). | `vanilla` |
+| `starting_supplies` | 0–10 random supplies (ammo, herbs, grenades, sprays) at the start. | `0` |
+| `starting_pesetas` | 0–100000 pesetas at the start. | `0` |
+| `enemy_randomizer_compat` | Turn on if you also use re_duke's enemy randomizer (see [below](#7b-combining-with-re_dukes-enemy-randomizer)). | `false` |
 | `death_link` | When you die, everyone with DeathLink dies too (and vice versa). Experimental. | `false` |
 
 **Goal:** defeat Saddler.
 
 Want a shorter game? Set `consumable_checks: false` — that leaves about 250 checks.
+
+Archipelago's own `start_inventory` option also works, for example:
+
+```yaml
+  start_inventory:
+    Shotgun: 1
+    Shotgun Shells: 2
+```
 
 ---
 
@@ -132,6 +144,24 @@ The village, castle and island lock behind you. If something you need is stuck i
 2. Go to the **Trainer** tab → **Area Jump**, and jump back to the area.
 
 You can also ask the host to use `!release` / `!collect`.
+
+---
+
+## 7b. Combining with re_duke's enemy randomizer
+
+For random enemies and bosses, you can play this together with
+[re_duke's RE4 Enemy/Merchant Randomizer](https://www.moddb.com/mods/re4randomizer) (not part of this project).
+
+1. Install re_duke's randomizer first, following its readme.
+2. Then extract `RE4-UHD-Archipelago.zip` into **Bin32** as in step 3 (our `dinput8.dll` already includes
+   re4_tweaks, which that randomizer recommends).
+3. Set `enemy_randomizer_compat: true` in your YAML.
+
+That mod changes the Merchant's stock and swaps boss fights, so this option turns off Merchant checks, boss checks
+and the blue medallion reward. The goal then triggers when you reach the jet-ski escape after Saddler.
+
+> This combination hasn't been tested in game yet. If something breaks, try without the enemy randomizer and
+> report it.
 
 ---
 

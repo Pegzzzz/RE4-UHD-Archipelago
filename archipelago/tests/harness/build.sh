@@ -19,7 +19,7 @@ sed -i 's/struct Message::MessageFont\*/void*/' "$W/tree/dllmain/SDK/message.h"
 sed -i 's/^enum ID_CLASS;/enum ID_CLASS : int;/; s/^enum ID_CLASS\s*$/enum ID_CLASS : int/' "$W/tree/dllmain/SDK/ID.h"
 
 # 2. slot_data and location ids from the real APWorld
-SKIP_REQUIREMENTS_UPDATE=1 python3 "$H/gen_slot.py" "$W/slot_data.json" > /dev/null 2>&1
+SKIP_REQUIREMENTS_UPDATE=1 python3 "$H/gen_slot.py" "$W/slot_data.json" > "$W/gen_slot.log" 2>&1 || { tail -5 "$W/gen_slot.log"; exit 1; }
 
 
 # 3. build + run

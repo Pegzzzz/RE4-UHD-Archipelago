@@ -892,6 +892,165 @@ void E13()
 	End();
 }
 
+
+// ------------------------------------------------------------------ extra scenarios (v0.2)
+void H1()
+{
+	Begin("H1. Starting inventory (precollected items) delivered at a new game, not counted as pickups");
+	Setup(0x100);
+	size_t m = cl.got.size();
+	int gold0 = sim::gold();
+	SetItems({ IT_RED9, IT_HANDGUN_AMMO, IT_HANDGUN_AMMO, IT_GREEN_HERB, IT_P1000 });
+	Tick(200);
+	Expect(sim::saveWork(62) == 5, "all 5 starting items applied (index " + std::to_string(sim::saveWork(62)) + ")");
+	Expect(sim::count(37) == 1, "Red9 in the case");
+	Expect(sim::gold() == gold0 + 1000, "1000 pesetas added");
+	Expect(ChecksSince(m).empty(), "no checks from starting items");
+	End();
+}
+
+void H2()
+{
+	Begin("H2. Buying ammo at the Merchant is not a consumable check; selling doesn't crash");
+	Setup(0x101);
+	size_t m = cl.got.size();
+	int ammo = sim::count(4);
+	Buy(4, 500);
+	CloseShop();
+	Expect(ChecksSince(m).empty(), "no check for bought ammo");
+	Expect(sim::count(4) == ammo + 1 || sim::count(4) > ammo, "bought ammo kept");
+	// sell the Handgun ammo
+	sim::setOpenFlag(sim::SS_SHOP);
+	sim::setStatus(sim::STA_INTO_SHOP, true);
+	Tick(2);
+	sim::gameRemoveAll(4);
+	sim::setGold(sim::gold() + 300);
+	Tick(2);
+	CloseShop();
+	Expect(ChecksSince(m).empty(), "selling sends nothing");
+	End();
+}
+
+void H3()
+{
+	Begin("H3. Combining a treasure in the inventory screen is not a pickup");
+	Setup(0x101);
+	sim::gameAdd(198, 1); // Elegant Mask
+	sim::gameAdd(199, 1); // Green Gem
+	Tick(5);
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	sim::setOpenFlag(sim::SS_NORMAL);
+	sim::setStatus(sim::STA_SUB_SCRN, true);
+	Tick(2);
+	sim::gameRemoveAll(198);
+	sim::gameRemoveAll(199);
+	sim::gameAdd(202, 1); // Elegant Mask w/ (G)
+	Tick(2);
+	sim::setOpenFlag(sim::SS_NULL);
+	sim::setStatus(sim::STA_SUB_SCRN, false);
+	Tick(10);
+	Expect(ChecksSince(m).empty(), "no check");
+	Expect(sim::count(202) == 1, "combined treasure kept");
+	Expect(!ConContains(c0, "Unmapped"), "not logged as an unmapped pickup");
+	End();
+}
+
+void H4()
+{
+	Begin("H4. A burst of 30 received items is delivered one at a time");
+	Setup(0x101);
+	int gold0 = sim::gold();
+	std::vector<int64_t> ids(30, IT_P1000);
+	SetItems(ids);
+	Tick(25);
+	Expect(sim::saveWork(62) >= 1 && sim::saveWork(62) <= 3, "only the first item or two after 25 frames");
+	Tick(800);
+	Expect(sim::saveWork(62) == 30, "all 30 applied (index " + std::to_string(sim::saveWork(62)) + ")");
+	Expect(sim::gold() == gold0 + 30000, "30000 pesetas added");
+	End();
+}
+
+void H5()
+{
+	Begin("H5. Removal waits through a cutscene and a room change");
+	Setup(0x101);
+	size_t m = cl.got.size();
+	Pickup(44, 1, false);                 // Shotgun, screen still open
+	sim::setStatus(sim::STA_EVENT, true); // a cutscene starts as the screen closes
+	sim::setOpenFlag(sim::SS_NULL);
+	sim::setItemGetFlag(false);
+	sim::setStatus(sim::STA_ITEM_GET, false);
+	Tick(10);
+	Expect(sim::count(44) == 1, "not removed during the cutscene");
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(5);
+	sim::setRoom(0x102);
+	sim::setRoutine(sim::R_MAINLOOP);
+	sim::setStatus(sim::STA_EVENT, false);
+	Tick(10);
+	Expect(Has(ChecksSince(m), L_SHOTGUN), "Shotgun check sent");
+	Expect(sim::count(44) == 0, "Shotgun removed after the room change");
+	End();
+}
+
+void H6()
+{
+	Begin("H6. Consumable picked up through the full-case organize screen counts");
+	Setup(0x101);
+	size_t m = cl.got.size();
+	int ammo = sim::count(24);
+	sim::setOpenFlag(sim::SS_PZZL);
+	sim::setGetItem(24, 6);
+	Tick(3);
+	sim::gameAdd(24, 6);
+	sim::setGetItem(0, 0);
+	sim::setOpenFlag(sim::SS_NULL);
+	Tick(10);
+	Expect(ChecksSince(m).size() == 1, "one consumable check");
+	Expect(sim::count(24) == ammo, "shells removed");
+	End();
+}
+
+void H7()
+{
+	Begin("H7. High location offsets (Final chapter) use the extended save bitset and roll back");
+	Setup(0x332);
+	auto checkpoint = sim::save();
+	size_t m = cl.got.size();
+	Pickup(24, 6);
+	Tick(5);
+	auto ch = ChecksSince(m);
+	Expect(ch.size() == 1 && ch[0] == L_SADDLER_SHELLS, "Saddler arena shells check");
+	uint32_t word = sim::saveWork(28 + OFF_SADDLER_SHELLS / 32);
+	Expect((word >> (OFF_SADDLER_SHELLS % 32)) & 1, "bit stored in save_free_work[" + std::to_string(28 + OFF_SADDLER_SHELLS / 32) + "]");
+	sim::setHp(0);
+	Tick(10);
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(5);
+	sim::restore(checkpoint);
+	Tick(5);
+	Expect(!ap::SaveBit(OFF_SADDLER_SHELLS), "bit rolled back with the save");
+	End();
+}
+
+void H8()
+{
+	Begin("H8. Enemy-randomizer config: no Saddler em, jet-ski room still reports the goal");
+	Setup(0x332);
+	size_t m = cl.got.size();
+	sim::setEm(0, 0x2B, 0, 99, true); // an El Gigante dies in Saddler's arena (randomized boss)
+	Tick(5);
+	Expect(CountCmdSince(m, "goal") == 0, "no goal from a non-Saddler enemy");
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(3);
+	sim::setEm(0, 0, 0, 0, false);
+	sim::setRoom(0x333);
+	sim::setRoutine(sim::R_MAINLOOP);
+	Tick(5);
+	Expect(CountCmdSince(m, "goal") >= 1, "goal sent on reaching the jet-ski");
+	End();
+}
+
 // Must run first: needs a process where no config has ever been received
 void E12()
 {
@@ -944,6 +1103,7 @@ int main()
 	S1();
 	S2(); S3(); S4(); S5(); S6(); S7(); S8(); S9(); S10(); S11(); S12(); S13();
 	E1(); E2(); E3(); E4(); E5(); E6(); E7(); E8(); E9(); E10(); E11(); E13();
+	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

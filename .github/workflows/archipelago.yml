@@ -51,6 +51,37 @@ jobs:
             ap/build/apworlds/re4uhd.apworld
             archipelago/templates/Resident Evil 4 UHD.yaml
 
+  harness:
+    name: Game-module behavior tests (wine)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install clang, MinGW and wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -q
+          sudo apt-get install -y -q clang mingw-w64 wine wine32
+          WINEDEBUG=-all wineboot -i || true
+
+      - name: Get Archipelago ${{ env.AP_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$AP_VERSION" https://github.com/ArchipelagoMW/Archipelago.git ap
+          pip install -r ap/requirements.txt
+          cp -r archipelago/apworld/re4uhd ap/worlds/re4uhd
+
+      - name: Run harness
+        env:
+          AP: ${{ github.workspace }}/ap
+          SKIP_REQUIREMENTS_UPDATE: "1"
+        run: archipelago/tests/harness/build.sh
+
   dll:
     name: Game mod (dinput8.dll)
     runs-on: windows-2025-vs2026
@@ -87,7 +118,7 @@ jobs:
 
   release:
     name: Release zip
-    needs: [apworld, dll]
+    needs: [apworld, dll, harness]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
