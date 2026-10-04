@@ -14,13 +14,13 @@ It takes about 15 minutes the first time.
 |---|---|
 | Resident Evil 4 on Steam (the **Ultimate HD Edition**, `bio4.exe`) | Steam |
 | Archipelago **0.6.7 or newer** | [Archipelago releases](https://github.com/ArchipelagoMW/Archipelago/releases) — install it like any program |
-| This mod's release files | The **Releases** page of this repository (right side of the repo page) |
+| This mod's release files | The [**Releases** page](https://github.com/Pegzzzz/RE4-UHD-Archipelago/releases) of this repository |
 
 From the latest release, download these three files:
 
 - `re4uhd.apworld` — teaches Archipelago about RE4
 - `RE4-UHD-Archipelago.zip` — the game mod
-- `Resident Evil 4 UHD.yaml` — your settings file
+- `Resident.Evil.4.UHD.yaml` — your settings file (GitHub swaps the spaces for dots; the name doesn't matter)
 
 ---
 
@@ -54,7 +54,7 @@ You should now see `dinput8.dll`, `dinput8.ini` and a `re4_tweaks` folder inside
 
 The YAML file holds your name and your choices for the randomizer.
 
-1. Open `Resident Evil 4 UHD.yaml` with Notepad.
+1. Open the `.yaml` file with Notepad.
 2. Change `name: Leon` to the name you want in the multiworld (no spaces is easiest).
 3. Pick your options:
 
