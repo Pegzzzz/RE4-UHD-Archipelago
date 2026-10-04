@@ -442,45 +442,45 @@
    "offset": 62
   },
   {
+   "name": "Ruby",
+   "classification": "filler",
+   "kind": "game",
+   "game_item": 119,
+   "offset": 63
+  },
+  {
    "name": "Pearl Pendant",
    "classification": "filler",
    "kind": "game",
    "game_item": 88,
-   "offset": 63
+   "offset": 64
   },
   {
    "name": "Beerstein",
    "classification": "filler",
    "kind": "game",
    "game_item": 94,
-   "offset": 64
+   "offset": 65
   },
   {
    "name": "Red Catseye",
    "classification": "filler",
    "kind": "game",
    "game_item": 96,
-   "offset": 65
+   "offset": 66
   },
   {
    "name": "Elegant Mask",
    "classification": "filler",
    "kind": "game",
    "game_item": 198,
-   "offset": 66
+   "offset": 67
   },
   {
    "name": "Brass Pocket Watch",
    "classification": "filler",
    "kind": "game",
    "game_item": 89,
-   "offset": 67
-  },
-  {
-   "name": "Ruby",
-   "classification": "filler",
-   "kind": "game",
-   "game_item": 119,
    "offset": 68
   },
   {
@@ -730,6 +730,7 @@
  "vanilla_pool": {
   "Spinel": 67,
   "Shotgun": 1,
+  "Ruby": 3,
   "Pearl Pendant": 2,
   "Beerstein": 1,
   "Red Catseye": 1,
@@ -738,7 +739,6 @@
   "Elegant Mask": 2,
   "Brass Pocket Watch": 2,
   "Insignia Key": 1,
-  "Ruby": 2,
   "Elegant Headdress": 2,
   "Green Catseye": 1,
   "Antique Pipe": 1,
@@ -795,7 +795,20 @@
   "Piece of the Holy Beast, Panther": 1,
   "Piece of the Holy Beast, Eagle": 1,
   "Piece of the Holy Beast, Serpent": 1,
-  "Emergency Lock Card Key": 1
+  "Emergency Lock Card Key": 1,
+  "Handgun Ammo": 86,
+  "Red Herb": 28,
+  "Hand Grenade": 23,
+  "Green Herb": 78,
+  "Yellow Herb": 26,
+  "Shotgun Shells": 64,
+  "Incendiary Grenade": 28,
+  "Flash Grenade": 26,
+  "Rifle Ammo": 31,
+  "Brown Chicken Egg": 1,
+  "TMP Ammo": 34,
+  "First Aid Spray": 10,
+  "Magnum Ammo": 12
  },
  "chapters": [
   "1-1",

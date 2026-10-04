@@ -84,6 +84,19 @@ def room_int(room: str) -> int:
 locations = []
 item_counts = Counter()        # vanilla item name -> count placed in the pool
 
+# Corrections from the consumables research pass (Evil Resource area pages)
+for e in RESEARCH:
+    if e["chapter"] == "1-1" and e["item"] == "Ruby" and e["room"] == "r101":
+        e["confidence"] = "high"  # the Farm-gate Dr. Salvador drops it (the other one drops pesetas)
+    if e["room"] == "r227" and "Lower Battlements" in e["area"]:
+        e["room"], e["room_confidence"] = "r22a", "medium"
+    if e["room"] == "r210" and "Dragon Hall Access" in e["area"]:
+        e["room_confidence"] = "high"
+    if e["room"] == "r305" and e["item"] == "Emerald":
+        e["room_confidence"] = "high"
+    if e["room"] == "r315":
+        e["room_confidence"] = "medium"
+
 # ---- world pickups ----------------------------------------------------------------
 pickups = []
 for e in RESEARCH:
@@ -131,6 +144,69 @@ for l in locations:
     if dupes[l["name"]] > 1:
         idx[l["name"]] += 1
         l["name"] = f"{l['name']} #{idx[l['name']]}"
+
+# ---- consumables (ammo, herbs, grenades, sprays) --------------------------------------
+# The mod matches these by room: any consumable picked up in a room takes that room's next spot,
+# because container contents and enemy drops can differ from the guides.
+CONSUMABLES = []
+for f in ("consumables_village.json", "consumables_castle.json", "consumables_island.json"):
+    CONSUMABLES += json.load(open(TOOLS / f))
+
+# extra gates for rooms that sit behind a key item inside their chapter
+ROOM_REQ = {
+    "r107": ["Emblem (Left half)", "Emblem (Right half)"],
+    "r117": ["Round Insignia"],
+    "r10f": ["Camp Key|Old Key"], "r11f": ["Camp Key|Old Key"],
+    "r200": ["Camp Key|Old Key", "False Eye"],
+    "r201": ["Platinum Sword", "Golden Sword", "Castle Gate Key"],
+    "r208": ["Platinum Sword", "Golden Sword", "Castle Gate Key", "Prison Key"],
+    "r216": ["Goat Ornament", "Lion Ornament"], "r219": ["Goat Ornament", "Lion Ornament"],
+    "r211": ["Goat Ornament", "Lion Ornament"], "r212": ["Goat Ornament", "Lion Ornament"],
+    "r213": ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"],
+    "r214": ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"],
+    "r215": ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"],
+    "r217": ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"],
+    "r218": ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"],
+    "r224": ["Dynamite"], "r21d": ["Dynamite"],
+    "r21b": ["Key to the Mine"],
+    "r308": ["Freezer Card Key"],
+    "r309": ["Waste Disposal Card Key"], "r30a": ["Waste Disposal Card Key"],
+    "r30b": ["Waste Disposal Card Key"], "r30c": ["Waste Disposal Card Key"],
+}
+# union of what the already-researched pickups in the same room and chapter need
+room_req = defaultdict(set)
+for e in RESEARCH:
+    for r in clean_requires(e.get("requires") or []):
+        room_req[(e["chapter"], e["room"])].add(r)
+
+consumable_locations = []
+for e in CONSUMABLES:
+    if e["item"] == "Black Bass" or e["confidence"] == "low" or e["chapter"] == "3-4" and "Ashley" in (e.get("notes") or ""):
+        continue
+    reqs = set(ROOM_REQ.get(e["room"], [])) | room_req[(e["chapter"], e["room"])]
+    loc = {
+        "name": f"{e['chapter']} {clean_area(e['area'])}: {e['item']}",
+        "kind": "pickup",
+        "consumable": True,
+        "chapter": e["chapter"],
+        "room": room_int(e["room"]),
+        "room_confidence": e.get("room_confidence", "medium"),
+        "game_items": [game_id(e["item"])],
+        "vanilla": e["item"],
+        "category": "consumable",
+        "requires": sorted(reqs),
+        "detail": e.get("area", ""),
+    }
+    consumable_locations.append(loc)
+    item_counts[loc["vanilla"]] += 1
+
+dupes = Counter(l["name"] for l in consumable_locations)
+idx = Counter()
+for l in consumable_locations:
+    if dupes[l["name"]] > 1:
+        idx[l["name"]] += 1
+        l["name"] = f"{l['name']} #{idx[l['name']]}"
+locations += consumable_locations
 
 # ---- bosses -----------------------------------------------------------------------
 BOSSES = [
@@ -184,7 +260,7 @@ for g, caps in CAPS.items():
 for i, l in enumerate(locations):
     l["offset"] = i
 assert len({l["name"] for l in locations}) == len(locations)
-assert len(locations) <= 256, "the game save stores collected locations in a 256-bit set"
+assert len(locations) <= 768, "the game save stores collected locations in a 768-bit set"
 
 # ---- AP items ---------------------------------------------------------------------
 KEY_ITEMS = ["Emblem (Left half)", "Emblem (Right half)", "Insignia Key", "Round Insignia",

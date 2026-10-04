@@ -7,6 +7,9 @@ Resident Evil 4 UHD:
   # false keeps every key item where it is in the vanilla game.
   shuffle_key_items: true
 
+  # Ammo, herbs, grenades and sprays placed in the world are checks (~450).
+  consumable_checks: true
+
   # First purchase of each Merchant item is a check (you keep what you bought).
   merchant_checks: true
 

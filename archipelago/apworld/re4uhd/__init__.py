@@ -5,7 +5,7 @@ from worlds.AutoWorld import WebWorld, World
 from worlds.LauncherComponents import Component, Type, components, launch as launch_component
 
 from .data_loader import (CHAPTER_GATES, CHAPTERS, GAME_NAME, ITEM_BASE_ID, ITEM_NAME_TO_ID, ITEMS,
-                          ITEMS_BY_NAME, LOCATION_BASE_ID, LOCATION_NAME_TO_ID, LOCATIONS, VANILLA_POOL)
+                          ITEMS_BY_NAME, LOCATION_BASE_ID, LOCATION_NAME_TO_ID, LOCATIONS)
 from .options import RE4Options
 
 
@@ -90,6 +90,8 @@ class RE4World(World):
 
     def _location_enabled(self, loc: Dict[str, Any]) -> bool:
         kind = loc["kind"]
+        if kind == "pickup" and loc.get("consumable"):
+            return bool(self.options.consumable_checks)
         if kind == "boss":
             return bool(self.options.boss_checks)
         if kind == "merchant":
@@ -143,11 +145,13 @@ class RE4World(World):
     def create_items(self) -> None:
         pool: List[RE4Item] = []
         key_items = self.item_name_groups["Key Items"]
-        for name, count in VANILLA_POOL.items():
-            for _ in range(count):
-                if not self.options.shuffle_key_items and name in key_items:
-                    continue  # placed on its vanilla location in pre_fill-style below
-                pool.append(self.create_item(name))
+        for loc in self.enabled_locations:
+            if loc["kind"] != "pickup":
+                continue
+            name = loc["vanilla"]
+            if not self.options.shuffle_key_items and name in key_items:
+                continue  # placed on its vanilla location below
+            pool.append(self.create_item(name))
 
         if not self.options.shuffle_key_items:
             for loc in self.enabled_locations:
@@ -181,6 +185,8 @@ class RE4World(World):
                 entry["loose"] = 1
             if l.get("cut"):
                 entry["cut"] = 1
+            if l.get("consumable"):
+                entry["c"] = 1
             locs.append(entry)
         items = []
         for i in ITEMS:

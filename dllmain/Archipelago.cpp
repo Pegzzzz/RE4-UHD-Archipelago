@@ -11,7 +11,7 @@
 //    location really holds through the normal received-items stream.
 //  - Per-save state lives inside the game's own save work (GLOBAL_WK::save_free_work), so dying,
 //    continuing or loading an older save keeps items and checks consistent:
-//      [52..59] bitset of locations collected in this save (by location offset)
+//      [28..51] bitset of locations collected in this save (by location offset, 768 bits)
 //      [60] magic  [61] seed tag  [62] index of the next received item to apply  [63] flags (bit0 = goal)
 
 #include <winsock2.h>
@@ -46,8 +46,8 @@ namespace ap
 	constexpr int kProtocolVersion = 1;
 
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
-	constexpr int kSlotBits = 52;   // 8 slots = 256 location bits
-	constexpr int kBitSlots = 8;
+	constexpr int kSlotBits = 28;   // 24 slots = 768 location bits
+	constexpr int kBitSlots = 24;
 	constexpr int kSlotMagic = 60;
 	constexpr int kSlotTag = 61;
 	constexpr int kSlotIndex = 62;
@@ -76,6 +76,7 @@ namespace ap
 		std::vector<int> items;
 		bool loose = false; // room id not verified: allow a match anywhere in the same stage
 		bool cut = false;   // given by a cutscene/puzzle rather than the pickup screen
+		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
 	};
 
 	struct ItemDef
@@ -113,6 +114,7 @@ namespace ap
 	std::mutex logMutex;
 	std::deque<std::string> consoleQueue; // lines for con.log, flushed on the main thread
 	std::filesystem::path logFile;
+	std::filesystem::path configFile;
 
 	// ---------------- main-thread state -------------------------------------------------------
 	bool configured = false;
@@ -152,6 +154,7 @@ namespace ap
 	struct TrackedEm { uint32_t guid; uint8_t id; };
 	std::unordered_map<uint32_t, TrackedEm> trackedBosses; // key: index in EmMgr
 	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
+	uint32_t warnedUnknownIndex = UINT32_MAX;
 
 	// =============================================================================== logging
 	// Safe from any thread: writes the file directly, console lines are queued for the main thread.
@@ -502,6 +505,13 @@ namespace ap
 		}
 	}
 
+	bool IsConsumableType(int id)
+	{
+		ITEM_INFO info;
+		bio4::itemInfo(ITEM_ID(id), &info);
+		return info.type_2 == ITEM_TYPE_AMMO || info.type_2 == ITEM_TYPE_GRENADE || info.type_2 == ITEM_TYPE_CONSUMABLE;
+	}
+
 	// =============================================================================== save state
 	uint32_t* SaveWork()
 	{
@@ -593,7 +603,7 @@ namespace ap
 				AddToast("This save isn't linked to Archipelago. Start a New Game, or type /bindsave in the client.");
 			}
 		}
-		uiStatus = state == 1 ? 2 : (state == 2 ? 3 : 4);
+		uiStatus = !clientConnected ? 0 : (state == 1 ? 2 : (state == 2 ? 3 : 4));
 		return state == 1;
 	}
 
@@ -681,6 +691,34 @@ namespace ap
 		return false;
 	}
 
+	// Ammo/herbs/grenades: a room has N consumable spots; any consumable picked up there takes the next one.
+	// (Container contents and enemy drops can differ from the guide, so the item type isn't matched.)
+	bool HandleConsumablePickup(uint16_t id, uint16_t room)
+	{
+		// If this room has spots of its own, only those count. A room with none at all is probably one whose
+		// id the guides got wrong, so it may take an unverified spot from the same stage.
+		bool roomHasSpots = false;
+		for (auto& loc : locations)
+			if (loc.kind == Kind::Pickup && loc.consumable && loc.room == room)
+				roomHasSpots = true;
+
+		for (int loosePass = 0; loosePass < (roomHasSpots ? 1 : 2); loosePass++)
+		{
+			for (auto& loc : locations)
+			{
+				if (loc.kind != Kind::Pickup || !loc.consumable || SaveBit(loc.offset))
+					continue;
+				if (loosePass ? (!loc.loose || (loc.room >> 8) != (room >> 8)) : loc.room != room)
+					continue;
+				if (loosePass)
+					SendLog("Consumable in room r" + Hex(room) + " matched location " + std::to_string(loc.id) + " by stage");
+				SendCheck(loc, std::string("picked up ") + ItemName(id));
+				return true;
+			}
+		}
+		return false; // every spot here already collected: keep the item
+	}
+
 	void HandleNewItem(uint16_t id, uint32_t count, int goldDelta, const std::vector<cItem*>& fresh)
 	{
 		GLOBAL_WK* g = GlobalPtr();
@@ -704,8 +742,8 @@ namespace ap
 			return;
 		}
 
-		bool shop = (frame - lastShopCtxFrame) <= kShopWindowFrames;
-		bool pickup = (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
+		bool shop = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
+		bool pickup = lastPickupCtxFrame && (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
 
 		// 3. Merchant
 		if (shop)
@@ -723,7 +761,15 @@ namespace ap
 			return;
 		}
 
-		// 4. world pickups (or cutscene/puzzle rewards)
+		// 4. consumables (one pickup = one event, whatever the amount)
+		if (IsConsumableType(id))
+		{
+			if (pickup && HandleConsumablePickup(id, room))
+				pendingRemovals.push_back({ id, count, fresh });
+			return;
+		}
+
+		// 5. world pickups (or cutscene/puzzle rewards)
 		uint32_t removeCount = 0;
 		for (uint32_t i = 0; i < count; i++)
 			if (HandlePickup(id, room, !pickup))
@@ -768,7 +814,7 @@ namespace ap
 		}
 
 		// Attache case bought from the Merchant (case size changes instead of an item appearing)
-		if (caseSize > prevCaseSize && prevCaseSize >= 0 && (frame - lastShopCtxFrame) <= kShopWindowFrames)
+		if (caseSize > prevCaseSize && prevCaseSize >= 0 && lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames)
 		{
 			int caseItem = 124 + caseSize;
 			for (auto& loc : locations)
@@ -908,8 +954,13 @@ namespace ap
 		std::string toast = item.from.empty() ? ("Received " + label) : ("Received " + label + " from " + item.from);
 		if (defIt == itemDefs.end())
 		{
-			SendLog("Unknown item id " + std::to_string(item.id));
-			return true;
+			if (warnedUnknownIndex != index)
+			{
+				warnedUnknownIndex = index;
+				SendLog("Unknown item id " + std::to_string(item.id) + " - the mod and the APWorld versions don't match");
+				AddToast("Archipelago: unknown item received. Update the mod and the APWorld to the same release.");
+			}
+			return false; // hold it rather than lose it
 		}
 		const ItemDef& def = defIt->second;
 		bool done = true;
@@ -937,7 +988,8 @@ namespace ap
 			InventoryItemAdd(ITEM_ID(def.game), count, false, true);
 			if (CountOf(gid) <= before)
 			{
-				if (SubScreenWk->open_flag_2C & SS_OPEN_PZZL)
+				// InventoryItemAdd sets get_item_id right away; the organize screen may open a frame later
+				if (SubScreenWk->get_item_id_2F6 == gid || (SubScreenWk->open_flag_2C & SS_OPEN_PZZL))
 				{
 					// case full: the game shows the organize screen and adds the item when the player places it
 					pendingGrant = { true, gid, index, 0 };
@@ -1036,30 +1088,31 @@ namespace ap
 		resetSnapshot = true;
 	}
 
-	void HandleConfig(const json& msg)
+	bool HandleConfig(const json& msg, bool fromDisk)
 	{
-		const json& sd = msg.value("slot_data", json::object());
-		uint32_t newTag = msg.value("save_tag", uint32_t(0));
-		if (newTag != saveTag)
+		if (!msg.contains("slot_data") || !msg["slot_data"].is_object() || !msg["slot_data"].value("locations", json()).is_array())
 		{
-			ResetSessionState();
-			saveTag = newTag;
+			Log("Ignored config without valid slot_data");
+			return false;
 		}
+		const json& sd = msg["slot_data"];
 
-		locations.clear();
-		itemDefs.clear();
-		bossEmIds = { 0x31, 0x3F };
-		locationBase = sd.value("location_base", int64_t(0));
+		// parse into locals first; only replace the active config if everything parsed
+		std::vector<LocationDef> newLocations;
+		std::unordered_map<int64_t, ItemDef> newItems;
+		std::unordered_set<int> newBossIds = { 0x31, 0x3F };
+		int64_t newBase = sd.value("location_base", int64_t(0));
 		for (auto& l : sd.value("locations", json::array()))
 		{
 			LocationDef d;
 			d.id = l.value("id", int64_t(0));
-			d.offset = int(d.id - locationBase);
+			d.offset = int(d.id - newBase);
 			d.kind = ParseKind(l.value("k", std::string()));
 			d.room = l.value("room", -1);
 			d.em = l.value("em_id", -1);
 			d.loose = l.value("loose", 0) != 0;
 			d.cut = l.value("cut", 0) != 0;
+			d.consumable = l.value("c", 0) != 0;
 			for (auto& i : l.value("items", json::array()))
 				d.items.push_back(i.get<int>());
 			if (d.offset < 0 || d.offset >= kBitSlots * 32)
@@ -1068,8 +1121,8 @@ namespace ap
 				continue;
 			}
 			if (d.kind == Kind::Boss && d.em >= 0)
-				bossEmIds.insert(d.em);
-			locations.push_back(std::move(d));
+				newBossIds.insert(d.em);
+			newLocations.push_back(std::move(d));
 		}
 		for (auto& i : sd.value("items", json::array()))
 		{
@@ -1077,12 +1130,35 @@ namespace ap
 			d.kind = i.value("k", std::string());
 			d.game = i.value("g", -1);
 			d.amount = i.value("amount", 0);
-			itemDefs[i.value("id", int64_t(0))] = d;
+			newItems[i.value("id", int64_t(0))] = d;
 		}
+
+		uint32_t newTag = msg.value("save_tag", uint32_t(0));
+		if (newTag != saveTag)
+		{
+			ResetSessionState();
+			saveTag = newTag;
+		}
+		locations = std::move(newLocations);
+		itemDefs = std::move(newItems);
+		bossEmIds = std::move(newBossIds);
+		locationBase = newBase;
 		deathLink = sd.value("death_link", false);
 		configured = true;
-		Log("Configured: " + std::to_string(locations.size()) + " locations, slot " + msg.value("slot", std::string()));
-		AddToast("Archipelago: connected as " + msg.value("slot", std::string()));
+		Log("Configured: " + std::to_string(locations.size()) + " locations, slot " + msg.value("slot", std::string()) +
+			(fromDisk ? " (from last session)" : ""));
+		if (!fromDisk)
+		{
+			AddToast("Archipelago: connected as " + msg.value("slot", std::string()));
+			// remember it, so pickups made before the client connects next time are still tracked
+			try
+			{
+				std::ofstream f(configFile, std::ios::trunc);
+				f << msg.dump();
+			}
+			catch (...) {}
+		}
+		return true;
 	}
 
 	// Re-send everything this save has collected that the server hasn't confirmed (e.g. done while offline)
@@ -1117,8 +1193,8 @@ namespace ap
 				cmd = msg.value("cmd", std::string());
 				if (cmd == "config")
 				{
-					HandleConfig(msg);
-					ResendFromSave();
+					if (HandleConfig(msg, msg.value("from_disk", false)))
+						ResendFromSave();
 				}
 				else if (cmd == "items")
 				{
@@ -1144,7 +1220,11 @@ namespace ap
 				}
 				else if (cmd == "bind_save")
 				{
-					if (configured && InMainLoop() && IsMainGame())
+					uint32_t* w = SaveWork();
+					bool alreadyLinked = w && w[kSlotMagic] == kSaveMagic && w[kSlotTag] == saveTag;
+					if (alreadyLinked)
+						AddToast("This save is already linked to this seed");
+					else if (configured && InMainLoop() && IsMainGame())
 					{
 						BindSave();
 						saveState = 0;
@@ -1291,9 +1371,27 @@ void Archipelago_Render()
 void re4t::init::Archipelago()
 {
 	ap::logFile = std::filesystem::path(rootPath) / "re4_tweaks" / "archipelago.log";
+	ap::configFile = std::filesystem::path(rootPath) / "re4_tweaks" / "archipelago_config.json";
 	try
 	{
 		std::filesystem::create_directories(ap::logFile.parent_path());
+	}
+	catch (...) {}
+
+	// Load the last seed's config so pickups are tracked even before the client connects
+	try
+	{
+		std::ifstream f(ap::configFile);
+		if (f)
+		{
+			json cfg = json::parse(f);
+			if (cfg.is_object())
+			{
+				cfg["from_disk"] = true;
+				std::lock_guard<std::mutex> lock(ap::inboxMutex);
+				ap::inbox.push_back(std::move(cfg));
+			}
+		}
 	}
 	catch (...) {}
 

@@ -11,7 +11,13 @@
 Newline-delimited JSON over TCP `127.0.0.1:46400` (the game listens). See the docstring at the top of
 `apworld/re4uhd/client.py`.
 
-## Things to verify in game (v0.1)
+## Behavioral tests for the game module
+
+`tests/harness/build.sh` compiles `dllmain/Archipelago.cpp` against a simulated game (inventory, item-get screen,
+Merchant, organize screen, enemies, save rollback) and runs 26 scenarios under wine with a fake client:
+`AP=/path/to/Archipelago tests/harness/build.sh`. Needs clang, mingw-w64 (i686), wine32.
+
+## Things to verify in game
 
 - Pickups are detected by diffing Leon's item list while the pickup screen is open. Confirm every location type
   (crates, shot-down treasures, chests, boss drops) triggers a check.

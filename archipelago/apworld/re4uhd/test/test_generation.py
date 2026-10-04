@@ -29,7 +29,23 @@ class TestVanillaKeys(RE4TestBase):
 
 
 class TestMinimal(RE4TestBase):
-    options = {"merchant_checks": False, "boss_checks": False, "shooting_gallery_checks": False}
+    options = {"merchant_checks": False, "boss_checks": False, "shooting_gallery_checks": False,
+               "consumable_checks": False}
+
+    def test_no_consumables(self) -> None:
+        names = {l.name for l in self.multiworld.get_locations(self.player)}
+        self.assertNotIn("1-1 Woods: Handgun Ammo", names)
+
+
+class TestConsumables(RE4TestBase):
+    def test_consumable_gated_by_room(self) -> None:
+        self.assertIn("1-1 Woods: Handgun Ammo", {l.name for l in self.multiworld.get_locations(self.player)})
+        self.collect_all_but(["Waste Disposal Card Key"])
+        gated = [l for l in self.multiworld.get_locations(self.player)
+                 if l.name.startswith("5-1") and "Waste Disposal" in l.name]
+        for loc in self.multiworld.get_locations(self.player):
+            if loc.name.startswith("5-1") and "Waste Disposal Area" in loc.name:
+                self.assertFalse(loc.can_reach(self.multiworld.state), loc.name)
 
 
 class TestEverything(RE4TestBase):
