@@ -47,6 +47,8 @@ want = {
     "L_MEDALLION": "Blue Medallions: Merchant Reward", "L_CAP_HANDGUN": "Shooting Gallery A: Leon w/ handgun Cap",
     "L_SADDLER_SHELLS": "Final Saddler arena: Shotgun Shells",
     "L_CASTLE_BONUS1": "Castle Bonus Treasure 1", "L_CASTLE_BONUS5": "Castle Bonus Treasure 5",
+    "L_VILLAGE_PESETAS1": "Village Pesetas 1", "L_VILLAGE_PESETAS2": "Village Pesetas 2",
+    "L_ISLAND_PESETAS1": "Island Pesetas 1", "L_ISLAND_PESETAS11": "Island Pesetas 11",
 }
 from worlds.re4uhd.data_loader import LOCATION_BASE_ID
 with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") as f:
@@ -56,6 +58,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") a
     items_want = {"IT_GREEN_HERB": "Green Herb", "IT_RED9": "Red9", "IT_HANDGUN_AMMO": "Handgun Ammo",
                   "IT_GRENADE": "Hand Grenade", "IT_P1000": "1000 Pesetas", "IT_SPRAY": "First Aid Spray"}
     f.write("constexpr int64_t " + ",\n\t".join(f"{k} = {ITEM_NAME_TO_ID[v]}" for k, v in items_want.items()) + ";\n")
+    f.write(f"constexpr int OFF_ISLAND_PESETAS11 = {LOCATION_NAME_TO_ID[want['L_ISLAND_PESETAS11']] - LOCATION_BASE_ID};\n")
     f.write(f"constexpr int OFF_SADDLER_SHELLS = {LOCATION_NAME_TO_ID[want['L_SADDLER_SHELLS']] - LOCATION_BASE_ID};\n")
     f.write(f"constexpr int OFF_FARM_SPINEL1 = {LOCATION_NAME_TO_ID[want['L_FARM_SPINEL1']] - LOCATION_BASE_ID}, "
             f"OFF_FARM_SPINEL2 = {LOCATION_NAME_TO_ID[want['L_FARM_SPINEL2']] - LOCATION_BASE_ID};\n")

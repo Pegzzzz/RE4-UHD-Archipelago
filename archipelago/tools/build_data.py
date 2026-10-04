@@ -293,11 +293,28 @@ for stage, stage_name, ch in ((1, "Village", "1-1"), (2, "Castle", "3-1"), (3, "
         locations.append({"name": f"{stage_name} Bonus Treasure {i}", "kind": "bonus", "stage": stage,
                           "index": i, "chapter": ch, "requires": [], "excluded": True})
 
+# Pesetas: placed pesetas (not enemy or boss drops) per chapter, counted from the community Manual APWorld
+# (VincentsSin/Resident-Evil-4-Manual-AP v2.2.0). Each placed pesetas pickup takes its stage's next check, so the
+# n-th check sits in the chapter where the n-th placed pesetas first becomes reachable. Filler-only: the game mod
+# can only tell placed pesetas from drops by the room's item flags.
+PESETAS_PER_CHAPTER = {"1-1": 5, "1-2": 1, "1-3": 2, "2-1": 1, "2-2": 2, "2-3": 1,
+                       "3-1": 6, "3-2": 5, "3-3": 1, "3-4": 5, "4-1": 8, "4-2": 3, "4-3": 9,
+                       "5-1": 2, "5-3": 6, "5-4": 1, "Final": 2}
+for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
+    i = 0
+    for ch in CHAPTERS:
+        if (ch == "Final" and stage != 3) or (ch != "Final" and {"1": 1, "2": 1, "3": 2, "4": 2, "5": 3}[ch[0]] != stage):
+            continue
+        for _ in range(PESETAS_PER_CHAPTER.get(ch, 0)):
+            i += 1
+            locations.append({"name": f"{stage_name} Pesetas {i}", "kind": "pesetas", "stage": stage,
+                              "index": i, "chapter": ch, "requires": [], "excluded": True})
+
 # ---- ids ---------------------------------------------------------------------------
 for i, l in enumerate(locations):
     l["offset"] = i
 assert len({l["name"] for l in locations}) == len(locations)
-assert len(locations) <= 768, "the game save stores collected locations in a 768-bit set"
+assert len(locations) <= 1024, "the game save stores collected locations in a 1024-bit set"
 
 # ---- AP items ---------------------------------------------------------------------
 KEY_ITEMS = ["Emblem (Left half)", "Emblem (Right half)", "Insignia Key", "Round Insignia",

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0
+- Enemy drops no longer use up a room's ammo/herb checks. The game marks placed items as taken in the room's
+  save data; a pickup only counts when that flag flips with it. If a game never shows those flags, the mod falls
+  back to the old behaviour on its own after a few pickups (and learns it per install).
+- New `pesetas_checks` (default on): 60 placed pesetas pickups (12 village, 37 castle, 11 island, counted from the
+  community Manual APWorld) are filler-only checks; you keep the money, drops don't count.
+- New `random_enemy_health` (built in, no other download): `mild`, `tough`, `wild`, `chaos`.
+- re_duke's randomizer: Merchant checks and the medallion reward now stay on when `re_duke_merchant` is off, so
+  "random enemies only" keeps them. Boss checks are only turned off with `re_duke_enemies`.
+- The save's location bitset grows from 768 to 1024 (save work slots 52-59, which were reserved and empty).
+- Location and item ids from 0.4 are unchanged; new ones are appended.
+
 ## 0.4.1
 - The client now checks re_duke's randomizer whenever it's installed, even if the YAML doesn't use it, and
   warns (in the client and in game) when its last seed moved items or doors, which makes checks miss.

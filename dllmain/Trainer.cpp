@@ -10,6 +10,8 @@
 #include "UI_DebugWindows.h"
 #include "UI_Utility.h"
 #include "Trainer.h"
+#include "Archipelago.h"
+#include <algorithm>
 #include <DirectXMath.h>
 
 int flagCategory = 0; // Flag editor category, matches with CategoryInfoIdx enum in Trainer.h
@@ -436,6 +438,32 @@ void Trainer_DrawDebugTrgHint()
 
 
 std::vector<FlagPatch> flagPatches;
+// Enemy HP multiplier: the trainer setting, or random enemy health from an Archipelago slot
+static void ApplyEnemyHPMultiplier(cEm* Em_ptr)
+{
+	if (!IsEnemy(Em_ptr->id_100))
+		return;
+
+	float multi = 0.0f;
+	float apMin = 0.0f, apMax = 0.0f;
+	if (re4t::cfg->bTrainerEnemyHPMultiplier)
+	{
+		if (re4t::cfg->bTrainerRandomHPMultiplier)
+			multi = GetRandomFloat(re4t::cfg->fTrainerRandomHPMultiMin, re4t::cfg->fTrainerRandomHPMultiMax);
+		else
+			multi = re4t::cfg->fTrainerEnemyHPMultiplier;
+	}
+	else if (Archipelago_EnemyHP(&apMin, &apMax))
+		multi = GetRandomFloat(apMin, apMax);
+	else
+		return;
+
+	// hp is a 16-bit value: big boss health times a large multiplier would wrap around
+	auto scale = [multi](int16_t hp) { return hp <= 0 ? hp : (int16_t)std::clamp(int(hp * multi), 1, 32000); };
+	Em_ptr->hp_324 = scale(Em_ptr->hp_324);
+	Em_ptr->hp_max_326 = scale(Em_ptr->hp_max_326);
+}
+
 void Trainer_Init()
 {
 	GLOBAL_WK* globals = GlobalPtr();
@@ -861,17 +889,7 @@ void Trainer_Init()
 				// Get pointer to cEm
 				cEm* Em_ptr = (cEm*)(regs.eax);
 
-				if (re4t::cfg->bTrainerEnemyHPMultiplier && IsEnemy(Em_ptr->id_100))
-				{
-					float multi = 0.0f;
-					if (re4t::cfg->bTrainerRandomHPMultiplier)
-						multi = GetRandomFloat(re4t::cfg->fTrainerRandomHPMultiMin, re4t::cfg->fTrainerRandomHPMultiMax);
-					else
-						multi = re4t::cfg->fTrainerEnemyHPMultiplier;
-
-					Em_ptr->hp_324 = (int16_t)(Em_ptr->hp_324 * multi);
-					Em_ptr->hp_max_326 = (int16_t)(Em_ptr->hp_max_326 * multi);
-				}
+				ApplyEnemyHPMultiplier(Em_ptr);
 			}
 		}; injector::MakeInline<EmSetFromList_hook>(pattern.count(1).get(0).get<uint32_t>(0), pattern.count(1).get(0).get<uint32_t>(7));
 
@@ -886,17 +904,7 @@ void Trainer_Init()
 				// Get pointer to cEm
 				cEm* Em_ptr = (cEm*)(regs.esi);
 
-				if (re4t::cfg->bTrainerEnemyHPMultiplier && IsEnemy(Em_ptr->id_100))
-				{
-					float multi = 0.0f;
-					if (re4t::cfg->bTrainerRandomHPMultiplier)
-						multi = GetRandomFloat(re4t::cfg->fTrainerRandomHPMultiMin, re4t::cfg->fTrainerRandomHPMultiMax);
-					else
-						multi = re4t::cfg->fTrainerEnemyHPMultiplier;
-
-					Em_ptr->hp_324 = (int16_t)(Em_ptr->hp_324 * multi);
-					Em_ptr->hp_max_326 = (int16_t)(Em_ptr->hp_max_326 * multi);
-				}
+				ApplyEnemyHPMultiplier(Em_ptr);
 			}
 		}; injector::MakeInline<EmSetFromList2_hook>(pattern.count(1).get(0).get<uint32_t>(0), pattern.count(1).get(0).get<uint32_t>(7));
 
@@ -911,17 +919,7 @@ void Trainer_Init()
 				// Get pointer to cEm
 				cEm* Em_ptr = (cEm*)(regs.esi);
 
-				if (re4t::cfg->bTrainerEnemyHPMultiplier && IsEnemy(Em_ptr->id_100))
-				{
-					float multi = 0.0f;
-					if (re4t::cfg->bTrainerRandomHPMultiplier)
-						multi = GetRandomFloat(re4t::cfg->fTrainerRandomHPMultiMin, re4t::cfg->fTrainerRandomHPMultiMax);
-					else
-						multi = re4t::cfg->fTrainerEnemyHPMultiplier;
-
-					Em_ptr->hp_324 = (int16_t)(Em_ptr->hp_324 * multi);
-					Em_ptr->hp_max_326 = (int16_t)(Em_ptr->hp_max_326 * multi);
-				}
+				ApplyEnemyHPMultiplier(Em_ptr);
 			}
 		}; injector::MakeInline<EmSetEvent_hook>(pattern.count(1).get(0).get<uint32_t>(0), pattern.count(1).get(0).get<uint32_t>(7));
 	}

@@ -11,6 +11,7 @@
 #include <functional>
 #include <set>
 #include <sstream>
+#include <iterator>
 
 // ---------------------------------------------------------------- ids
 constexpr int64_t LB = 7741000; // location base
@@ -267,7 +268,10 @@ void SetItems(const std::vector<int64_t>& ids)
 	Deliver({ { {"cmd", "items"}, {"items", cl.items} } });
 }
 
-// Pick up `num` of an item through the item-get screen; screen closes afterwards
+// Pick up `num` of an item through the item-get screen; screen closes afterwards.
+// placed: a map item (the game sets the room's item flag); otherwise an enemy drop.
+// Supply pickups (ammo/herbs/grenades) are decided up to kFlagAfterFrames later: use Settle().
+bool gPickupPlaced = true;
 void Pickup(uint16_t id, int num, bool close = true, int chr = 0)
 {
 	sim::setOpenFlag(sim::SS_ITEM);
@@ -275,6 +279,8 @@ void Pickup(uint16_t id, int num, bool close = true, int chr = 0)
 	sim::setStatus(sim::STA_ITEM_GET, true);
 	Tick(3);
 	sim::gameAdd(id, num, chr);
+	if (gPickupPlaced)
+		sim::setRoomItemFlag(sim::nextRoomItemBit());
 	Tick(3);
 	if (close)
 	{
@@ -284,6 +290,25 @@ void Pickup(uint16_t id, int num, bool close = true, int chr = 0)
 		Tick(3);
 	}
 }
+
+void Drop(uint16_t id, int num)
+{
+	gPickupPlaced = false;
+	Pickup(id, num);
+	gPickupPlaced = true;
+}
+
+// Pesetas lying in the world (placed) or dropped by an enemy; no pickup screen
+void PickupGold(int amount, bool placed = true)
+{
+	sim::setGold(sim::gold() + amount);
+	if (placed)
+		sim::setRoomItemFlag(sim::nextRoomItemBit());
+	Tick(3);
+}
+
+// let pending supply pickups be decided
+void Settle() { Tick(ap::kFlagAfterFrames + 5); }
 
 void Buy(uint16_t id, int price)
 {
@@ -391,18 +416,18 @@ void S4()
 	size_t m = cl.got.size(), c0 = sim::conLines().size();
 	int before = sim::count(4);
 	Pickup(4, 10);
-	Tick(5);
+	Settle();
 	auto ch = ChecksSince(m);
 	Expect(ch.size() == 1, "first ammo pickup -> one check");
 	Expect(sim::count(4) == before, "picked ammo removed");
 	auto snapshot = sim::save();
 	Pickup(6, 1); // green herb counts toward the same room's spots
 	Pickup(24, 6);
-	Tick(5);
+	Settle();
 	Expect(ChecksSince(m).size() == 3, "three spots -> three checks");
 	size_t m2 = cl.got.size();
 	Pickup(4, 10);
-	Tick(5);
+	Settle();
 	Expect(ChecksSince(m2).empty(), "4th consumable: no check");
 	Expect(sim::count(4) == before + 10, "4th consumable kept");
 	Expect(!ConContains(c0, "Unmapped"), "no Unmapped log for consumables");
@@ -415,13 +440,14 @@ void S4()
 	Tick(5);
 	size_t m3 = cl.got.size();
 	Pickup(6, 1);
-	Tick(5);
+	Settle();
 	Expect(ChecksSince(m3).size() <= 1, "re-pickup after rollback sends at most the already-known spot");
+	Expect(sim::count(6) == 0, "re-picked herb maps to a spot again (room flags rolled back too) and is removed");
 	// a room with no spots of its own may take an unverified spot from the stage
 	Setup(0x102);
 	size_t m4 = cl.got.size();
 	Pickup(4, 10);
-	Tick(5);
+	Settle();
 	Expect(ChecksSince(m4).size() <= 1, "unlisted room: at most one loose spot");
 	End();
 }
@@ -1034,9 +1060,10 @@ void H6()
 	sim::setGetItem(24, 6);
 	Tick(3);
 	sim::gameAdd(24, 6);
+	sim::setRoomItemFlag(sim::nextRoomItemBit());
 	sim::setGetItem(0, 0);
 	sim::setOpenFlag(sim::SS_NULL);
-	Tick(10);
+	Settle();
 	Expect(ChecksSince(m).size() == 1, "one consumable check");
 	Expect(sim::count(24) == ammo, "shells removed");
 	End();
@@ -1049,7 +1076,7 @@ void H7()
 	auto checkpoint = sim::save();
 	size_t m = cl.got.size();
 	Pickup(24, 6);
-	Tick(5);
+	Settle();
 	auto ch = ChecksSince(m);
 	Expect(ch.size() == 1 && ch[0] == L_SADDLER_SHELLS, "Saddler arena shells check");
 	uint32_t word = sim::saveWork(28 + OFF_SADDLER_SHELLS / 32);
@@ -1132,7 +1159,7 @@ void H11()
 	sim::setOpenFlag(sim::SS_NULL);
 	sim::setItemGetFlag(false);
 	Tick(200);                // flag window expires
-	Pickup(24, 6);            // a drop: no room flag
+	Drop(24, 6);              // a drop: no room flag
 	Tick(3);
 	Expect(ConContains(c0, "[roomflag] r101 item_flg bit 5"), "room flag flip logged");
 	Expect(ConContains(c0, "[pickup] Handgun Ammo x10 r101 pickup-screen placed-item-flag"), "placed pickup logged with the flag");
@@ -1171,6 +1198,171 @@ void E12()
 	End();
 }
 
+// =================================================================== 0.5: placed items vs drops, pesetas
+void P1()
+{
+	Begin("P1. Enemy drops don't take consumable spots; placed items still do");
+	Setup(0x106); // 3 consumable spots
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	int ammo = sim::count(4);
+	Drop(4, 10);
+	Drop(6, 1);
+	Settle();
+	Expect(ChecksSince(m).empty(), "two drops: no checks");
+	Expect(sim::count(4) == ammo + 10 && sim::count(6) == 1, "drops kept");
+	Expect(ConContains(c0, "[pickup] drop Handgun Ammo x10 in r106 (not a check)"), "drop logged");
+	Pickup(24, 6);
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "placed shells after the drops -> the room's first spot");
+	Expect(sim::count(24) == 0, "placed shells removed");
+	End();
+}
+
+void P2()
+{
+	Begin("P2. Room flag set a little after the item appears still counts");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	gPickupPlaced = false;
+	Pickup(4, 10);
+	gPickupPlaced = true;
+	Tick(30);
+	sim::setRoomItemFlag(sim::nextRoomItemBit());
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "late flag -> check");
+	// and a flag set shortly before the item appears
+	sim::setRoomItemFlag(sim::nextRoomItemBit());
+	Tick(20);
+	gPickupPlaced = false;
+	Pickup(6, 1);
+	gPickupPlaced = true;
+	Settle();
+	Expect(ChecksSince(m).size() == 2, "early flag -> check");
+	End();
+}
+
+void P3()
+{
+	Begin("P3. A treasure's room flag doesn't make a drop picked up right after it count");
+	Setup(0x103);
+	size_t m = cl.got.size();
+	Pickup(87, 1); // placed Spinel: sets a flag
+	Drop(4, 10);   // drop right after it
+	Settle();
+	auto c = ChecksSince(m);
+	Expect(c.size() == 1 && c[0] == L_FARM_SPINEL1, "only the Spinel checked (got " + json(c).dump() + ")");
+	Expect(sim::count(4) == 30, "dropped ammo kept");
+	End();
+}
+
+void P4()
+{
+	Begin("P4. Game that never flags pickups: falls back to counting every pickup, then learns");
+	Setup(0x106);
+	ap::flagMode = ap::FlagMode::Unknown;
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	for (int i = 0; i < ap::kLegacyAfterUnflagged - 1; i++)
+		Drop(6, 1);
+	Settle();
+	Expect(ChecksSince(m).empty(), "undecided pickups wait");
+	Drop(6, 1);
+	Settle();
+	Expect(ap::flagMode == ap::FlagMode::Legacy, "switched to counting every pickup");
+	Expect(ChecksSince(m).size() == 3, "the room's 3 spots checked retroactively");
+	Expect(sim::count(6) == ap::kLegacyAfterUnflagged, "retroactive pickups kept");
+	Expect(ConContains(c0, "counting every ammo/herb/pesetas pickup"), "fallback logged");
+	Setup(0x101);
+	size_t m2 = cl.got.size();
+	Pickup(4, 10); // the game does flag this one
+	Settle();
+	Expect(ap::flagMode == ap::FlagMode::Flags, "a flagged supply pickup switches to flag mode");
+	Expect(ChecksSince(m2).size() == 1, "and counts");
+	std::ifstream f("re4_tweaks/archipelago_learned.json");
+	std::string text((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+	Expect(text.find("\"room_flags\":true") != std::string::npos, "learned state saved: " + text);
+	End();
+}
+
+void P5()
+{
+	Begin("P5. Pesetas: placed pesetas take the stage's next pesetas check and are kept; drops and sales don't");
+	Setup(0x101);
+	size_t m = cl.got.size();
+	PickupGold(500);
+	Settle();
+	auto c = ChecksSince(m);
+	Expect(c.size() == 1 && c[0] == L_VILLAGE_PESETAS1, "Village Pesetas 1 (got " + json(c).dump() + ")");
+	Expect(sim::gold() == 500, "pesetas kept");
+	auto snapshot = sim::save();
+	PickupGold(300, false); // enemy drop
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "dropped pesetas: no check");
+	sim::setOpenFlag(sim::SS_SHOP); // selling a treasure
+	sim::setStatus(sim::STA_INTO_SHOP, true);
+	Tick(2);
+	sim::setGold(sim::gold() + 5000);
+	Tick(2);
+	CloseShop();
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "sale at the Merchant: no check");
+	PickupGold(1000);
+	Settle();
+	Expect(Has(ChecksSince(m), L_VILLAGE_PESETAS2), "next placed pesetas -> Village Pesetas 2");
+	// death: pesetas bits roll back with the save, the re-pickup maps to Pesetas 2 again
+	sim::setHp(0);
+	Tick(10);
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(5);
+	sim::restore(snapshot);
+	Tick(5);
+	Expect(!ap::SaveBit(int(L_VILLAGE_PESETAS2 - LB)), "Pesetas 2 bit rolled back");
+	size_t m2 = cl.got.size();
+	PickupGold(1000);
+	Settle();
+	Expect(ap::SaveBit(int(L_VILLAGE_PESETAS2 - LB)), "re-pickup maps to Pesetas 2 again");
+	Expect(ChecksSince(m2).size() <= 1, "no new location from the re-pickup");
+	End();
+}
+
+void P6()
+{
+	Begin("P6. Island pesetas use the extended save bitset (offsets past 768)");
+	Setup(0x301);
+	size_t m = cl.got.size();
+	for (int i = 0; i < 11; i++)
+		PickupGold(100);
+	Settle();
+	auto c = ChecksSince(m);
+	Expect(c.size() == 11 && Has(c, L_ISLAND_PESETAS1) && Has(c, L_ISLAND_PESETAS11), "11 island pesetas checks");
+	Expect((sim::saveWork(28 + OFF_ISLAND_PESETAS11 / 32) >> (OFF_ISLAND_PESETAS11 % 32)) & 1,
+		"bit stored in save_free_work[" + std::to_string(28 + OFF_ISLAND_PESETAS11 / 32) + "]");
+	PickupGold(100);
+	Settle();
+	Expect(ChecksSince(m).size() == 11, "12th island pesetas: none left");
+	End();
+}
+
+void P7()
+{
+	Begin("P7. Random enemy health range comes from slot data");
+	Setup(0x101);
+	float lo = 0, hi = 0;
+	Expect(!Archipelago_EnemyHP(&lo, &hi), "off by default");
+	json cfg = cl.config;
+	cfg["slot_data"]["enemy_health"] = { 0.5, 2.5 };
+	Deliver({ cfg });
+	Tick(2);
+	Expect(Archipelago_EnemyHP(&lo, &hi) && lo == 0.5f && hi == 2.5f, "range 0.5 - 2.5");
+	cfg["slot_data"]["enemy_health"] = { 50.0, 0.0 };
+	Deliver({ cfg });
+	Tick(2);
+	Expect(Archipelago_EnemyHP(&lo, &hi) && lo == 15.0f && hi == 15.0f, "out-of-range values clamped");
+	Deliver({ cl.config });
+	Tick(2);
+	Expect(!Archipelago_EnemyHP(&lo, &hi), "off again with a config without it");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -1198,6 +1390,7 @@ int main()
 	S2(); S3(); S4(); S5(); S5b(); S6(); S7(); S8(); S9(); S10(); S11(); S12(); S13();
 	E1(); E2(); E3(); E4(); E5(); E6(); E7(); E8(); E9(); E10(); E11(); E13();
 	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10(); H11();
+	P1(); P2(); P3(); P4(); P5(); P6(); P7();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

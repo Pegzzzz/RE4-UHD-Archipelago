@@ -9,7 +9,7 @@ from worlds.LauncherComponents import Component, Type, components, launch as lau
 
 from .data_loader import (CHAPTER_GATES, CHAPTERS, GAME_NAME, ITEM_BASE_ID, ITEM_NAME_TO_ID, ITEMS,
                           ITEMS_BY_NAME, LOCATION_BASE_ID, LOCATION_NAME_TO_ID, LOCATIONS)
-from .options import OPTION_GROUPS, RE4Options
+from .options import ENEMY_HEALTH_RANGES, OPTION_GROUPS, RE4Options
 from .rando_bridge import rando_settings
 
 
@@ -115,16 +115,21 @@ class RE4World(World):
         "Merchant": {l["name"] for l in LOCATIONS if l["kind"] == "merchant"},
         "Shooting Gallery": {l["name"] for l in LOCATIONS if l["kind"] == "bottle_cap"},
         "Blue Medallions": {l["name"] for l in LOCATIONS if l["kind"] == "medallion_reward"},
+        "Pesetas Pickups": {l["name"] for l in LOCATIONS if l["kind"] == "pesetas"},
     }
 
     def _location_enabled(self, loc: Dict[str, Any]) -> bool:
         kind = loc["kind"]
-        if self.re_duke and kind in ("merchant", "boss", "medallion_reward"):
+        if self.re_duke and self.options.re_duke_merchant and kind in ("merchant", "medallion_reward"):
+            return False
+        if self.re_duke and self.options.re_duke_enemies and kind == "boss":
             return False
         if kind == "pickup" and loc.get("consumable"):
             return bool(self.options.consumable_checks)
         if kind == "bonus":
             return loc["index"] <= self.options.bonus_treasure_checks.value
+        if kind == "pesetas":
+            return bool(self.options.pesetas_checks)
         if kind == "boss":
             return bool(self.options.boss_checks)
         if kind == "merchant":
@@ -135,7 +140,7 @@ class RE4World(World):
 
     @property
     def merchant_check_only(self) -> bool:
-        return bool(self.options.merchant_checks) and not self.re_duke and \
+        return bool(self.options.merchant_checks) and not (self.re_duke and self.options.re_duke_merchant) and \
             self.options.merchant_purchases == self.options.merchant_purchases.option_check_only
 
     @property
@@ -255,7 +260,7 @@ class RE4World(World):
                 entry["loose"] = 1
             if l.get("cut"):
                 entry["cut"] = 1
-            if l["kind"] == "bonus":
+            if l["kind"] in ("bonus", "pesetas"):
                 entry["stage"] = l["stage"]
             if l.get("consumable"):
                 entry["c"] = 1
@@ -275,6 +280,8 @@ class RE4World(World):
             "death_link": bool(self.options.death_link),
             "location_base": LOCATION_BASE_ID,
             "merchant_check_only": self.merchant_check_only,
+            "enemy_health": list(ENEMY_HEALTH_RANGES[self.options.random_enemy_health.value])
+            if self.options.random_enemy_health.value in ENEMY_HEALTH_RANGES else None,
             "enemy_randomizer_compat": self.re_duke,
             "re_duke": rando_settings(
                 self.options.re_duke_preset.value, bool(self.options.re_duke_enemies),

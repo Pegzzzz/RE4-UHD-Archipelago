@@ -7,8 +7,12 @@ Resident Evil 4 UHD:
   # false keeps every key item where it is in the vanilla game.
   shuffle_key_items: true
 
-  # Ammo, herbs, grenades and sprays placed in the world are checks (~450).
+  # Ammo, herbs, grenades and sprays placed in the world are checks (~450). Enemy drops don't count.
   consumable_checks: true
+
+  # Pesetas placed in the world are checks (60: 12 village, 37 castle, 11 island). You keep the money.
+  # Enemy drops don't count. Filler-only.
+  pesetas_checks: true
 
   # First purchase of each Merchant item is a check.
   merchant_checks: true
@@ -35,10 +39,15 @@ Resident Evil 4 UHD:
   # Pesetas at the start: 0-100000
   starting_pesetas: 0
 
+  # Built in, nothing to download: every enemy spawns with random health.
+  # off, mild (75-150%), tough (100-200%), wild (50-250%), chaos (25-400%)
+  random_enemy_health: off
+
   # --- re_duke's RE4 PC Randomizer (install it yourself inside the game folder; see the tutorial) ---
   # Random enemies / enemy health / Merchant / loadout from re_duke's randomizer, set up by the client's /setup.
   # Doors and item randomization stay off there (Archipelago places the items).
-  # Turns off Merchant checks, boss checks and the medallion reward.
+  # Random enemies turn off boss checks; random Merchant turns off Merchant checks and the medallion reward.
+  # For random enemies only: re_duke_randomizer: true, re_duke_merchant: false
   re_duke_randomizer: false
   re_duke_preset: default        # default, normal, hard
   re_duke_enemies: true

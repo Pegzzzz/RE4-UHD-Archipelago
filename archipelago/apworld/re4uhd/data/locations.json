@@ -11880,6 +11880,606 @@
    "requires": [],
    "excluded": true,
    "offset": 742
+  },
+  {
+   "name": "Village Pesetas 1",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 1,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 743
+  },
+  {
+   "name": "Village Pesetas 2",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 2,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 744
+  },
+  {
+   "name": "Village Pesetas 3",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 3,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 745
+  },
+  {
+   "name": "Village Pesetas 4",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 4,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 746
+  },
+  {
+   "name": "Village Pesetas 5",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 5,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 747
+  },
+  {
+   "name": "Village Pesetas 6",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 6,
+   "chapter": "1-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 748
+  },
+  {
+   "name": "Village Pesetas 7",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 7,
+   "chapter": "1-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 749
+  },
+  {
+   "name": "Village Pesetas 8",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 8,
+   "chapter": "1-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 750
+  },
+  {
+   "name": "Village Pesetas 9",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 9,
+   "chapter": "2-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 751
+  },
+  {
+   "name": "Village Pesetas 10",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 10,
+   "chapter": "2-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 752
+  },
+  {
+   "name": "Village Pesetas 11",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 11,
+   "chapter": "2-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 753
+  },
+  {
+   "name": "Village Pesetas 12",
+   "kind": "pesetas",
+   "stage": 1,
+   "index": 12,
+   "chapter": "2-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 754
+  },
+  {
+   "name": "Castle Pesetas 1",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 1,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 755
+  },
+  {
+   "name": "Castle Pesetas 2",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 2,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 756
+  },
+  {
+   "name": "Castle Pesetas 3",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 3,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 757
+  },
+  {
+   "name": "Castle Pesetas 4",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 4,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 758
+  },
+  {
+   "name": "Castle Pesetas 5",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 5,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 759
+  },
+  {
+   "name": "Castle Pesetas 6",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 6,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 760
+  },
+  {
+   "name": "Castle Pesetas 7",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 7,
+   "chapter": "3-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 761
+  },
+  {
+   "name": "Castle Pesetas 8",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 8,
+   "chapter": "3-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 762
+  },
+  {
+   "name": "Castle Pesetas 9",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 9,
+   "chapter": "3-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 763
+  },
+  {
+   "name": "Castle Pesetas 10",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 10,
+   "chapter": "3-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 764
+  },
+  {
+   "name": "Castle Pesetas 11",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 11,
+   "chapter": "3-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 765
+  },
+  {
+   "name": "Castle Pesetas 12",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 12,
+   "chapter": "3-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 766
+  },
+  {
+   "name": "Castle Pesetas 13",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 13,
+   "chapter": "3-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 767
+  },
+  {
+   "name": "Castle Pesetas 14",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 14,
+   "chapter": "3-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 768
+  },
+  {
+   "name": "Castle Pesetas 15",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 15,
+   "chapter": "3-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 769
+  },
+  {
+   "name": "Castle Pesetas 16",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 16,
+   "chapter": "3-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 770
+  },
+  {
+   "name": "Castle Pesetas 17",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 17,
+   "chapter": "3-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 771
+  },
+  {
+   "name": "Castle Pesetas 18",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 18,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 772
+  },
+  {
+   "name": "Castle Pesetas 19",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 19,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 773
+  },
+  {
+   "name": "Castle Pesetas 20",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 20,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 774
+  },
+  {
+   "name": "Castle Pesetas 21",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 21,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 775
+  },
+  {
+   "name": "Castle Pesetas 22",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 22,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 776
+  },
+  {
+   "name": "Castle Pesetas 23",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 23,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 777
+  },
+  {
+   "name": "Castle Pesetas 24",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 24,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 778
+  },
+  {
+   "name": "Castle Pesetas 25",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 25,
+   "chapter": "4-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 779
+  },
+  {
+   "name": "Castle Pesetas 26",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 26,
+   "chapter": "4-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 780
+  },
+  {
+   "name": "Castle Pesetas 27",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 27,
+   "chapter": "4-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 781
+  },
+  {
+   "name": "Castle Pesetas 28",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 28,
+   "chapter": "4-2",
+   "requires": [],
+   "excluded": true,
+   "offset": 782
+  },
+  {
+   "name": "Castle Pesetas 29",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 29,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 783
+  },
+  {
+   "name": "Castle Pesetas 30",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 30,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 784
+  },
+  {
+   "name": "Castle Pesetas 31",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 31,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 785
+  },
+  {
+   "name": "Castle Pesetas 32",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 32,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 786
+  },
+  {
+   "name": "Castle Pesetas 33",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 33,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 787
+  },
+  {
+   "name": "Castle Pesetas 34",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 34,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 788
+  },
+  {
+   "name": "Castle Pesetas 35",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 35,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 789
+  },
+  {
+   "name": "Castle Pesetas 36",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 36,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 790
+  },
+  {
+   "name": "Castle Pesetas 37",
+   "kind": "pesetas",
+   "stage": 2,
+   "index": 37,
+   "chapter": "4-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 791
+  },
+  {
+   "name": "Island Pesetas 1",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 1,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 792
+  },
+  {
+   "name": "Island Pesetas 2",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 2,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 793
+  },
+  {
+   "name": "Island Pesetas 3",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 3,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 794
+  },
+  {
+   "name": "Island Pesetas 4",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 4,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 795
+  },
+  {
+   "name": "Island Pesetas 5",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 5,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 796
+  },
+  {
+   "name": "Island Pesetas 6",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 6,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 797
+  },
+  {
+   "name": "Island Pesetas 7",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 7,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 798
+  },
+  {
+   "name": "Island Pesetas 8",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 8,
+   "chapter": "5-3",
+   "requires": [],
+   "excluded": true,
+   "offset": 799
+  },
+  {
+   "name": "Island Pesetas 9",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 9,
+   "chapter": "5-4",
+   "requires": [],
+   "excluded": true,
+   "offset": 800
+  },
+  {
+   "name": "Island Pesetas 10",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 10,
+   "chapter": "Final",
+   "requires": [],
+   "excluded": true,
+   "offset": 801
+  },
+  {
+   "name": "Island Pesetas 11",
+   "kind": "pesetas",
+   "stage": 3,
+   "index": 11,
+   "chapter": "Final",
+   "requires": [],
+   "excluded": true,
+   "offset": 802
   }
  ]
 }

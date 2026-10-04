@@ -34,7 +34,8 @@ namespace sim
 	void setDeferredSubScreenOpen(bool d);// SubScreenOpen takes effect on the next game frame
 	uint16_t getItemId();
 	void setGetItem(uint16_t id, uint16_t num);
-	void setRoomItemFlag(int bit);            // the game marks a placed item in the current room as taken                 // SubScreenWk->get_item_id_2F6
+	void setRoomItemFlag(int bit);        // the game marks a placed item in the current room as taken
+	int nextRoomItemBit();                // first item flag bit not yet set in the current room
 
 	// Inventory
 	void gameAdd(uint16_t id, int num, int chr = 0);   // game-side add (stacks like cItemMgr::get)
@@ -53,7 +54,7 @@ namespace sim
 	void setEm(int idx, uint8_t id, int16_t hp, uint32_t guid, bool valid);
 
 	// Snapshots (GLOBAL_WK + item array + item manager + sub screen)
-	struct State { std::vector<uint8_t> g, items, mgr, ss; };
+	struct State { std::vector<uint8_t> g, items, mgr, ss, rooms; };
 	State save();
 	void restore(const State& s);
 

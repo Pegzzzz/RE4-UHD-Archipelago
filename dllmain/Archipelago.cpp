@@ -27,6 +27,7 @@
 #include <imgui.h>
 
 #include <atomic>
+#include <algorithm>
 #include <chrono>
 #include <deque>
 #include <fstream>
@@ -46,8 +47,8 @@ namespace ap
 	constexpr int kProtocolVersion = 1;
 
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
-	constexpr int kSlotBits = 28;   // 24 slots = 768 location bits
-	constexpr int kBitSlots = 24;
+	constexpr int kSlotBits = 28;   // 32 slots (28..59) = 1024 location bits
+	constexpr int kBitSlots = 32;
 	constexpr int kSlotMagic = 60;
 	constexpr int kSlotTag = 61;
 	constexpr int kSlotIndex = 62;
@@ -58,13 +59,18 @@ namespace ap
 	constexpr int kShopWindowFrames = 10;
 	constexpr int kGrantCooldownFrames = 20;
 	constexpr int kGrantGiveUpFrames = 90; // case-full screen closed without the item: player discarded it
+	// Placed (map) items set a bit in the room's save data when taken; enemy drops don't. A supply pickup counts
+	// as placed when such a bit flips up to kFlagBeforeFrames before or kFlagAfterFrames after it.
+	constexpr int kFlagBeforeFrames = 120;
+	constexpr int kFlagAfterFrames = 90;
+	constexpr int kLegacyAfterUnflagged = 8; // never saw a flag after this many supply pickups: count them all
 
 	constexpr uint16_t kRoomStart = 0x100;
 	constexpr uint16_t kRoomOpening = 0x120;
 	constexpr uint16_t kRoomSaddler = 0x332;
 	constexpr uint16_t kRoomJetski = 0x333;
 
-	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Bonus, Unknown };
+	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Bonus, Pesetas, Unknown };
 
 	struct LocationDef
 	{
@@ -77,7 +83,7 @@ namespace ap
 		bool loose = false; // room id not verified: allow a match anywhere in the same stage
 		bool cut = false;   // given by a cutscene/puzzle rather than the pickup screen
 		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
-		int stage = 0;           // bonus treasure: 1 village, 2 castle, 3 island
+		int stage = 0;           // bonus treasure / pesetas: 1 village, 2 castle, 3 island
 	};
 
 	struct ItemDef
@@ -116,11 +122,13 @@ namespace ap
 	std::deque<std::string> consoleQueue; // lines for con.log, flushed on the main thread
 	std::filesystem::path logFile;
 	std::filesystem::path configFile;
+	std::filesystem::path learnedFile; // what the module learned about this game install (room flags work)
 
 	// ---------------- main-thread state -------------------------------------------------------
 	bool configured = false;
 	bool deathLink = false;
 	bool merchantCheckOnly = false; // first purchase only sends the check; the bought item is taken back
+	float enemyHpMin = 0.0f, enemyHpMax = 0.0f; // random enemy health multiplier range (0 = off)
 	uint32_t saveTag = 0;
 	int64_t locationBase = 0;
 	std::vector<LocationDef> locations;
@@ -163,6 +171,26 @@ namespace ap
 	struct RoomFlagSnapshot { uint16_t room = 0xFFFF; uint32_t item[4] = {}; uint32_t find[4] = {}; uint16_t etc[64] = {}; };
 	RoomFlagSnapshot roomFlags;
 	uint64_t lastItemFlagFrame = 0;
+
+	// Supply pickups (ammo/herbs/grenades and pesetas) wait here until we know whether they were placed items
+	// (a room item flag flipped) or enemy/random drops (no flag), which never count.
+	enum class FlagMode { Unknown, Flags, Legacy };
+	FlagMode flagMode = FlagMode::Unknown;
+	std::deque<uint64_t> unclaimedFlips; // frames of item flag flips not yet matched to a pickup
+	struct SupplyPickup
+	{
+		bool gold = false;
+		uint16_t id = 0;     // item id (consumables)
+		uint32_t count = 0;  // item count, or pesetas amount
+		bool screen = false; // came through the pickup screen
+		std::vector<cItem*> fresh;
+		uint16_t room = 0;
+		uint64_t frame = 0;
+		bool other = false;   // any other pickup: only here so it can claim its own flag flip
+		bool matched = false; // a flag flip was assigned to it
+	};
+	std::vector<SupplyPickup> pendingSupplies;
+	std::vector<SupplyPickup> undecidedSupplies; // unflagged while we don't know yet whether flags work
 
 	// =============================================================================== logging
 	// Safe from any thread: writes the file directly, console lines are queued for the main thread.
@@ -745,6 +773,136 @@ namespace ap
 		return false; // every spot here already collected: keep the item
 	}
 
+	// Pesetas: each stage has a pool of pesetas checks; every placed pesetas pickup takes the next one.
+	// The pesetas themselves are kept.
+	bool HandleGoldPickup(uint32_t amount, uint16_t room)
+	{
+		for (auto& loc : locations)
+		{
+			if (loc.kind != Kind::Pesetas || loc.stage != (room >> 8) || SaveBit(loc.offset))
+				continue;
+			SendCheck(loc, "picked up " + std::to_string(amount) + " pesetas");
+			return true;
+		}
+		return false;
+	}
+
+	void ClaimSupply(const SupplyPickup& p, bool removeItem)
+	{
+		if (p.gold)
+			HandleGoldPickup(p.count, p.room);
+		else if (HandleConsumablePickup(p.id, p.room) && removeItem)
+			pendingRemovals.push_back({ p.id, p.count, p.fresh });
+	}
+
+	std::string SupplyName(const SupplyPickup& p)
+	{
+		return p.gold ? std::to_string(p.count) + " pesetas" : std::string(ItemName(p.id)) + " x" + std::to_string(p.count);
+	}
+
+	void SaveLearnedState()
+	{
+		try
+		{
+			std::ofstream f(learnedFile, std::ios::trunc);
+			f << json({ {"room_flags", flagMode == FlagMode::Flags} }).dump();
+		}
+		catch (...) {}
+	}
+
+	void ResolveSupplies()
+	{
+		// 1. give each flag flip (once it has settled a little) to the nearest pickup in time
+		for (auto f = unclaimedFlips.begin(); f != unclaimedFlips.end();)
+		{
+			if (frame - *f < 15)
+			{
+				++f;
+				continue;
+			}
+			SupplyPickup* best = nullptr;
+			uint64_t bestDist = UINT64_MAX;
+			for (auto& p : pendingSupplies)
+			{
+				if (p.matched)
+					continue;
+				bool inWindow = *f >= p.frame ? (*f - p.frame <= kFlagAfterFrames) : (p.frame - *f <= kFlagBeforeFrames);
+				uint64_t dist = *f >= p.frame ? *f - p.frame : p.frame - *f;
+				if (inWindow && dist < bestDist)
+				{
+					best = &p;
+					bestDist = dist;
+				}
+			}
+			if (best)
+			{
+				best->matched = true;
+				f = unclaimedFlips.erase(f);
+			}
+			else if (frame - *f > kFlagBeforeFrames + kFlagAfterFrames)
+				f = unclaimedFlips.erase(f); // nobody picked anything up near it (Ashley, a cutscene item, ...)
+			else
+				++f;
+		}
+
+		// 2. decide
+		for (auto it = pendingSupplies.begin(); it != pendingSupplies.end();)
+		{
+			SupplyPickup& p = *it;
+			if (p.other)
+			{
+				if (p.matched || frame - p.frame > kFlagAfterFrames)
+					it = pendingSupplies.erase(it);
+				else
+					++it;
+				continue;
+			}
+			if (p.matched)
+			{
+				if (flagMode != FlagMode::Flags)
+				{
+					Log("Placed items are recognized by their room flags: enemy drops won't count as checks");
+					flagMode = FlagMode::Flags;
+					undecidedSupplies.clear(); // those were drops
+					SaveLearnedState();
+				}
+				Log("[pickup] placed " + SupplyName(p) + " in r" + Hex(p.room));
+				ClaimSupply(p, true);
+				it = pendingSupplies.erase(it);
+				continue;
+			}
+			if (frame - p.frame <= kFlagAfterFrames)
+			{
+				++it;
+				continue;
+			}
+			// no flag: an enemy drop or a random container drop
+			switch (flagMode)
+			{
+			case FlagMode::Flags:
+				Log("[pickup] drop " + SupplyName(p) + " in r" + Hex(p.room) + " (not a check)");
+				break;
+			case FlagMode::Legacy:
+				ClaimSupply(p, true);
+				break;
+			case FlagMode::Unknown:
+				undecidedSupplies.push_back(p);
+				if (int(undecidedSupplies.size()) >= kLegacyAfterUnflagged)
+				{
+					// This game never flagged a supply pickup: fall back to counting every pickup (as before 0.5)
+					Log("No room flags seen for " + std::to_string(undecidedSupplies.size()) +
+						" pickups: counting every ammo/herb/pesetas pickup instead");
+					flagMode = FlagMode::Legacy;
+					for (auto& u : undecidedSupplies)
+						ClaimSupply(u, false); // already in the inventory for a while: the player keeps these
+					undecidedSupplies.clear();
+				}
+				break;
+			}
+			it = pendingSupplies.erase(it);
+		}
+	}
+
 	void WatchRoomFlags()
 	{
 		GLOBAL_WK* g = GlobalPtr();
@@ -770,7 +928,10 @@ namespace ap
 					{
 						Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " " + what + " bit " + std::to_string(w * 32 + b));
 						if (strcmp(what, "item_flg") == 0)
+						{
 							lastItemFlagFrame = frame;
+							unclaimedFlips.push_back(frame);
+						}
 					}
 				before[w] = now[w];
 			}
@@ -850,15 +1011,34 @@ namespace ap
 			return;
 		}
 
-		// 4. consumables (one pickup = one event, whatever the amount)
+		// 4. consumables (one pickup = one event, whatever the amount). Decided once we know whether it was a
+		//    placed item or an enemy drop, see ResolveSupplies.
 		if (IsConsumableType(id))
 		{
-			if (pickup && HandleConsumablePickup(id, room))
-				pendingRemovals.push_back({ id, count, fresh });
+			if (pickup)
+			{
+				SupplyPickup p;
+				p.id = id;
+				p.count = count;
+				p.screen = true;
+				p.fresh = fresh;
+				p.room = room;
+				p.frame = frame;
+				pendingSupplies.push_back(std::move(p));
+			}
 			return;
 		}
 
 		// 5. world pickups (or cutscene/puzzle rewards)
+		if (pickup)
+		{
+			SupplyPickup other; // lets this pickup claim its own room flag, so a drop picked up next to it can't
+			other.other = true;
+			other.id = id;
+			other.room = room;
+			other.frame = frame;
+			pendingSupplies.push_back(std::move(other));
+		}
 		uint32_t removeCount = 0;
 		for (uint32_t i = 0; i < count; i++)
 			if (HandlePickup(id, room, !pickup))
@@ -887,6 +1067,16 @@ namespace ap
 		}
 
 		int goldDelta = gold - prevGold;
+		bool shopNow = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
+		if (goldDelta > 0 && !shopNow)
+		{
+			SupplyPickup p;
+			p.gold = true;
+			p.count = uint32_t(goldDelta);
+			p.room = g->curRoomId_4FAC;
+			p.frame = frame;
+			pendingSupplies.push_back(std::move(p));
+		}
 		for (auto& [id, num] : cur)
 		{
 			uint32_t before = 0;
@@ -1162,6 +1352,7 @@ namespace ap
 		if (k == "medallion_reward") return Kind::MedallionReward;
 		if (k == "bottle_cap") return Kind::BottleCap;
 		if (k == "bonus") return Kind::Bonus;
+		if (k == "pesetas") return Kind::Pesetas;
 		return Kind::Unknown;
 	}
 
@@ -1173,6 +1364,8 @@ namespace ap
 		received.clear();
 		trackedBosses.clear();
 		pendingGrant = {};
+		pendingSupplies.clear();
+		undecidedSupplies.clear();
 		goalReported = false;
 		saveState = 0;
 		resetSnapshot = true;
@@ -1236,6 +1429,15 @@ namespace ap
 		locationBase = newBase;
 		deathLink = sd.value("death_link", false);
 		merchantCheckOnly = sd.value("merchant_check_only", false);
+		enemyHpMin = enemyHpMax = 0.0f;
+		{
+			const json& hp = sd.value("enemy_health", json());
+			if (hp.is_array() && hp.size() == 2 && hp[0].is_number() && hp[1].is_number())
+			{
+				enemyHpMin = std::clamp(hp[0].get<float>(), 0.1f, 15.0f);
+				enemyHpMax = std::clamp(hp[1].get<float>(), enemyHpMin, 15.0f);
+			}
+		}
 		configured = true;
 		Log("Configured: " + std::to_string(locations.size()) + " locations, slot " + msg.value("slot", std::string()) +
 			(fromDisk ? " (from last session)" : ""));
@@ -1387,6 +1589,7 @@ namespace ap
 				ReportGoal();
 		}
 
+		WatchRoomFlags();
 		if (!IsLeon())
 		{
 			resetSnapshot = true; // Ashley's segment: her pickups stay vanilla
@@ -1398,8 +1601,8 @@ namespace ap
 		if (ShopContext())
 			lastShopCtxFrame = frame;
 
-		WatchRoomFlags();
 		DiffInventory();
+		ResolveSupplies();
 		ProcessRemovals();
 		TrackBosses();
 		DiscoveryLog();
@@ -1410,6 +1613,15 @@ namespace ap
 }
 
 // =================================================================================== public API
+bool Archipelago_EnemyHP(float* minMul, float* maxMul)
+{
+	if (!ap::configured || ap::enemyHpMax <= 0.0f)
+		return false;
+	*minMul = ap::enemyHpMin;
+	*maxMul = ap::enemyHpMax;
+	return true;
+}
+
 void Archipelago_Tick()
 {
 	ap::Tick();
@@ -1465,6 +1677,7 @@ void re4t::init::Archipelago()
 {
 	ap::logFile = std::filesystem::path(rootPath) / "re4_tweaks" / "archipelago.log";
 	ap::configFile = std::filesystem::path(rootPath) / "re4_tweaks" / "archipelago_config.json";
+	ap::learnedFile = std::filesystem::path(rootPath) / "re4_tweaks" / "archipelago_learned.json";
 	try
 	{
 		std::filesystem::create_directories(ap::logFile.parent_path());
@@ -1485,6 +1698,14 @@ void re4t::init::Archipelago()
 				ap::inbox.push_back(std::move(cfg));
 			}
 		}
+	}
+	catch (...) {}
+
+	try
+	{
+		std::ifstream f(ap::learnedFile);
+		if (f && json::parse(f).value("room_flags", false))
+			ap::flagMode = ap::FlagMode::Flags;
 	}
 	catch (...) {}
 

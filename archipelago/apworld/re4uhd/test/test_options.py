@@ -81,7 +81,7 @@ class TestData(RE4TestBase):
         data = self.world.fill_slot_data()
         ids = [l["id"] for l in data["locations"]]
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertTrue(all(0 <= i - LOCATION_BASE_ID < 768 for i in ids))
+        self.assertTrue(all(0 <= i - LOCATION_BASE_ID < 1024 for i in ids))
         for item in data["items"]:
             if item["k"] == "game":
                 self.assertTrue(0 <= item["g"] < 272, item)
@@ -160,3 +160,68 @@ class TestNoBonus(RE4TestBase):
 
     def test_none(self) -> None:
         self.assertFalse(any("Bonus Treasure" in l.name for l in self.multiworld.get_locations(self.player)))
+
+
+class TestPesetas(RE4TestBase):
+    def test_pesetas_locations(self) -> None:
+        from BaseClasses import LocationProgressType
+        from Fill import distribute_items_restrictive
+        from worlds.AutoWorld import call_all
+        call_all(self.multiworld, "pre_fill")
+        distribute_items_restrictive(self.multiworld)
+        pesetas = [l for l in self.multiworld.get_locations(self.player) if "Pesetas " in l.name]
+        self.assertEqual(len(pesetas), 60)
+        for loc in pesetas:
+            self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)
+            self.assertFalse(loc.item.advancement, f"{loc.name} holds progression")
+        slot = [l for l in self.world.fill_slot_data()["locations"] if l["k"] == "pesetas"]
+        counts = Counter(l["stage"] for l in slot)
+        self.assertEqual(counts, {1: 12, 2: 37, 3: 11})
+
+    def test_chapters_follow_stage(self) -> None:
+        for loc in LOCATIONS:
+            if loc["kind"] == "pesetas":
+                stage = {"1": 1, "2": 1, "3": 2, "4": 2, "5": 3, "F": 3}[loc["chapter"][0]]
+                self.assertEqual(stage, loc["stage"], loc["name"])
+
+
+class TestNoPesetas(RE4TestBase):
+    options = {"pesetas_checks": False}
+
+    def test_none(self) -> None:
+        self.assertFalse(any("Pesetas " in l.name for l in self.multiworld.get_locations(self.player)))
+
+
+class TestReDukeEnemiesOnly(RE4TestBase):
+    options = {"re_duke_randomizer": True, "re_duke_merchant": False}
+
+    def test_merchant_kept_bosses_off(self) -> None:
+        names = {l.name for l in self.multiworld.get_locations(self.player)}
+        self.assertTrue(any(n.startswith("Merchant:") for n in names))
+        self.assertIn("Blue Medallions: Merchant Reward", names)
+        self.assertFalse(any(n.startswith("Defeat ") and n != "Defeat Saddler" for n in names))
+        data = self.world.fill_slot_data()
+        self.assertTrue(data["merchant_check_only"])
+        self.assertEqual(data["re_duke"]["overrides"]["randomizeMerchantStockCheckBox"], "0")
+        self.assertEqual(data["re_duke"]["overrides"]["randomizeEnemiesCheckBox"], "1")
+
+
+class TestReDukeMerchantOnly(RE4TestBase):
+    options = {"re_duke_randomizer": True, "re_duke_enemies": False}
+
+    def test_bosses_kept_merchant_off(self) -> None:
+        names = {l.name for l in self.multiworld.get_locations(self.player)}
+        self.assertFalse(any(n.startswith("Merchant:") for n in names))
+        self.assertTrue(any(n.startswith("Defeat ") and n != "Defeat Saddler" for n in names))
+
+
+class TestRandomEnemyHealth(RE4TestBase):
+    options = {"random_enemy_health": "wild"}
+
+    def test_range_in_slot_data(self) -> None:
+        self.assertEqual(self.world.fill_slot_data()["enemy_health"], [0.5, 2.5])
+
+
+class TestEnemyHealthOff(RE4TestBase):
+    def test_off(self) -> None:
+        self.assertIsNone(self.world.fill_slot_data()["enemy_health"])

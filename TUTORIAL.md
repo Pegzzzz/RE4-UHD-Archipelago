@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.4).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -23,7 +23,8 @@ From the latest release, download:
 - *(only for installing by hand)* `RE4-UHD-Archipelago.zip` — the same game mod as a zip
 
 **Optional:** [re_duke's RE4 PC Randomizer](https://www.moddb.com/mods/re4randomizer) (or the newer build from
-re_duke's Patreon), for random enemies, enemy health and Merchant. See [section 3b](#3b-optional-re_dukes-randomizer-random-enemies).
+re_duke's Patreon), if you want random enemy *types*. See [section 3b](#3b-optional-re_dukes-randomizer-random-enemies).
+Random enemy *health* is built in and needs nothing extra (`random_enemy_health`, section 4).
 
 ---
 
@@ -71,6 +72,8 @@ the Merchant and more. It's a separate project (not included here); this mod set
 1. Install it the normal way: extract its zip **into the Resident Evil 4 folder** (not Bin32), so you have
    `Resident Evil 4\RE4_PC_Randomizer\RE4RND_v2.exe`. Follow its own setup guide for anything else.
 2. In your YAML, set `re_duke_randomizer: true` (and pick the `re_duke_…` options you like, see section 4).
+   For random enemies only, also set `re_duke_merchant: false` (and `re_duke_enemy_health: false` if you use the
+   built-in `random_enemy_health` instead).
 3. After you generate the multiworld, connect the client to the room, then type `/setup`.
    - The client installs our game mod (step 3) and writes an **"Archipelago"** profile for the randomizer, made from
      your own copy's presets with your YAML choices.
@@ -84,7 +87,9 @@ the Merchant and more. It's a separate project (not included here); this mod set
 - **Doors, item and key-item randomization are always off** in the Archipelago profile. Archipelago places the
   items, and its logic needs the normal room layout. (If you turn them back on in the randomizer, the client will
   warn you.)
-- Merchant checks, boss checks and the blue medallion reward are turned off, because the randomizer changes those.
+- With `re_duke_enemies` on, boss checks are turned off: random bosses can show up in other rooms.
+- With `re_duke_merchant` on, Merchant checks and the blue medallion reward are turned off, because the randomizer
+  changes the Merchant. With it off, they stay on.
 - The same slot always gets the same enemies (the client sets the randomizer's seed number from your slot).
 - The randomizer replaces `bio4.exe` with its own patched version and keeps its own settings in `dinput8.ini`; our
   `dinput8.dll` works with both. If you reinstall the randomizer later, run `/setup` again, since its zip contains
@@ -103,7 +108,8 @@ The YAML file holds your name and your choices for the randomizer.
 | Option | What it does | Default |
 |---|---|---|
 | `shuffle_key_items` | Key items (Insignia Key, False Eye, Card Keys…) can be anywhere in the multiworld. `false` keeps them in their normal spots. | `true` |
-| `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). | `true` |
+| `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). Enemy drops don't count. | `true` |
+| `pesetas_checks` | Pesetas placed in the world (cabinets, crates, bird nests…) are checks: 12 village, 37 castle, 11 island. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `true` |
 | `merchant_checks` | The first time you buy each Merchant item, you send a check. | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
 | `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
@@ -112,7 +118,8 @@ The YAML file holds your name and your choices for the randomizer.
 | `starting_weapon` | An extra weapon at the start, with 2 boxes of its ammo: `vanilla` (none), `random_handgun` (Red9, Blacktail or Punisher) or `random_weapon` (any). | `vanilla` |
 | `starting_supplies` | 0–10 random supplies (ammo, herbs, grenades, sprays) at the start. | `0` |
 | `starting_pesetas` | 0–100000 pesetas at the start. | `0` |
-| `re_duke_randomizer` | Use re_duke's randomizer for random enemies (see [3b](#3b-optional-re_dukes-randomizer-random-enemies)). Turns off Merchant/boss checks. | `false` |
+| `random_enemy_health` | Built in: every enemy (bosses too) spawns with random health. `off`, `mild` (75–150%), `tough` (100–200%), `wild` (50–250%) or `chaos` (25–400%). | `off` |
+| `re_duke_randomizer` | Use re_duke's randomizer for random enemies (see [3b](#3b-optional-re_dukes-randomizer-random-enemies)). Turns off boss checks, and Merchant checks if `re_duke_merchant` is on. | `false` |
 | `re_duke_preset` | The randomizer preset to start from: `default`, `normal` or `hard`. | `default` |
 | `re_duke_enemies` | Random enemies. | `true` |
 | `re_duke_enemy_health` | Random enemy health. | `true` |
@@ -122,7 +129,7 @@ The YAML file holds your name and your choices for the randomizer.
 
 **Goal:** defeat Saddler.
 
-Want a shorter game? Set `consumable_checks: false` — that leaves about 250 checks.
+Want a shorter game? Set `consumable_checks: false` and `pesetas_checks: false` — that leaves about 250 checks.
 
 Archipelago's own `start_inventory` option also works, for example:
 
@@ -174,8 +181,11 @@ That's it — play the game.
   Items are only delivered during normal gameplay, not during menus, cutscenes or while shopping.
   If your attache case is full, the normal "organize" screen opens.
 - **Ammo and herbs:** each room has as many checks as the game places ammo/herbs/grenades there. Whatever
-  consumable you pick up in that room uses the next one. When a room's checks are used up, everything you find
-  there is yours to keep.
+  placed consumable you pick up in that room uses the next one. When a room's checks are used up, everything you
+  find there is yours to keep. **Enemy drops never count** (the mod tells them apart from placed items with the
+  game's own "already taken" flags), so they're always yours.
+- **Pesetas:** each placed pesetas pickup (not enemy drops) sends the next pesetas check for that area. You keep
+  the money.
 - **Merchant:** the first purchase of each item sends a check. With `merchant_purchases: check_only` (the default)
   the item is taken back when you leave the shop: you've paid for the check, and the item itself is somewhere in
   the multiworld. Buying it again later works normally. Attache cases and the tactical vest always take effect.
@@ -241,10 +251,15 @@ First check the randomizer's own setup guide and FAQ (most crashes come from its
 Discord, or missing `X3DAudio1_7.dll`). To tell whose problem it is, try once without our mod: rename `dinput8.dll` to
 `dinput8.dll.off` and put `dinput8.dll.pre-archipelago` back as `dinput8.dll`.
 
-**Many checks not sent / odd items (like Mine-Darts in chapter 1)**
-re_duke's randomizer is probably moving items around. Its default settings randomize items and doors, which
-Archipelago can't follow. Type `/rando` in the client, keep the "Archipelago" profile it loads, and click
-Generate Seed again (or click **Restore Game** in the randomizer to remove it).
+**I picked up ammo/pesetas and no check was sent**
+Enemy drops never count, only items placed in the world (before v0.5, drops used up a room's checks, so placed
+items picked up afterwards sent nothing). A room's checks also run out once its placed items are collected.
+`archipelago.log` shows each pickup as `placed` or `drop`; please send it if a placed item didn't count.
+
+**The client or game warns that re_duke's randomizer moved items**
+Its default settings randomize items and doors, which Archipelago can't follow. Type `/rando` in the client, keep
+the "Archipelago" profile it loads, and click Generate Seed again (or click **Restore Game** in the randomizer to
+remove it).
 
 **"re_duke randomizer: … turned on, which breaks Archipelago's item logic"**
 The last seed was generated with doors or items randomized. Type `/rando`, keep the Archipelago profile, and click

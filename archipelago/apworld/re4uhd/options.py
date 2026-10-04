@@ -11,7 +11,8 @@ class ShuffleKeyItems(DefaultOnToggle):
 
 class ConsumableChecks(DefaultOnToggle):
     """Ammo, herbs, grenades and sprays placed in the world are checks (about 450 of them).
-    In each room, every consumable you pick up takes that room's next spot until they're all collected."""
+    In each room, every placed consumable you pick up takes that room's next spot until they're all collected.
+    Enemy drops don't count."""
     display_name = "Consumable Checks"
 
 
@@ -41,6 +42,13 @@ class BonusTreasureChecks(Range):
     range_start = 0
     range_end = 15
     default = 5
+
+
+class PesetasChecks(DefaultOnToggle):
+    """Pesetas placed in the world (cabinets, tables, crates, bird nests...) are checks: 12 in the village,
+    37 in the castle, 11 on the island. Each placed pesetas pickup takes its area's next check and you keep the
+    money. Enemy and boss drops don't count. Filler-only: these checks give minor items."""
+    display_name = "Pesetas Checks"
 
 
 class BossChecks(DefaultOnToggle):
@@ -81,13 +89,34 @@ class StartingPesetas(Range):
     default = 0
 
 
+class RandomEnemyHealth(Choice):
+    """Built in, no other download needed: every enemy spawns with random health.
+    off: vanilla health.
+    mild: 75% to 150%.
+    tough: 100% to 200%.
+    wild: 50% to 250%.
+    chaos: 25% to 400%.
+    Bosses are included. Leave this off if re_duke's randomizer already randomizes enemy health."""
+    display_name = "Random Enemy Health"
+    option_off = 0
+    option_mild = 1
+    option_tough = 2
+    option_wild = 3
+    option_chaos = 4
+    default = 0
+
+
+ENEMY_HEALTH_RANGES = {1: (0.75, 1.5), 2: (1.0, 2.0), 3: (0.5, 2.5), 4: (0.25, 4.0)}
+
+
 class ReDukeRandomizer(Toggle):
     """Also use re_duke's RE4 PC Randomizer (Patreon / moddb.com/mods/re4randomizer, installed separately inside
     the game folder) for random enemies, enemy health, Merchant stock/prices/upgrades and starting loadout.
     The RE4 UHD Client's /setup command writes an Archipelago-safe settings profile for it and opens it:
     doors, item and key-item randomization are always turned off there, because Archipelago places the items.
-    This turns off Merchant checks, boss checks and the blue medallion reward (that mod changes them);
-    the goal also triggers when you reach the jet-ski escape."""
+    With re_duke_enemies on, boss checks are turned off (random bosses can appear in other rooms); with
+    re_duke_merchant on, Merchant checks and the blue medallion reward are turned off. For random enemies only,
+    turn re_duke_merchant off. The goal also triggers when you reach the jet-ski escape."""
     display_name = "re_duke Randomizer"
 
 
@@ -134,11 +163,13 @@ class RE4Options(PerGameCommonOptions):
     merchant_checks: MerchantChecks
     merchant_purchases: MerchantPurchases
     bonus_treasure_checks: BonusTreasureChecks
+    pesetas_checks: PesetasChecks
     boss_checks: BossChecks
     shooting_gallery_checks: ShootingGalleryChecks
     starting_weapon: StartingWeapon
     starting_supplies: StartingSupplies
     starting_pesetas: StartingPesetas
+    random_enemy_health: RandomEnemyHealth
     re_duke_randomizer: ReDukeRandomizer
     re_duke_preset: ReDukePreset
     re_duke_enemies: ReDukeEnemies
@@ -150,9 +181,10 @@ class RE4Options(PerGameCommonOptions):
 
 
 OPTION_GROUPS = [
-    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, MerchantChecks, MerchantPurchases, BonusTreasureChecks,
-                           BossChecks, ShootingGalleryChecks]),
+    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, PesetasChecks, MerchantChecks, MerchantPurchases,
+                           BonusTreasureChecks, BossChecks, ShootingGalleryChecks]),
     OptionGroup("Starting Inventory", [StartingWeapon, StartingSupplies, StartingPesetas]),
+    OptionGroup("Enemies", [RandomEnemyHealth]),
     OptionGroup("re_duke Randomizer", [ReDukeRandomizer, ReDukePreset, ReDukeEnemies, ReDukeEnemyHealth,
                                        ReDukeMerchant, ReDukeLoadout]),
 ]

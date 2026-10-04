@@ -16,3 +16,6 @@ void Archipelago_Tick();
 
 // Called from the ImGui frame in EndSceneHook.cpp
 void Archipelago_Render();
+
+// Random enemy health requested by the Archipelago slot: true with the multiplier range when active
+bool Archipelago_EnemyHP(float* minMul, float* maxMul);

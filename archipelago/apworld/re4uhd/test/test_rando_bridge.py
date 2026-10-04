@@ -158,7 +158,8 @@ class TestSlotData(RE4TestBase):
         self.assertEqual(o["randomizeMerchantStockCheckBox"], "0")
         self.assertTrue(1 <= int(o["seedHashNumericBox"]) <= 99)
         names = {l.name for l in self.multiworld.get_locations(self.player)}
-        self.assertFalse(any(n.startswith("Merchant:") for n in names))
+        # the randomizer leaves the Merchant alone here, so Merchant checks stay
+        self.assertTrue(any(n.startswith("Merchant:") for n in names))
 
 
 class TestNoReDuke(RE4TestBase):

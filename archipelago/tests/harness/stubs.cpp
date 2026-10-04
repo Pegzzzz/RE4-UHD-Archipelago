@@ -254,6 +254,14 @@ namespace sim
 		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];
 		rs.item_flg_8[bit / 32] |= 0x80000000u >> (bit % 32);
 	}
+	int nextRoomItemBit()
+	{
+		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];
+		for (int b = 0; b < 128; b++)
+			if (!(rs.item_flg_8[b / 32] & (0x80000000u >> (b % 32))))
+				return b;
+		return -1;
+	}
 
 	void reset(uint16_t room)
 	{
@@ -366,6 +374,8 @@ namespace sim
 		s.items.assign((uint8_t*)items, (uint8_t*)items + sizeof(items));
 		s.mgr.assign(mgrBuf, mgrBuf + sizeof(mgrBuf));
 		s.ss.assign(ssBuf, ssBuf + sizeof(ssBuf));
+		for (auto& [room, rs] : gRoomSaves)
+			s.rooms.insert(s.rooms.end(), (uint8_t*)&rs, (uint8_t*)&rs + sizeof(rs));
 		return s;
 	}
 	void restore(const State& s)
@@ -374,6 +384,13 @@ namespace sim
 		memcpy(items, s.items.data(), s.items.size());
 		memcpy(mgrBuf, s.mgr.data(), s.mgr.size());
 		memcpy(ssBuf, s.ss.data(), s.ss.size());
+		gRoomSaves.clear(); // room save data rolls back with the save, like in the game
+		for (size_t i = 0; i + sizeof(ROOM_SAVE_DATA) <= s.rooms.size(); i += sizeof(ROOM_SAVE_DATA))
+		{
+			ROOM_SAVE_DATA rs;
+			memcpy(&rs, s.rooms.data() + i, sizeof(rs));
+			gRoomSaves[rs.RoomNo_0] = rs;
+		}
 	}
 
 	void gameFrame()
