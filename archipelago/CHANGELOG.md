@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1
+- The client now checks re_duke's randomizer whenever it's installed, even if the YAML doesn't use it, and
+  warns (in the client and in game) when its last seed moved items or doors, which makes checks miss.
+  `/setup` and `/rando` then write a safe profile: random enemies only, Merchant left alone when the YAML
+  has Merchant checks.
+- Diagnostics in `archipelago.log`: a `[pickup]` line per item (pickup screen / shop / no screen) and
+  `[roomflag]` lines when the game marks a placed item as taken, to tell placed items from enemy drops.
+
 ## 0.4.0
 - `merchant_purchases: check_only` (new default): the first purchase of each Merchant item only sends the check;
   the item is taken back when you leave the shop, and the Merchant's stock (weapons, scopes, stocks, treasure maps,

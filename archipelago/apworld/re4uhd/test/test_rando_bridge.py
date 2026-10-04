@@ -209,3 +209,40 @@ class TestClientSetupFlow(unittest.TestCase):
                     self.assertFalse(any(k in ("warn", "error") for k, _m in messages), messages)
 
             asyncio.run(run())
+
+
+class TestUnsafeRandoWithoutReDukeYaml(unittest.TestCase):
+    """re_duke's randomizer installed with its item randomizer on, slot doesn't use it: warn (client + game)."""
+
+    def test_warns(self) -> None:
+        import asyncio
+        from unittest import mock
+        from .. import client as C
+
+        with tempfile.TemporaryDirectory() as tmp:
+            game = make_game(tmp, dll=b"MZ " + rb.MOD_MARKER)
+            rando = rb.rando_folder(game)
+            write_seedlog(rando, "2026-10-04_17-00-00", dict(PROFILE_KEYS))  # items/doors randomized
+            warnings, sent = [], []
+
+            async def run() -> None:
+                ctx = C.RE4Context(None, None)
+                ctx.slot_data = {"re_duke": None}
+                with mock.patch.object(C, "get_game_folder_setting", lambda: game), \
+                        mock.patch.object(C, "set_game_folder_setting", lambda f: None), \
+                        mock.patch.object(ctx, "send_game", lambda m: sent.append(m)), \
+                        mock.patch.object(C.logger, "warning", lambda m, *a: warnings.append(m)), \
+                        mock.patch.object(C.logger, "info", lambda m, *a: None):
+                    ctx.check_local_setup()
+                    self.assertTrue(any("breaks Archipelago" in w and "/rando" in w for w in warnings), warnings)
+                    self.assertTrue(any(m.get("cmd") == "message" and "/rando" in m.get("text", "") for m in sent))
+                    # /rando writes an enemies-only safe profile, Merchant untouched
+                    with mock.patch.object(rb, "launch_rando", lambda folder: None):
+                        self.assertTrue(ctx.prepare_rando(launch=False, game=game))
+                    _h, v = rb.read_profile(os.path.join(rando, "Profiles", "PC", rb.AP_PROFILE))
+                    self.assertEqual(v["randomizeItemsCheckBox"], "0")
+                    self.assertEqual(v["randomizeDoorsCheckBox"], "0")
+                    self.assertEqual(v["randomizeMerchantStockCheckBox"], "0")
+                    self.assertEqual(v["randomizeEnemiesCheckBox"], "1")
+
+            asyncio.run(run())

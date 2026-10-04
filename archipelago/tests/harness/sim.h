@@ -33,7 +33,8 @@ namespace sim
 	void setCaseFull(bool full);          // PutInCase always fails
 	void setDeferredSubScreenOpen(bool d);// SubScreenOpen takes effect on the next game frame
 	uint16_t getItemId();
-	void setGetItem(uint16_t id, uint16_t num);                 // SubScreenWk->get_item_id_2F6
+	void setGetItem(uint16_t id, uint16_t num);
+	void setRoomItemFlag(int bit);            // the game marks a placed item in the current room as taken                 // SubScreenWk->get_item_id_2F6
 
 	// Inventory
 	void gameAdd(uint16_t id, int num, int chr = 0);   // game-side add (stacks like cItemMgr::get)

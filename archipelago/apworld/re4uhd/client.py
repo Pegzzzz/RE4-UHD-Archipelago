@@ -164,16 +164,23 @@ class RE4Context(CommonContext):
                            "(this APWorld build doesn't include the game files).")
         else:
             logger.info("Archipelago game mod is installed.")
-        if self.slot_data.get("re_duke"):
+        if self.slot_data.get("re_duke") or (self.slot_data and rando_bridge.rando_folder(game)):
             self.prepare_rando(launch=True, game=game)
         elif not self.slot_data:
-            logger.info("Connect to the room to also set up re_duke's randomizer, if your YAML uses it.")
+            logger.info("Connect to the room to also set up re_duke's randomizer, if you use it.")
 
     def prepare_rando(self, launch: bool, game: Optional[str] = None) -> bool:
         settings = self.slot_data.get("re_duke")
         if not settings:
-            logger.info("Your slot doesn't use re_duke's randomizer (re_duke_randomizer: false).")
-            return False
+            if not self.slot_data:
+                logger.info("Connect to the room first, so the profile can match your slot.")
+                return False
+            # slot doesn't use it, but it may be installed anyway: random enemies only, Merchant left alone so
+            # this slot's Merchant checks still work, items/doors off
+            settings = rando_bridge.rando_settings(0, True, True, False, False,
+                                                   1 + zlib.crc32((self.seed_name or "").encode()) % 99)
+            logger.info("Your YAML doesn't use re_duke's randomizer (re_duke_randomizer: false), so the profile only "
+                        "randomizes enemies and keeps items, doors and the Merchant normal.")
         game = game or self.game_folder()
         if not game:
             logger.error("Couldn't find Resident Evil 4; run /setup with the game folder first.")
@@ -215,8 +222,8 @@ class RE4Context(CommonContext):
         if not rando_bridge.mod_installed(game):
             logger.warning("The Archipelago game mod isn't installed in this game folder. Type /setup to install it.")
         settings = self.slot_data.get("re_duke")
+        rando = rando_bridge.rando_folder(game)
         if settings:
-            rando = rando_bridge.rando_folder(game)
             if not rando:
                 logger.warning("Your YAML uses re_duke's randomizer, but it isn't in the game folder. "
                                "See the tutorial, then type /setup.")
@@ -224,6 +231,22 @@ class RE4Context(CommonContext):
             status, message = rando_bridge.check_generated(rando, settings)
             (logger.info if status == "ok" else logger.warning)("re_duke randomizer: " + message +
                                                                ("" if status == "ok" else " Type /rando."))
+            if status == "unsafe":
+                self.send_game({"cmd": "message", "text": "re_duke's randomizer moved items/doors: checks won't "
+                                                         "line up! Type /rando in the client."})
+        elif rando:
+            # installed even though this slot doesn't use it: its last seed must still leave items alone
+            status, message = rando_bridge.check_generated(rando, rando_bridge.rando_settings(0, True, True, False,
+                                                                                               False, 1))
+            if status == "unsafe":
+                logger.warning("re_duke randomizer: " + message + " Type /rando to write a safe profile "
+                               "(random enemies only), then click Generate Seed.")
+                self.send_game({"cmd": "message", "text": "re_duke's randomizer moved items/doors: checks won't "
+                                                         "line up! Type /rando in the client."})
+            elif status != "missing":
+                logger.info("re_duke's randomizer is installed. Its items and doors are off, which is what "
+                            "Archipelago needs. For random enemies with Merchant/boss checks handled for you, set "
+                            "re_duke_randomizer: true in your next YAML.")
 
     # ---- Archipelago side ------------------------------------------------------
     async def server_auth(self, password_requested: bool = False) -> None:

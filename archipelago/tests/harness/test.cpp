@@ -1116,6 +1116,35 @@ void H10()
 	End();
 }
 
+
+void H11()
+{
+	Begin("H11. Diagnostics: pickups are logged with whether the game flagged a placed item");
+	Setup(0x101);
+	Tick(3);
+	size_t c0 = sim::conLines().size();
+	sim::setOpenFlag(sim::SS_ITEM);
+	sim::setItemGetFlag(true);
+	Tick(2);
+	sim::setRoomItemFlag(5);  // placed item taken
+	sim::gameAdd(4, 10);
+	Tick(3);
+	sim::setOpenFlag(sim::SS_NULL);
+	sim::setItemGetFlag(false);
+	Tick(200);                // flag window expires
+	Pickup(24, 6);            // a drop: no room flag
+	Tick(3);
+	Expect(ConContains(c0, "[roomflag] r101 item_flg bit 5"), "room flag flip logged");
+	Expect(ConContains(c0, "[pickup] Handgun Ammo x10 r101 pickup-screen placed-item-flag"), "placed pickup logged with the flag");
+	bool dropLine = false;
+	for (size_t i = c0; i < sim::conLines().size(); i++)
+		if (sim::conLines()[i].find("[pickup] Shotgun Shells x6 r101 pickup-screen") != std::string::npos &&
+			sim::conLines()[i].find("placed-item-flag") == std::string::npos)
+			dropLine = true;
+	Expect(dropLine, "drop logged without the flag");
+	End();
+}
+
 // Must run first: needs a process where no config has ever been received
 void E12()
 {
@@ -1168,7 +1197,7 @@ int main()
 	S1();
 	S2(); S3(); S4(); S5(); S5b(); S6(); S7(); S8(); S9(); S10(); S11(); S12(); S13();
 	E1(); E2(); E3(); E4(); E5(); E6(); E7(); E8(); E9(); E10(); E11(); E13();
-	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10();
+	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10(); H11();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

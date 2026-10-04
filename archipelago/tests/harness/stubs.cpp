@@ -1,3 +1,4 @@
+#include <map>
 // Stub definitions for every symbol Archipelago.cpp links against, backed by a simulated game state.
 #include <winsock2.h>
 #include "dllmain.h"
@@ -166,6 +167,18 @@ namespace
 
 cItemMgr* ItemMgr = reinterpret_cast<cItemMgr*>(mgrBuf);
 SUB_SCREEN* SubScreenWk = reinterpret_cast<SUB_SCREEN*>(ssBuf);
+
+// room save data (placed-item flags), one per room id
+static std::map<uint16_t, ROOM_SAVE_DATA> gRoomSaves;
+static uint8_t roomDataBuf[sizeof(cRoomData)];
+static ROOM_SAVE_DATA* __fastcall FakeGetRoomSave(cRoomData*, void*, uint16_t room)
+{
+	auto& rs = gRoomSaves[room];
+	rs.RoomNo_0 = room;
+	return &rs;
+}
+cRoomData* RoomData = reinterpret_cast<cRoomData*>(roomDataBuf);
+cRoomData__getRoomSavePtr_Fn cRoomData__getRoomSavePtr = FakeGetRoomSave;
 cItemMgr__erase_Fn cItemMgr__erase = EraseStub;
 cItemMgr__search_Fn cItemMgr__search = SearchStub;
 cItemMgr__get_Fn cItemMgr__get = GetStub;
@@ -236,8 +249,15 @@ namespace ImGui
 // ---------------------------------------------------------------- sim API
 namespace sim
 {
+	void setRoomItemFlag(int bit)
+	{
+		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];
+		rs.item_flg_8[bit / 32] |= 0x80000000u >> (bit % 32);
+	}
+
 	void reset(uint16_t room)
 	{
+		gRoomSaves.clear();
 		memset(gBuf, 0, sizeof(gBuf));
 		memset(ssBuf, 0, sizeof(ssBuf));
 		memset(mgrBuf, 0, sizeof(mgrBuf));

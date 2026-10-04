@@ -241,6 +241,11 @@ First check the randomizer's own setup guide and FAQ (most crashes come from its
 Discord, or missing `X3DAudio1_7.dll`). To tell whose problem it is, try once without our mod: rename `dinput8.dll` to
 `dinput8.dll.off` and put `dinput8.dll.pre-archipelago` back as `dinput8.dll`.
 
+**Many checks not sent / odd items (like Mine-Darts in chapter 1)**
+re_duke's randomizer is probably moving items around. Its default settings randomize items and doors, which
+Archipelago can't follow. Type `/rando` in the client, keep the "Archipelago" profile it loads, and click
+Generate Seed again (or click **Restore Game** in the randomizer to remove it).
+
 **"re_duke randomizer: … turned on, which breaks Archipelago's item logic"**
 The last seed was generated with doors or items randomized. Type `/rando`, keep the Archipelago profile, and click
 Generate Seed again.

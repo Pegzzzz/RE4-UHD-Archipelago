@@ -158,6 +158,12 @@ namespace ap
 	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
 	uint32_t warnedUnknownIndex = UINT32_MAX;
 
+	// Diagnostics: the game marks placed (map) items as taken in the room's save data. Logging those flips next to
+	// each pickup tells us whether placed items and enemy drops can be told apart.
+	struct RoomFlagSnapshot { uint16_t room = 0xFFFF; uint32_t item[4] = {}; uint32_t find[4] = {}; uint16_t etc[64] = {}; };
+	RoomFlagSnapshot roomFlags;
+	uint64_t lastItemFlagFrame = 0;
+
 	// =============================================================================== logging
 	// Safe from any thread: writes the file directly, console lines are queued for the main thread.
 	void Log(const std::string& text)
@@ -739,10 +745,57 @@ namespace ap
 		return false; // every spot here already collected: keep the item
 	}
 
+	void WatchRoomFlags()
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		if (!RoomData)
+			return;
+		ROOM_SAVE_DATA* rs = RoomData->getRoomSavePtr(g->curRoomId_4FAC);
+		if (!rs)
+			return;
+		if (roomFlags.room != g->curRoomId_4FAC)
+		{
+			roomFlags.room = g->curRoomId_4FAC;
+			memcpy(roomFlags.item, rs->item_flg_8, sizeof(roomFlags.item));
+			memcpy(roomFlags.find, rs->item_find_flg_18, sizeof(roomFlags.find));
+			memcpy(roomFlags.etc, rs->EtcModelFlg, sizeof(roomFlags.etc));
+			return;
+		}
+		auto diff = [&](const char* what, const uint32_t* now, uint32_t* before, int words) {
+			for (int w = 0; w < words; w++)
+			{
+				uint32_t added = now[w] & ~before[w];
+				for (int b = 0; b < 32 && added; b++)
+					if (added & (0x80000000u >> b))
+					{
+						Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " " + what + " bit " + std::to_string(w * 32 + b));
+						if (strcmp(what, "item_flg") == 0)
+							lastItemFlagFrame = frame;
+					}
+				before[w] = now[w];
+			}
+		};
+		diff("item_flg", rs->item_flg_8, roomFlags.item, 4);
+		diff("item_find", rs->item_find_flg_18, roomFlags.find, 4);
+		for (int i = 0; i < 64; i++)
+			if (rs->EtcModelFlg[i] != roomFlags.etc[i])
+			{
+				Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " etcmodel " + std::to_string(i) + " = " + Hex(rs->EtcModelFlg[i]));
+				roomFlags.etc[i] = rs->EtcModelFlg[i];
+			}
+	}
+
 	void HandleNewItem(uint16_t id, uint32_t count, int goldDelta, const std::vector<cItem*>& fresh)
 	{
 		GLOBAL_WK* g = GlobalPtr();
 		uint16_t room = g->curRoomId_4FAC;
+		{
+			bool pickupCtx = lastPickupCtxFrame && (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
+			bool shopCtx = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
+			bool flagged = lastItemFlagFrame && (frame - lastItemFlagFrame) <= kPickupWindowFrames;
+			Log(std::string("[pickup] ") + ItemName(id) + " x" + std::to_string(count) + " r" + Hex(room) +
+				(shopCtx ? " shop" : pickupCtx ? " pickup-screen" : " no-screen") + (flagged ? " placed-item-flag" : ""));
+		}
 
 		// 1. a received item that went through the "case full" screen
 		if (pendingGrant.active && pendingGrant.id == id)
@@ -1345,6 +1398,7 @@ namespace ap
 		if (ShopContext())
 			lastShopCtxFrame = frame;
 
+		WatchRoomFlags();
 		DiffInventory();
 		ProcessRemovals();
 		TrackBosses();
