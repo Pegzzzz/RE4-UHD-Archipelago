@@ -3,7 +3,7 @@ from typing import Any, Callable, ClassVar, Dict, List
 
 import settings
 
-from BaseClasses import CollectionState, Item, ItemClassification, Location, Region, Tutorial
+from BaseClasses import CollectionState, Item, ItemClassification, Location, LocationProgressType, Region, Tutorial
 from worlds.AutoWorld import WebWorld, World
 from worlds.LauncherComponents import Component, Type, components, launch as launch_component
 
@@ -123,6 +123,8 @@ class RE4World(World):
             return False
         if kind == "pickup" and loc.get("consumable"):
             return bool(self.options.consumable_checks)
+        if kind == "bonus":
+            return loc["index"] <= self.options.bonus_treasure_checks.value
         if kind == "boss":
             return bool(self.options.boss_checks)
         if kind == "merchant":
@@ -130,6 +132,11 @@ class RE4World(World):
         if kind == "bottle_cap":
             return bool(self.options.shooting_gallery_checks)
         return True
+
+    @property
+    def merchant_check_only(self) -> bool:
+        return bool(self.options.merchant_checks) and not self.re_duke and \
+            self.options.merchant_purchases == self.options.merchant_purchases.option_check_only
 
     @property
     def re_duke(self) -> bool:
@@ -170,6 +177,8 @@ class RE4World(World):
             reqs = [_requirement(r, self.player) for r in loc.get("requires", [])]
             if reqs:
                 location.access_rule = lambda state, rs=reqs: all(r(state) for r in rs)
+            if loc.get("excluded"):
+                location.progress_type = LocationProgressType.EXCLUDED  # may not be obtainable: filler only
             region.locations.append(location)
 
         victory = RE4Location(self.player, "Defeat Saddler", None, regions["Final"])
@@ -181,6 +190,10 @@ class RE4World(World):
         pool: List[RE4Item] = []
         key_items = self.item_name_groups["Key Items"]
         for loc in self.enabled_locations:
+            # merchant stock joins the pool when buying only sends the check
+            if loc["kind"] == "merchant" and self.merchant_check_only:
+                pool.append(self.create_item(loc["vanilla"]))
+                continue
             if loc["kind"] != "pickup":
                 continue
             name = loc["vanilla"]
@@ -196,7 +209,9 @@ class RE4World(World):
 
         unfilled = len(self.multiworld.get_unfilled_locations(self.player))
         extra = unfilled - len(pool)
-        extras: List[str] = ["Progressive Attache Case"] * 3 + EXTRA_USEFUL
+        have = [i.name for i in pool]
+        extras: List[str] = ["Progressive Attache Case"] * max(0, 3 - have.count("Progressive Attache Case"))
+        extras += [n for n in EXTRA_USEFUL if n not in have or n == "Yellow Herb"]
         for name in extras:
             if extra <= 0:
                 break
@@ -240,6 +255,8 @@ class RE4World(World):
                 entry["loose"] = 1
             if l.get("cut"):
                 entry["cut"] = 1
+            if l["kind"] == "bonus":
+                entry["stage"] = l["stage"]
             if l.get("consumable"):
                 entry["c"] = 1
             locs.append(entry)
@@ -257,6 +274,7 @@ class RE4World(World):
             "version": 1,
             "death_link": bool(self.options.death_link),
             "location_base": LOCATION_BASE_ID,
+            "merchant_check_only": self.merchant_check_only,
             "enemy_randomizer_compat": self.re_duke,
             "re_duke": rando_settings(
                 self.options.re_duke_preset.value, bool(self.options.re_duke_enemies),

@@ -6,8 +6,9 @@ Key items, the weapons lying around the world, every fixed treasure pickup and (
 herb, grenade and spray are shuffled into the multiworld, about 700 locations in total. When Leon takes one of those items, it is removed again and its location is sent as a check;
 whatever item that location holds (for you or another player) is delivered by Archipelago.
 
-Optional checks: defeating bosses, the first purchase of each Merchant item, the 24 shooting gallery
-bottle caps, and the Merchant's blue medallion reward.
+Optional checks: defeating bosses, the first purchase of each Merchant item (by default the purchase only sends
+the check and the item comes from the multiworld), the 24 shooting gallery bottle caps, the Merchant's blue
+medallion reward, and bonus checks for treasures nothing else counts (like random enemy drops).
 
 ## What is the goal?
 

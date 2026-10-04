@@ -99,9 +99,12 @@ for e in RESEARCH:
 
 # ---- world pickups ----------------------------------------------------------------
 pickups = []
+uncertain_pickups = []
 for e in RESEARCH:
     if e["confidence"] == "low":
-        continue  # unverified placement: could be impossible to check
+        if e["chapter"] != "3-4" and e["item"] not in VANILLA_KEEP:
+            uncertain_pickups.append(e)  # may not exist in game: added at the end as filler-only checks
+        continue
     if e["chapter"] == "3-4":
         continue  # Ashley segment: her pickups are left vanilla
     if e["item"] in VANILLA_KEEP:
@@ -180,8 +183,12 @@ for e in RESEARCH:
         room_req[(e["chapter"], e["room"])].add(r)
 
 consumable_locations = []
+uncertain_consumables = []
 for e in CONSUMABLES:
-    if e["item"] == "Black Bass" or e["confidence"] == "low" or e["chapter"] == "3-4" and "Ashley" in (e.get("notes") or ""):
+    if e["item"] == "Black Bass" or e["chapter"] == "3-4" and "Ashley" in (e.get("notes") or ""):
+        continue
+    if e["confidence"] == "low":
+        uncertain_consumables.append(e)
         continue
     reqs = set(ROOM_REQ.get(e["room"], [])) | room_req[(e["chapter"], e["room"])]
     loc = {
@@ -238,7 +245,8 @@ MERCHANT = [
 ]
 for name, ch in MERCHANT:
     locations.append({"name": f"Merchant: Buy {name}", "kind": "merchant", "chapter": ch,
-                      "game_items": [game_id(name)], "requires": []})
+                      "game_items": [game_id(name)], "requires": [],
+                      "vanilla": "Progressive Attache Case" if name.startswith("Attache Case") else name})
 
 # ---- blue medallions ----------------------------------------------------------------
 locations.append({"name": "Blue Medallions: Merchant Reward", "kind": "medallion_reward", "chapter": "1-3",
@@ -255,6 +263,35 @@ for g, caps in CAPS.items():
     for cid in caps:
         locations.append({"name": f"Shooting Gallery {g}: {names[cid]} Cap", "kind": "bottle_cap",
                           "chapter": GAME_CH[g], "game_items": [cid], "requires": []})
+
+# ---- added in 0.4.0, kept after everything older so earlier location ids don't move -----------
+# Pickups whose existence is uncertain: filler-only, so a missing one can never hold progression.
+for e in uncertain_pickups:
+    locations.append({
+        "name": f"{e['chapter']} {clean_area(e['area'])}: {e['item']} (unverified)",
+        "kind": "pickup", "chapter": e["chapter"], "room": room_int(e["room"]),
+        "room_confidence": "low", "game_items": [game_id(e["item"])], "vanilla": e["item"],
+        "category": e["category"], "requires": clean_requires(e.get("requires") or []),
+        "detail": e.get("location_detail", ""), "cut": e["obtained"] in ("cutscene", "puzzle"),
+        "excluded": True,
+    })
+    item_counts[e["item"]] += 1
+for e in uncertain_consumables:
+    locations.append({
+        "name": f"{e['chapter']} {clean_area(e['area'])}: {e['item']} (unverified)",
+        "kind": "pickup", "consumable": True, "chapter": e["chapter"], "room": room_int(e["room"]),
+        "room_confidence": "low", "game_items": [game_id(e["item"])], "vanilla": e["item"],
+        "category": "consumable", "requires": [], "detail": e.get("area", ""), "excluded": True,
+    })
+    item_counts[e["item"]] += 1
+
+# Bonus treasure: any treasure Leon picks up that no other location accounts for (random enemy drops,
+# guide data gaps) takes the next one for its stage. Filler-only, since drops aren't guaranteed.
+BONUS_PER_STAGE = 15
+for stage, stage_name, ch in ((1, "Village", "1-1"), (2, "Castle", "3-1"), (3, "Island", "5-1")):
+    for i in range(1, BONUS_PER_STAGE + 1):
+        locations.append({"name": f"{stage_name} Bonus Treasure {i}", "kind": "bonus", "stage": stage,
+                          "index": i, "chapter": ch, "requires": [], "excluded": True})
 
 # ---- ids ---------------------------------------------------------------------------
 for i, l in enumerate(locations):
@@ -305,6 +342,9 @@ for amt in (1000, 5000, 10000, 20000):
     items[f"{amt} Pesetas"]["amount"] = amt
 add_item("Progressive Attache Case", "useful", None, kind="attache_case")
 add_item("Victory", "progression", None, kind="event")
+# 0.4.0: Merchant stock that can now be shuffled (appended last so earlier item ids don't move)
+for name in ("Handgun", "Treasure Map (Village)", "Treasure Map (Castle)", "Treasure Map (Island)"):
+    add_item(name, "useful", game_id(name))
 
 for i, name in enumerate(items):
     items[name]["offset"] = i

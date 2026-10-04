@@ -46,6 +46,7 @@ want = {
     "L_BUY_RED9": "Merchant: Buy Red9", "L_BUY_PUNISHER": "Merchant: Buy Punisher",
     "L_MEDALLION": "Blue Medallions: Merchant Reward", "L_CAP_HANDGUN": "Shooting Gallery A: Leon w/ handgun Cap",
     "L_SADDLER_SHELLS": "Final Saddler arena: Shotgun Shells",
+    "L_CASTLE_BONUS1": "Castle Bonus Treasure 1", "L_CASTLE_BONUS5": "Castle Bonus Treasure 5",
 }
 from worlds.re4uhd.data_loader import LOCATION_BASE_ID
 with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") as f:

@@ -95,3 +95,68 @@ class TestData(RE4TestBase):
         for loc in LOCATIONS:
             if loc["kind"] in ("pickup", "boss"):
                 self.assertIn(loc["room"] >> 8, (1, 2, 3), loc["name"])
+
+
+class TestMerchantCheckOnly(RE4TestBase):
+    """Default: buying only sends the check, and the Merchant's stock is in the item pool instead."""
+
+    def test_stock_in_pool(self) -> None:
+        self.assertTrue(self.world.fill_slot_data()["merchant_check_only"])
+        pool = Counter(i.name for i in self.multiworld.itempool if i.player == self.player)
+        for name in ("Rifle", "Handgun", "Treasure Map (Village)", "Treasure Map (Castle)", "Treasure Map (Island)",
+                     "Striker", "Killer7", "Tactical Vest", "Scope (semi-auto rifle)"):
+            self.assertGreaterEqual(pool[name], 1, name)
+        self.assertEqual(pool["Progressive Attache Case"], 3)
+
+    def test_one_item_per_location(self) -> None:
+        mine = [i for i in self.multiworld.itempool if i.player == self.player]
+        locs = [l for l in self.multiworld.get_locations(self.player) if l.address is not None]
+        self.assertEqual(len(mine), len(locs))
+
+
+class TestMerchantKeepItem(RE4TestBase):
+    options = {"merchant_purchases": "keep_item"}
+
+    def test_flag(self) -> None:
+        self.assertFalse(self.world.fill_slot_data()["merchant_check_only"])
+
+
+class TestCheckOnlyOffWithReDuke(RE4TestBase):
+    options = {"re_duke_randomizer": True}
+
+    def test_flag(self) -> None:
+        self.assertFalse(self.world.fill_slot_data()["merchant_check_only"])
+
+
+class TestBonusTreasure(RE4TestBase):
+    options = {"bonus_treasure_checks": 3}
+
+    def _fill(self) -> None:
+        from Fill import distribute_items_restrictive
+        from worlds.AutoWorld import call_all
+        call_all(self.multiworld, "pre_fill")
+        distribute_items_restrictive(self.multiworld)
+
+    def test_bonus_locations(self) -> None:
+        from BaseClasses import LocationProgressType
+        self._fill()
+        bonus = [l for l in self.multiworld.get_locations(self.player) if "Bonus Treasure" in l.name]
+        self.assertEqual(len(bonus), 9)
+        for loc in bonus:
+            self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)
+            self.assertFalse(loc.item.advancement, f"{loc.name} holds progression")
+        stages = {l["stage"] for l in self.world.fill_slot_data()["locations"] if l["k"] == "bonus"}
+        self.assertEqual(stages, {1, 2, 3})
+
+    def test_unverified_are_filler_only(self) -> None:
+        self._fill()
+        for loc in self.multiworld.get_locations(self.player):
+            if loc.name.endswith("(unverified)"):
+                self.assertFalse(loc.item.advancement, loc.name)
+
+
+class TestNoBonus(RE4TestBase):
+    options = {"bonus_treasure_checks": 0}
+
+    def test_none(self) -> None:
+        self.assertFalse(any("Bonus Treasure" in l.name for l in self.multiworld.get_locations(self.player)))

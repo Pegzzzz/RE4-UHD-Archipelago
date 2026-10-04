@@ -10,8 +10,15 @@ Resident Evil 4 UHD:
   # Ammo, herbs, grenades and sprays placed in the world are checks (~450).
   consumable_checks: true
 
-  # First purchase of each Merchant item is a check (you keep what you bought).
+  # First purchase of each Merchant item is a check.
   merchant_checks: true
+
+  # check_only: buying only sends the check; the item goes to the multiworld (you get it from Archipelago).
+  # keep_item: you also keep what you bought.
+  merchant_purchases: check_only
+
+  # Extra filler-only checks per stage (0-15) for treasures nothing else counts, like random enemy drops.
+  bonus_treasure_checks: 5
 
   # Defeating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks.
   boss_checks: true

@@ -725,6 +725,34 @@
    "classification": "progression",
    "kind": "event",
    "offset": 103
+  },
+  {
+   "name": "Handgun",
+   "classification": "useful",
+   "kind": "game",
+   "game_item": 35,
+   "offset": 104
+  },
+  {
+   "name": "Treasure Map (Village)",
+   "classification": "useful",
+   "kind": "game",
+   "game_item": 169,
+   "offset": 105
+  },
+  {
+   "name": "Treasure Map (Castle)",
+   "classification": "useful",
+   "kind": "game",
+   "game_item": 84,
+   "offset": 106
+  },
+  {
+   "name": "Treasure Map (Island)",
+   "classification": "useful",
+   "kind": "game",
+   "game_item": 85,
+   "offset": 107
   }
  ],
  "vanilla_pool": {
@@ -763,7 +791,7 @@
   "Goat Ornament": 1,
   "Moonstone (Left half)": 1,
   "Moonstone (Right half)": 1,
-  "Red Gem": 1,
+  "Red Gem": 2,
   "Mirror w/ Pearls & Rubies": 1,
   "Hourglass w/ Gold Decor": 1,
   "Rocket Launcher": 1,
@@ -802,7 +830,7 @@
   "Green Herb": 78,
   "Yellow Herb": 26,
   "Shotgun Shells": 64,
-  "Incendiary Grenade": 28,
+  "Incendiary Grenade": 29,
   "Flash Grenade": 26,
   "Rifle Ammo": 31,
   "Brown Chicken Egg": 1,

@@ -21,6 +21,28 @@ class MerchantChecks(DefaultOnToggle):
     display_name = "Merchant Checks"
 
 
+class MerchantPurchases(Choice):
+    """What happens to the item when a Merchant purchase sends a check (needs merchant_checks).
+    check_only: the first purchase of each item only sends the check; the item is taken away when you leave the
+    shop, and the Merchant's stock is shuffled into the multiworld instead (attache cases and the tactical vest
+    always take effect).
+    keep_item: you also keep what you bought.
+    Later purchases of the same item are normal."""
+    display_name = "Merchant Purchases"
+    option_check_only = 0
+    option_keep_item = 1
+    default = 0
+
+
+class BonusTreasureChecks(Range):
+    """Extra filler-only checks per stage (village, castle, island) for treasures no other check accounts for,
+    such as random enemy drops. Each one gives a minor item."""
+    display_name = "Bonus Treasure Checks"
+    range_start = 0
+    range_end = 15
+    default = 5
+
+
 class BossChecks(DefaultOnToggle):
     """Defeating a boss (Del Lago, El Gigantes, Mendez, Verdugo, Salazar, U-3, Krauser) is a check."""
     display_name = "Boss Checks"
@@ -110,6 +132,8 @@ class RE4Options(PerGameCommonOptions):
     shuffle_key_items: ShuffleKeyItems
     consumable_checks: ConsumableChecks
     merchant_checks: MerchantChecks
+    merchant_purchases: MerchantPurchases
+    bonus_treasure_checks: BonusTreasureChecks
     boss_checks: BossChecks
     shooting_gallery_checks: ShootingGalleryChecks
     starting_weapon: StartingWeapon
@@ -126,7 +150,8 @@ class RE4Options(PerGameCommonOptions):
 
 
 OPTION_GROUPS = [
-    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, MerchantChecks, BossChecks, ShootingGalleryChecks]),
+    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, MerchantChecks, MerchantPurchases, BonusTreasureChecks,
+                           BossChecks, ShootingGalleryChecks]),
     OptionGroup("Starting Inventory", [StartingWeapon, StartingSupplies, StartingPesetas]),
     OptionGroup("re_duke Randomizer", [ReDukeRandomizer, ReDukePreset, ReDukeEnemies, ReDukeEnemyHealth,
                                        ReDukeMerchant, ReDukeLoadout]),

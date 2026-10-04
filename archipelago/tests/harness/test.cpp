@@ -158,10 +158,12 @@ void Disconnect()
 		Sleep(5);
 }
 
+bool gMerchantCheckOnly = true; // default YAML: merchant_purchases: check_only
 json Config(uint32_t tag, bool deathLink = true)
 {
 	json sd = slotData;
 	sd["death_link"] = deathLink;
+	sd["merchant_check_only"] = gMerchantCheckOnly;
 	return { {"cmd", "config"}, {"seed", "S"}, {"slot", "Leon"}, {"save_tag", tag}, {"slot_data", sd} };
 }
 
@@ -426,8 +428,10 @@ void S4()
 
 void S5()
 {
-	Begin("5. Merchant: first purchase checked once & kept; free Punisher -> medallion reward");
+	Begin("5. Merchant (keep_item): first purchase checked once & kept; free Punisher -> medallion reward");
+	gMerchantCheckOnly = false;
 	Setup(0x104);
+	gMerchantCheckOnly = true;
 	sim::setGold(100000);
 	Tick(2);
 	size_t m = cl.got.size();
@@ -457,6 +461,33 @@ void S5()
 	Buy(33, 20000);
 	CloseShop();
 	Expect(Has(ChecksSince(m4), L_BUY_PUNISHER), "paid Punisher -> Merchant: Buy Punisher");
+	End();
+}
+
+void S5b()
+{
+	Begin("5b. Merchant (check_only): first purchase sends the check, item taken back after the shop; vest stays");
+	Setup(0x104);
+	sim::setGold(200000);
+	Tick(2);
+	size_t m = cl.got.size();
+	Buy(37, 14000); // Red9
+	Expect(sim::count(37) == 1, "Red9 still there while the shop is open");
+	CloseShop();
+	Expect(Has(ChecksSince(m), L_BUY_RED9), "Merchant: Buy Red9 checked");
+	Expect(sim::count(37) == 0, "Red9 taken back after leaving the shop");
+	Expect(sim::gold() == 200000 - 14000, "price stays paid");
+	size_t m2 = cl.got.size();
+	Buy(37, 14000);
+	CloseShop();
+	Expect(ChecksSince(m2).empty() && sim::count(37) == 1, "second purchase: normal, Red9 kept");
+	size_t m3 = cl.got.size();
+	Buy(33, 0); // free Punisher (medallion reward)
+	CloseShop();
+	Expect(Has(ChecksSince(m3), L_MEDALLION) && sim::count(33) == 0, "medallion reward checked, Punisher taken back");
+	Buy(254, 60000); // Tactical Vest
+	CloseShop();
+	Expect(sim::count(254) == 1, "tactical vest kept (costume change)");
 	End();
 }
 
@@ -811,12 +842,12 @@ void E6()
 
 void E7()
 {
-	Begin("E7. Unmapped treasure via pickup screen is kept and logged");
+	Begin("E7. Unmapped weapon via pickup screen is kept and logged");
 	Setup(0x101);
 	size_t m = cl.got.size();
-	Pickup(199, 1); // Green Gem, no location in r101 or stage loose set
+	Pickup(45, 1); // Striker: never placed in the village
 	Tick(3);
-	Expect(sim::count(199) == 1, "kept");
+	Expect(sim::count(45) == 1, "kept");
 	Expect(CountCmdSince(m, "log") >= 1, "Unmapped log sent to client");
 	End();
 }
@@ -1051,6 +1082,40 @@ void H8()
 	End();
 }
 
+
+void H9()
+{
+	Begin("H9. Treasure in a room the data doesn't list for it -> same item elsewhere in the stage");
+	Setup(0x20d); // castle room with no Velvet Blue location
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	Pickup(86, 1); // Velvet Blue
+	Tick(5);
+	auto ch = ChecksSince(m);
+	Expect(ch.size() == 1, "one check");
+	Expect(sim::count(86) == 0, "Velvet Blue removed");
+	Expect(ConContains(c0, "by stage"), "logged as a stage match (room data to fix)");
+	End();
+}
+
+void H10()
+{
+	Begin("H10. Treasure no location accounts for -> bonus treasure checks for its stage, then kept");
+	Setup(0x20d);
+	size_t m = cl.got.size();
+	for (int i = 0; i < 5; i++)
+		Pickup(119, 1); // Ruby: no castle Ruby locations exist
+	Tick(5);
+	auto ch = ChecksSince(m);
+	Expect(ch.size() == 5 && Has(ch, L_CASTLE_BONUS1) && Has(ch, L_CASTLE_BONUS5), "5 castle bonus checks");
+	Expect(sim::count(119) == 0, "all 5 removed");
+	size_t m2 = cl.got.size(), c0 = sim::conLines().size();
+	Pickup(119, 1);
+	Tick(5);
+	Expect(ChecksSince(m2).empty() && sim::count(119) == 1, "6th Ruby: no bonus left, kept");
+	Expect(ConContains(c0, "Unmapped pickup"), "logged as unmapped");
+	End();
+}
+
 // Must run first: needs a process where no config has ever been received
 void E12()
 {
@@ -1101,9 +1166,9 @@ int main()
 	ap::configured = false;
 	ap::saveTag = 0;
 	S1();
-	S2(); S3(); S4(); S5(); S6(); S7(); S8(); S9(); S10(); S11(); S12(); S13();
+	S2(); S3(); S4(); S5(); S5b(); S6(); S7(); S8(); S9(); S10(); S11(); S12(); S13();
 	E1(); E2(); E3(); E4(); E5(); E6(); E7(); E8(); E9(); E10(); E11(); E13();
-	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8();
+	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

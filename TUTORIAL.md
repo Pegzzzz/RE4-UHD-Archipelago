@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.3).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.4).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -104,7 +104,9 @@ The YAML file holds your name and your choices for the randomizer.
 |---|---|---|
 | `shuffle_key_items` | Key items (Insignia Key, False Eye, Card Keys…) can be anywhere in the multiworld. `false` keeps them in their normal spots. | `true` |
 | `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). | `true` |
-| `merchant_checks` | The first time you buy each Merchant item, you also send a check. You keep what you bought. | `true` |
+| `merchant_checks` | The first time you buy each Merchant item, you send a check. | `true` |
+| `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
+| `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
 | `boss_checks` | Beating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks. | `true` |
 | `shooting_gallery_checks` | Each of the 24 bottle caps from the shooting gallery is a check. | `true` |
 | `starting_weapon` | An extra weapon at the start, with 2 boxes of its ammo: `vanilla` (none), `random_handgun` (Red9, Blacktail or Punisher) or `random_weapon` (any). | `vanilla` |
@@ -174,7 +176,12 @@ That's it — play the game.
 - **Ammo and herbs:** each room has as many checks as the game places ammo/herbs/grenades there. Whatever
   consumable you pick up in that room uses the next one. When a room's checks are used up, everything you find
   there is yours to keep.
-- **Merchant:** the first purchase of each item sends a check, and you still get the item.
+- **Merchant:** the first purchase of each item sends a check. With `merchant_purchases: check_only` (the default)
+  the item is taken back when you leave the shop: you've paid for the check, and the item itself is somewhere in
+  the multiworld. Buying it again later works normally. Attache cases and the tactical vest always take effect.
+- **Treasures:** every treasure you pick up counts. If the data has it in another room, it still counts (and the
+  log notes it so the data can be fixed). Extra treasures, like random enemy drops, use the stage's bonus treasure
+  checks until they run out.
 - **Dying / continuing / loading:** safe. Your save remembers what it has already received and collected.
 - **Ashley's solo section (3-4):** her pickups are normal — nothing is randomized there.
 

@@ -10869,6 +10869,7 @@
     35
    ],
    "requires": [],
+   "vanilla": "Handgun",
    "offset": 645
   },
   {
@@ -10879,6 +10880,7 @@
     44
    ],
    "requires": [],
+   "vanilla": "Shotgun",
    "offset": 646
   },
   {
@@ -10889,6 +10891,7 @@
     46
    ],
    "requires": [],
+   "vanilla": "Rifle",
    "offset": 647
   },
   {
@@ -10899,6 +10902,7 @@
     68
    ],
    "requires": [],
+   "vanilla": "Scope (Rifle)",
    "offset": 648
   },
   {
@@ -10909,6 +10913,7 @@
     48
    ],
    "requires": [],
+   "vanilla": "TMP",
    "offset": 649
   },
   {
@@ -10919,6 +10924,7 @@
     53
    ],
    "requires": [],
+   "vanilla": "Rocket Launcher",
    "offset": 650
   },
   {
@@ -10929,6 +10935,7 @@
     125
    ],
    "requires": [],
+   "vanilla": "Progressive Attache Case",
    "offset": 651
   },
   {
@@ -10939,6 +10946,7 @@
     5
    ],
    "requires": [],
+   "vanilla": "First Aid Spray",
    "offset": 652
   },
   {
@@ -10949,6 +10957,7 @@
     169
    ],
    "requires": [],
+   "vanilla": "Treasure Map (Village)",
    "offset": 653
   },
   {
@@ -10959,6 +10968,7 @@
     67
    ],
    "requires": [],
+   "vanilla": "Stock (TMP)",
    "offset": 654
   },
   {
@@ -10969,6 +10979,7 @@
     37
    ],
    "requires": [],
+   "vanilla": "Red9",
    "offset": 655
   },
   {
@@ -10979,6 +10990,7 @@
     66
    ],
    "requires": [],
+   "vanilla": "Stock (Red9)",
    "offset": 656
   },
   {
@@ -10989,6 +11001,7 @@
     33
    ],
    "requires": [],
+   "vanilla": "Punisher",
    "offset": 657
   },
   {
@@ -10999,6 +11012,7 @@
     39
    ],
    "requires": [],
+   "vanilla": "Blacktail",
    "offset": 658
   },
   {
@@ -11009,6 +11023,7 @@
     41
    ],
    "requires": [],
+   "vanilla": "Broken Butterfly",
    "offset": 659
   },
   {
@@ -11019,6 +11034,7 @@
     148
    ],
    "requires": [],
+   "vanilla": "Riot Gun",
    "offset": 660
   },
   {
@@ -11029,6 +11045,7 @@
     47
    ],
    "requires": [],
+   "vanilla": "Rifle (semi-auto)",
    "offset": 661
   },
   {
@@ -11039,6 +11056,7 @@
     69
    ],
    "requires": [],
+   "vanilla": "Scope (semi-auto rifle)",
    "offset": 662
   },
   {
@@ -11049,6 +11067,7 @@
     54
    ],
    "requires": [],
+   "vanilla": "Mine Thrower",
    "offset": 663
   },
   {
@@ -11059,6 +11078,7 @@
     126
    ],
    "requires": [],
+   "vanilla": "Progressive Attache Case",
    "offset": 664
   },
   {
@@ -11069,6 +11089,7 @@
     84
    ],
    "requires": [],
+   "vanilla": "Treasure Map (Castle)",
    "offset": 665
   },
   {
@@ -11079,6 +11100,7 @@
     127
    ],
    "requires": [],
+   "vanilla": "Progressive Attache Case",
    "offset": 666
   },
   {
@@ -11089,6 +11111,7 @@
     45
    ],
    "requires": [],
+   "vanilla": "Striker",
    "offset": 667
   },
   {
@@ -11099,6 +11122,7 @@
     42
    ],
    "requires": [],
+   "vanilla": "Killer7",
    "offset": 668
   },
   {
@@ -11109,6 +11133,7 @@
     85
    ],
    "requires": [],
+   "vanilla": "Treasure Map (Island)",
    "offset": 669
   },
   {
@@ -11119,6 +11144,7 @@
     254
    ],
    "requires": [],
+   "vanilla": "Tactical Vest",
    "offset": 670
   },
   {
@@ -11370,6 +11396,490 @@
    ],
    "requires": [],
    "offset": 695
+  },
+  {
+   "name": "2-3 Split Road: Red Gem (unverified)",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 285,
+   "room_confidence": "low",
+   "game_items": [
+    200
+   ],
+   "vanilla": "Red Gem",
+   "category": "treasure",
+   "requires": [],
+   "detail": "In one of two barrels at end of passage past a boarded window",
+   "cut": false,
+   "excluded": true,
+   "offset": 696
+  },
+  {
+   "name": "2-3 Torture Shed 1F: Incendiary Grenade (unverified)",
+   "kind": "pickup",
+   "consumable": true,
+   "chapter": "2-3",
+   "room": 287,
+   "room_confidence": "low",
+   "game_items": [
+    2
+   ],
+   "vanilla": "Incendiary Grenade",
+   "category": "consumable",
+   "requires": [],
+   "detail": "Torture Shed 1F",
+   "excluded": true,
+   "offset": 697
+  },
+  {
+   "name": "Village Bonus Treasure 1",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 1,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 698
+  },
+  {
+   "name": "Village Bonus Treasure 2",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 2,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 699
+  },
+  {
+   "name": "Village Bonus Treasure 3",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 3,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 700
+  },
+  {
+   "name": "Village Bonus Treasure 4",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 4,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 701
+  },
+  {
+   "name": "Village Bonus Treasure 5",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 5,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 702
+  },
+  {
+   "name": "Village Bonus Treasure 6",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 6,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 703
+  },
+  {
+   "name": "Village Bonus Treasure 7",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 7,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 704
+  },
+  {
+   "name": "Village Bonus Treasure 8",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 8,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 705
+  },
+  {
+   "name": "Village Bonus Treasure 9",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 9,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 706
+  },
+  {
+   "name": "Village Bonus Treasure 10",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 10,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 707
+  },
+  {
+   "name": "Village Bonus Treasure 11",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 11,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 708
+  },
+  {
+   "name": "Village Bonus Treasure 12",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 12,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 709
+  },
+  {
+   "name": "Village Bonus Treasure 13",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 13,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 710
+  },
+  {
+   "name": "Village Bonus Treasure 14",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 14,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 711
+  },
+  {
+   "name": "Village Bonus Treasure 15",
+   "kind": "bonus",
+   "stage": 1,
+   "index": 15,
+   "chapter": "1-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 712
+  },
+  {
+   "name": "Castle Bonus Treasure 1",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 1,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 713
+  },
+  {
+   "name": "Castle Bonus Treasure 2",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 2,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 714
+  },
+  {
+   "name": "Castle Bonus Treasure 3",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 3,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 715
+  },
+  {
+   "name": "Castle Bonus Treasure 4",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 4,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 716
+  },
+  {
+   "name": "Castle Bonus Treasure 5",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 5,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 717
+  },
+  {
+   "name": "Castle Bonus Treasure 6",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 6,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 718
+  },
+  {
+   "name": "Castle Bonus Treasure 7",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 7,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 719
+  },
+  {
+   "name": "Castle Bonus Treasure 8",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 8,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 720
+  },
+  {
+   "name": "Castle Bonus Treasure 9",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 9,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 721
+  },
+  {
+   "name": "Castle Bonus Treasure 10",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 10,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 722
+  },
+  {
+   "name": "Castle Bonus Treasure 11",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 11,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 723
+  },
+  {
+   "name": "Castle Bonus Treasure 12",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 12,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 724
+  },
+  {
+   "name": "Castle Bonus Treasure 13",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 13,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 725
+  },
+  {
+   "name": "Castle Bonus Treasure 14",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 14,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 726
+  },
+  {
+   "name": "Castle Bonus Treasure 15",
+   "kind": "bonus",
+   "stage": 2,
+   "index": 15,
+   "chapter": "3-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 727
+  },
+  {
+   "name": "Island Bonus Treasure 1",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 1,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 728
+  },
+  {
+   "name": "Island Bonus Treasure 2",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 2,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 729
+  },
+  {
+   "name": "Island Bonus Treasure 3",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 3,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 730
+  },
+  {
+   "name": "Island Bonus Treasure 4",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 4,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 731
+  },
+  {
+   "name": "Island Bonus Treasure 5",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 5,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 732
+  },
+  {
+   "name": "Island Bonus Treasure 6",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 6,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 733
+  },
+  {
+   "name": "Island Bonus Treasure 7",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 7,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 734
+  },
+  {
+   "name": "Island Bonus Treasure 8",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 8,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 735
+  },
+  {
+   "name": "Island Bonus Treasure 9",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 9,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 736
+  },
+  {
+   "name": "Island Bonus Treasure 10",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 10,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 737
+  },
+  {
+   "name": "Island Bonus Treasure 11",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 11,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 738
+  },
+  {
+   "name": "Island Bonus Treasure 12",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 12,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 739
+  },
+  {
+   "name": "Island Bonus Treasure 13",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 13,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 740
+  },
+  {
+   "name": "Island Bonus Treasure 14",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 14,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 741
+  },
+  {
+   "name": "Island Bonus Treasure 15",
+   "kind": "bonus",
+   "stage": 3,
+   "index": 15,
+   "chapter": "5-1",
+   "requires": [],
+   "excluded": true,
+   "offset": 742
   }
  ]
 }

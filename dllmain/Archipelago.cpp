@@ -64,7 +64,7 @@ namespace ap
 	constexpr uint16_t kRoomSaddler = 0x332;
 	constexpr uint16_t kRoomJetski = 0x333;
 
-	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Unknown };
+	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Bonus, Unknown };
 
 	struct LocationDef
 	{
@@ -77,6 +77,7 @@ namespace ap
 		bool loose = false; // room id not verified: allow a match anywhere in the same stage
 		bool cut = false;   // given by a cutscene/puzzle rather than the pickup screen
 		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
+		int stage = 0;           // bonus treasure: 1 village, 2 castle, 3 island
 	};
 
 	struct ItemDef
@@ -119,6 +120,7 @@ namespace ap
 	// ---------------- main-thread state -------------------------------------------------------
 	bool configured = false;
 	bool deathLink = false;
+	bool merchantCheckOnly = false; // first purchase only sends the check; the bought item is taken back
 	uint32_t saveTag = 0;
 	int64_t locationBase = 0;
 	std::vector<LocationDef> locations;
@@ -487,6 +489,13 @@ namespace ap
 		return "?";
 	}
 
+	bool IsTreasureType(int id)
+	{
+		ITEM_INFO info;
+		bio4::itemInfo(ITEM_ID(id), &info);
+		return info.type_2 == ITEM_TYPE_TREASURE || info.type_2 == ITEM_TYPE_TREASURE_GEM;
+	}
+
 	bool IsInterestingType(int id)
 	{
 		ITEM_INFO info;
@@ -655,36 +664,47 @@ namespace ap
 	// Matches a picked-up item to a location. Locations already collected *in this save* are skipped,
 	// so re-collecting after a death maps to the same location again instead of farming the next one.
 	// Returns true if the item came from a shuffled location and must be removed.
+	// Matches a picked-up item to a location, most specific first:
+	//   1. a location for this item in this room
+	//   2. a location for this item anywhere in the same stage (guide room data can be wrong)
+	//   3. treasures only: the stage's next bonus treasure check (random drops, data gaps)
+	// Locations already collected *in this save* are skipped, and the bits roll back with the save, so
+	// re-collecting after a death maps to the same location again instead of farming new ones.
+	// Returns true if the item came from a check (and must be removed).
 	bool HandlePickup(uint16_t id, uint16_t room, bool onlyCutscene)
 	{
-		auto pass = [&](bool loosePass) -> int {
-			bool sawMatch = false;
+		auto pass = [&](bool stageWide) -> bool {
 			for (auto& loc : locations)
 			{
-				if (loc.kind != Kind::Pickup || !HasItem(loc, id))
+				if (loc.kind != Kind::Pickup || loc.consumable || !HasItem(loc, id) || SaveBit(loc.offset))
 					continue;
 				if (onlyCutscene && !loc.cut)
 					continue;
-				if (loosePass ? (!loc.loose || (loc.room >> 8) != (room >> 8) || loc.room == room) : loc.room != room)
+				if (stageWide ? ((loc.room >> 8) != (room >> 8) || loc.room == room) : loc.room != room)
 					continue;
-				sawMatch = true;
-				if (!SaveBit(loc.offset))
-				{
-					if (loosePass)
-						SendLog("Matched " + std::string(ItemName(id)) + " in room r" + Hex(room) + " to location " +
-							std::to_string(loc.id) + " by stage (room data needs fixing)");
-					SendCheck(loc, std::string("picked up ") + ItemName(id));
-					return 1;
-				}
+				if (stageWide)
+					SendLog("Matched " + std::string(ItemName(id)) + " in room r" + Hex(room) + " to location " +
+						std::to_string(loc.id) + " (room r" + Hex(loc.room) + " in the data) by stage");
+				SendCheck(loc, std::string("picked up ") + ItemName(id));
+				return true;
 			}
-			return sawMatch ? 0 : -1;
+			return false;
 		};
 
-		int r = pass(false);
-		if (r < 0)
-			r = pass(true);
-		if (r >= 0)
-			return true; // matched (new check, or every matching location already collected in this save)
+		if (pass(false) || pass(true))
+			return true;
+
+		if (!onlyCutscene && IsTreasureType(id))
+		{
+			for (auto& loc : locations)
+			{
+				if (loc.kind != Kind::Bonus || loc.stage != (room >> 8) || SaveBit(loc.offset))
+					continue;
+				SendLog("Bonus treasure: " + std::string(ItemName(id)) + " in room r" + Hex(room));
+				SendCheck(loc, std::string("bonus treasure ") + ItemName(id));
+				return true;
+			}
+		}
 
 		if (!onlyCutscene && IsInterestingType(id))
 			SendLog("Unmapped pickup: " + std::string(ItemName(id)) + " (id " + std::to_string(id) + ") in room r" + Hex(room));
@@ -748,16 +768,32 @@ namespace ap
 		// 3. Merchant
 		if (shop)
 		{
+			bool checked = false;
 			if (id == 33 && goldDelta >= 0) // Punisher handed over for free: blue medallion reward
 			{
 				for (auto& loc : locations)
 					if (loc.kind == Kind::MedallionReward && !EventDone(loc))
+					{
 						SendCheck(loc, "medallion reward");
-				return;
+						checked = true;
+					}
 			}
-			for (auto& loc : locations)
-				if (loc.kind == Kind::Merchant && HasItem(loc, id) && !EventDone(loc))
-					SendCheck(loc, std::string("bought ") + ItemName(id));
+			else
+			{
+				for (auto& loc : locations)
+					if (loc.kind == Kind::Merchant && HasItem(loc, id) && !EventDone(loc))
+					{
+						SendCheck(loc, std::string("bought ") + ItemName(id));
+						checked = true;
+					}
+			}
+			// check-only mode: the item itself is shuffled into the multiworld, so take this copy back once the
+			// shop closes (the tactical vest changes Leon's costume on purchase, so it stays)
+			if (checked && merchantCheckOnly && id != uint16_t(EItemId::Assault_Jacket))
+			{
+				pendingRemovals.push_back({ id, 1, fresh });
+				AddToast(std::string("Merchant check: ") + ItemName(id) + " goes to the multiworld");
+			}
 			return;
 		}
 
@@ -1072,6 +1108,7 @@ namespace ap
 		if (k == "merchant") return Kind::Merchant;
 		if (k == "medallion_reward") return Kind::MedallionReward;
 		if (k == "bottle_cap") return Kind::BottleCap;
+		if (k == "bonus") return Kind::Bonus;
 		return Kind::Unknown;
 	}
 
@@ -1113,6 +1150,7 @@ namespace ap
 			d.loose = l.value("loose", 0) != 0;
 			d.cut = l.value("cut", 0) != 0;
 			d.consumable = l.value("c", 0) != 0;
+			d.stage = l.value("stage", 0);
 			for (auto& i : l.value("items", json::array()))
 				d.items.push_back(i.get<int>());
 			if (d.offset < 0 || d.offset >= kBitSlots * 32)
@@ -1144,6 +1182,7 @@ namespace ap
 		bossEmIds = std::move(newBossIds);
 		locationBase = newBase;
 		deathLink = sd.value("death_link", false);
+		merchantCheckOnly = sd.value("merchant_check_only", false);
 		configured = true;
 		Log("Configured: " + std::to_string(locations.size()) + " locations, slot " + msg.value("slot", std::string()) +
 			(fromDisk ? " (from last session)" : ""));

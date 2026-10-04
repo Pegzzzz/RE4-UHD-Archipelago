@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+- `merchant_purchases: check_only` (new default): the first purchase of each Merchant item only sends the check;
+  the item is taken back when you leave the shop, and the Merchant's stock (weapons, scopes, stocks, treasure maps,
+  attache cases as Progressive Attache Case, tactical vest) is shuffled into the multiworld. `keep_item` restores
+  the old behaviour. Off with re_duke's randomizer (its Merchant stock is random).
+- Treasures count more reliably: a treasure that isn't listed for the room it's found in now matches the same
+  item anywhere in the stage, and treasures nothing accounts for (random drops, data gaps) use new
+  `bonus_treasure_checks` (filler-only, 5 per stage by default).
+- Unverified placements (2-3 Red Gem, a 2-3 grenade) are back in as filler-only checks.
+- Location and item ids from 0.3.0 are unchanged; new ones are appended.
+
 ## 0.3.0
 - All-in-one setup: the client's new `/setup` command finds the game (Steam libraries or a given folder), installs
   the game mod bundled inside the APWorld (backing up the old `dinput8.dll`), and sets up re_duke's randomizer.
