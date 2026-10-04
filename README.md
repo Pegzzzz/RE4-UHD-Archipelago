@@ -6,7 +6,7 @@ This repository is a fork of [re4_tweaks](https://github.com/nipkownix/re4_tweak
 contributors. All of re4_tweaks is still here; an Archipelago module was added on top. The original
 re4_tweaks README follows below.
 
-- **Players:** see the [setup guide](archipelago/apworld/re4uhd/docs/setup_en.md). Downloads are on the Releases page.
+- **Players:** start with the **[tutorial](TUTORIAL.md)**. Downloads are on the Releases page.
 - **What's shuffled:** key items, world weapons and every fixed treasure; optional boss, Merchant and shooting-gallery
   checks. Goal: defeat Saddler.
 
