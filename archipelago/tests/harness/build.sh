@@ -4,7 +4,7 @@
 #
 # Needs: clang, mingw-w64 (i686), wine + wine32, and an Archipelago checkout with worlds/re4uhd linked in ($AP).
 #   AP=/path/to/Archipelago ./build.sh
-set -e
+set -eo pipefail
 H="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$H/../../.." && pwd)"
 W="${WORK:-$H/.work}"
