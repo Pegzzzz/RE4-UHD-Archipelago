@@ -1,0 +1,23 @@
+name: Leon
+description: Resident Evil 4 UHD
+game: Resident Evil 4 UHD
+
+Resident Evil 4 UHD:
+  # Shuffle key items (Insignia Key, False Eye, Card Keys...) into the multiworld.
+  # false keeps every key item where it is in the vanilla game.
+  shuffle_key_items: true
+
+  # First purchase of each Merchant item is a check (you keep what you bought).
+  merchant_checks: true
+
+  # Defeating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks.
+  boss_checks: true
+
+  # Each of the 24 bottle caps from the shooting gallery is a check.
+  shooting_gallery_checks: true
+
+  # When you die, everyone with DeathLink dies, and vice versa. Experimental.
+  death_link: false
+
+  progression_balancing: 50
+  accessibility: full

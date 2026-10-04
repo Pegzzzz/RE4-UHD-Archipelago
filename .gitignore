@@ -29,3 +29,7 @@ ipch/
 
 # Generated on compilation
 dllmain/gitparams.h
+
+# Archipelago
+__pycache__/
+*.pyc

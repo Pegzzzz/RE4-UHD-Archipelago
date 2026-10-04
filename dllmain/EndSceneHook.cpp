@@ -1,5 +1,6 @@
 #include <iostream>
 #include "dllmain.h"
+#include "Archipelago.h"
 #include "ConsoleWnd.h"
 #include "Settings.h"
 #include "AutoUpdater.h"
@@ -518,6 +519,9 @@ void EndSceneHook::EndScene_hook(LPDIRECT3DDEVICE9 pDevice)
 
 	// Draw trainer ESP
 	Trainer_ESP();
+
+	// Archipelago messages / status
+	Archipelago_Render();
 
 	// Show update dialog if needed
 	if (updt.UpdateStatus != UpdateStatus::Finished)

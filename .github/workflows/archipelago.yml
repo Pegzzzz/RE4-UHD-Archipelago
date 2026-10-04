@@ -1,0 +1,115 @@
+name: Archipelago build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  AP_VERSION: "0.6.7"
+
+jobs:
+  apworld:
+    name: APWorld + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Get Archipelago ${{ env.AP_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$AP_VERSION" https://github.com/ArchipelagoMW/Archipelago.git ap
+          pip install -r ap/requirements.txt pytest
+          cp -r archipelago/apworld/re4uhd ap/worlds/re4uhd
+
+      - name: Test world
+        working-directory: ap
+        env:
+          SKIP_REQUIREMENTS_UPDATE: "1"
+        run: python -m pytest worlds/re4uhd/test test/webhost/test_docs.py -q
+
+      - name: Build re4uhd.apworld
+        working-directory: ap
+        env:
+          SKIP_REQUIREMENTS_UPDATE: "1"
+        run: |
+          python ../archipelago/tools/build_apworld.py
+          ls -la build/apworlds
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apworld
+          path: |
+            ap/build/apworlds/re4uhd.apworld
+            archipelago/templates/Resident Evil 4 UHD.yaml
+
+  dll:
+    name: Game mod (dinput8.dll)
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Remove VERBOSE
+        shell: bash
+        run: sed -i "s/#define VERBOSE//" dllmain/dllmain.h
+
+      - name: Build Release
+        run: msbuild re4_tweaks.sln /p:Configuration=Release /p:PostBuildEventUseInBuild=false
+
+      - name: Package
+        shell: bash
+        working-directory: ./Release
+        run: |
+          mkdir -p pkg/re4_tweaks
+          cp dinput8.dll pkg/
+          cp ../settings/settings.ini pkg/dinput8.ini
+          cp ../settings/trainer_settings.ini pkg/re4_tweaks/trainer.ini
+          cp -r ../external/EnglishSubtitleData/Bin32/re4_tweaks/ pkg/
+          cp -r ../dist/Bin32/re4_tweaks/ pkg/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: game-files
+          path: Release/pkg/
+
+  release:
+    name: Release zip
+    needs: [apworld, dll]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dl
+
+      - name: Assemble
+        run: |
+          mkdir -p out
+          (cd dl/game-files && zip -r ../../out/RE4-UHD-Archipelago.zip .)
+          cp dl/apworld/ap/build/apworlds/re4uhd.apworld out/
+          cp "dl/apworld/archipelago/templates/Resident Evil 4 UHD.yaml" out/
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RE4-UHD-Archipelago
+          path: out/
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          prerelease: true

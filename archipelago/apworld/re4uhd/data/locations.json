@@ -1,0 +1,3808 @@
+{
+ "locations": [
+  {
+   "name": "1-1 Woods: Spinel",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 256,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by the furthest crow on the path in front of the starting position",
+   "cut": false,
+   "offset": 0
+  },
+  {
+   "name": "1-1 Village: Shotgun",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 257,
+   "room_confidence": "high",
+   "game_items": [
+    44
+   ],
+   "vanilla": "Shotgun",
+   "category": "weapon",
+   "requires": [],
+   "detail": "Hanging on the north wall of 2F, loaded with 6 shells",
+   "cut": false,
+   "offset": 1
+  },
+  {
+   "name": "1-1 Village: Spinel",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 257,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Middle of the south-east roof area",
+   "cut": false,
+   "offset": 2
+  },
+  {
+   "name": "1-1 Farm: Pearl Pendant",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 259,
+   "room_confidence": "high",
+   "game_items": [
+    88
+   ],
+   "vanilla": "Pearl Pendant",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Hanging from the roof of the well next to Shed 1; close the lid first or it becomes Dirty Pearl Pendant",
+   "cut": false,
+   "offset": 3
+  },
+  {
+   "name": "1-1 Farm: Spinel #1",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 259,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small cabinet near NW corner of 1F",
+   "cut": false,
+   "offset": 4
+  },
+  {
+   "name": "1-1 Farm: Beerstein",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 259,
+   "room_confidence": "high",
+   "game_items": [
+    94
+   ],
+   "vanilla": "Beerstein",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Breakable crate in outside fenced area",
+   "cut": false,
+   "offset": 5
+  },
+  {
+   "name": "1-1 Farm: Spinel #2",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 259,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Breakable crate on the table",
+   "cut": false,
+   "offset": 6
+  },
+  {
+   "name": "1-1 Old House Road: Spinel #1",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 262,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Embedded in tunnel roof (1 of 2)",
+   "cut": false,
+   "offset": 7
+  },
+  {
+   "name": "1-1 Old House Road: Spinel #2",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 262,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Embedded in tunnel roof (2 of 2)",
+   "cut": false,
+   "offset": 8
+  },
+  {
+   "name": "1-1 Old House: Spinel",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 262,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Breakable crate on shelves (tripwire + bear trap)",
+   "cut": false,
+   "offset": 9
+  },
+  {
+   "name": "1-1 Old House Yard: Red Catseye",
+   "kind": "pickup",
+   "chapter": "1-1",
+   "room": 262,
+   "room_confidence": "high",
+   "game_items": [
+    96
+   ],
+   "vanilla": "Red Catseye",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest in tree, SW corner of yard",
+   "cut": false,
+   "offset": 10
+  },
+  {
+   "name": "1-2 Valley: Emblem (Left half)",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 260,
+   "room_confidence": "high",
+   "game_items": [
+    165
+   ],
+   "vanilla": "Emblem (Left half)",
+   "category": "key",
+   "requires": [],
+   "detail": "Large treasure chest, NE corner at top of the hill",
+   "cut": false,
+   "offset": 11
+  },
+  {
+   "name": "1-2 Valley: Emblem (Right half)",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 260,
+   "room_confidence": "high",
+   "game_items": [
+    164
+   ],
+   "vanilla": "Emblem (Right half)",
+   "category": "key",
+   "requires": [],
+   "detail": "Large treasure chest on the roof",
+   "cut": false,
+   "offset": 12
+  },
+  {
+   "name": "1-2 Water Processing: Elegant Mask",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 263,
+   "room_confidence": "high",
+   "game_items": [
+    198
+   ],
+   "vanilla": "Elegant Mask",
+   "category": "treasure",
+   "requires": [
+    "Emblem (Left half)",
+    "Emblem (Right half)"
+   ],
+   "detail": "On shelf on east wall; reached by knifing a boarded window",
+   "cut": false,
+   "offset": 13
+  },
+  {
+   "name": "1-2 Water Processing: Spinel",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 263,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Emblem (Left half)",
+    "Emblem (Right half)"
+   ],
+   "detail": "Inside the northern furnace, east side",
+   "cut": false,
+   "offset": 14
+  },
+  {
+   "name": "1-2 Chief's House: Brass Pocket Watch",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 261,
+   "room_confidence": "high",
+   "game_items": [
+    89
+   ],
+   "vanilla": "Brass Pocket Watch",
+   "category": "treasure",
+   "requires": [
+    "Emblem (Left half)",
+    "Emblem (Right half)"
+   ],
+   "detail": "Hanging from the well roof NW corner; close the lid or it becomes Dirty Brass Pocket Watch",
+   "cut": false,
+   "offset": 15
+  },
+  {
+   "name": "1-2 Chief's House: Insignia Key",
+   "kind": "pickup",
+   "chapter": "1-2",
+   "room": 261,
+   "room_confidence": "high",
+   "game_items": [
+    59
+   ],
+   "vanilla": "Insignia Key",
+   "category": "key",
+   "requires": [
+    "Emblem (Left half)",
+    "Emblem (Right half)"
+   ],
+   "detail": "In the small open jewellery box on the cabinet, south side of bedroom",
+   "cut": false,
+   "offset": 16
+  },
+  {
+   "name": "1-3 South: Spinel",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 261,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest in tree next to path just south of the Shed",
+   "cut": false,
+   "offset": 17
+  },
+  {
+   "name": "1-3 South: Ruby",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 261,
+   "room_confidence": "medium",
+   "game_items": [
+    119
+   ],
+   "vanilla": "Ruby",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dr. Salvador at corner of main clearing leading to path",
+   "cut": false,
+   "offset": 18
+  },
+  {
+   "name": "1-3 Village: Spinel",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 257,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Insignia Key"
+   ],
+   "detail": "Inside the lantern hanging from the ceiling",
+   "cut": false,
+   "offset": 19
+  },
+  {
+   "name": "1-3 Underpass: Spinel #1",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 258,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Insignia Key"
+   ],
+   "detail": "Embedded in ceiling of central cavern; shoot the hanging lantern first (1 of 2)",
+   "cut": false,
+   "offset": 20
+  },
+  {
+   "name": "1-3 Underpass: Spinel #2",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 258,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Insignia Key"
+   ],
+   "detail": "Embedded in ceiling of central cavern (2 of 2)",
+   "cut": false,
+   "offset": 21
+  },
+  {
+   "name": "1-3 Underpass: Elegant Headdress",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 258,
+   "room_confidence": "high",
+   "game_items": [
+    90
+   ],
+   "vanilla": "Elegant Headdress",
+   "category": "treasure",
+   "requires": [
+    "Insignia Key"
+   ],
+   "detail": "Embedded in ceiling of central cavern; shoot the lantern to see it",
+   "cut": false,
+   "offset": 22
+  },
+  {
+   "name": "1-3 Church Backyard: Green Catseye",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 264,
+   "room_confidence": "high",
+   "game_items": [
+    95
+   ],
+   "vanilla": "Green Catseye",
+   "category": "treasure",
+   "requires": [
+    "Insignia Key"
+   ],
+   "detail": "Inside pedestal on stone platform after solving the tombstone symbol puzzle",
+   "cut": true,
+   "offset": 23
+  },
+  {
+   "name": "1-3 Quarry, day: Spinel #1",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 265,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On table inside the west wooden hut",
+   "cut": false,
+   "offset": 24
+  },
+  {
+   "name": "1-3 Quarry, day: Spinel #2",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 265,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On the wooden cart in NW corner of clearing",
+   "cut": false,
+   "offset": 25
+  },
+  {
+   "name": "1-3 Swamp: Spinel",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 266,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Embedded in cliff above west entrance (turn around after boulder)",
+   "cut": false,
+   "offset": 26
+  },
+  {
+   "name": "1-3 Swamp: Antique Pipe",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 266,
+   "room_confidence": "high",
+   "game_items": [
+    91
+   ],
+   "vanilla": "Antique Pipe",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest in tree next to SE area of eastern walkway",
+   "cut": false,
+   "offset": 27
+  },
+  {
+   "name": "1-3 Lake: Gold Bangle w/ Pearls",
+   "kind": "pickup",
+   "chapter": "1-3",
+   "room": 267,
+   "room_confidence": "high",
+   "game_items": [
+    92
+   ],
+   "vanilla": "Gold Bangle w/ Pearls",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest in tree near the Entry Path Shed",
+   "cut": false,
+   "offset": 28
+  },
+  {
+   "name": "2-1 Merchant Area: Spinel",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 269,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Underside of lantern, east corner of wooden walkway",
+   "cut": false,
+   "offset": 29
+  },
+  {
+   "name": "2-1 Merchant Area: Green Gem",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 269,
+   "room_confidence": "high",
+   "game_items": [
+    199
+   ],
+   "vanilla": "Green Gem",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Breakable barrel on the roof of the merchant shack",
+   "cut": false,
+   "offset": 30
+  },
+  {
+   "name": "2-1 Waterfall: Spinel",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 268,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Embedded in cliff wall near the rope, NW of north river side",
+   "cut": false,
+   "offset": 31
+  },
+  {
+   "name": "2-1 Waterfall: Amber Ring",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 268,
+   "room_confidence": "high",
+   "game_items": [
+    93
+   ],
+   "vanilla": "Amber Ring",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On wooden beam in mid-river in front of cave entrance",
+   "cut": false,
+   "offset": 32
+  },
+  {
+   "name": "2-1 Waterfall: Round Insignia",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 268,
+   "room_confidence": "high",
+   "game_items": [
+    60
+   ],
+   "vanilla": "Round Insignia",
+   "category": "key",
+   "requires": [],
+   "detail": "End of the passage inside the cave behind the waterfall",
+   "cut": false,
+   "offset": 33
+  },
+  {
+   "name": "2-1 Canal: Spinel",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 270,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On the torch next to the door",
+   "cut": false,
+   "offset": 34
+  },
+  {
+   "name": "2-1 Colosseum: Spinel #1",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 281,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table inside west hut (El Gigante arena)",
+   "cut": false,
+   "offset": 35
+  },
+  {
+   "name": "2-1 Colosseum: Spinel #2",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 281,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table inside east hut (El Gigante arena)",
+   "cut": false,
+   "offset": 36
+  },
+  {
+   "name": "2-1 Church: Spinel",
+   "kind": "pickup",
+   "chapter": "2-1",
+   "room": 280,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest at end of path leading to Graveyard",
+   "cut": false,
+   "offset": 37
+  },
+  {
+   "name": "2-2 Church: Spinel",
+   "kind": "pickup",
+   "chapter": "2-2",
+   "room": 280,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Respawned bird's nest at end of path to Graveyard",
+   "cut": false,
+   "offset": 38
+  },
+  {
+   "name": "2-2 Village: Spinel #1",
+   "kind": "pickup",
+   "chapter": "2-2",
+   "room": 273,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Lantern over the trapdoor (respawned)",
+   "cut": false,
+   "offset": 39
+  },
+  {
+   "name": "2-2 Village: Spinel #2",
+   "kind": "pickup",
+   "chapter": "2-2",
+   "room": 273,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On the table at the top of the ladder",
+   "cut": false,
+   "offset": 40
+  },
+  {
+   "name": "2-3 Camp Center: Camp Key",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 285,
+   "room_confidence": "high",
+   "game_items": [
+    140
+   ],
+   "vanilla": "Camp Key",
+   "category": "key",
+   "requires": [],
+   "detail": "Dropped by one of the Bella Sisters",
+   "cut": false,
+   "offset": 41
+  },
+  {
+   "name": "2-3 Camp Center: Ruby",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 285,
+   "room_confidence": "high",
+   "game_items": [
+    119
+   ],
+   "vanilla": "Ruby",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by one of the Bella Sisters",
+   "cut": false,
+   "offset": 42
+  },
+  {
+   "name": "2-3 Gorge: Old Key",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 286,
+   "room_confidence": "high",
+   "game_items": [
+    139
+   ],
+   "vanilla": "Old Key",
+   "category": "key",
+   "requires": [],
+   "detail": "On the floor in the eastern wooden hut",
+   "cut": false,
+   "offset": 43
+  },
+  {
+   "name": "2-3 Gorge: Purple Gem",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 286,
+   "room_confidence": "high",
+   "game_items": [
+    201
+   ],
+   "vanilla": "Purple Gem",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bucket hanging near the two sheds",
+   "cut": false,
+   "offset": 44
+  },
+  {
+   "name": "2-3 Gorge: Spinel #1",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 286,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table, western hut",
+   "cut": false,
+   "offset": 45
+  },
+  {
+   "name": "2-3 Gorge: Spinel #2",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 286,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table, eastern hut (1 of 2)",
+   "cut": false,
+   "offset": 46
+  },
+  {
+   "name": "2-3 Gorge: Spinel #3",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 286,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table, eastern hut (2 of 2)",
+   "cut": false,
+   "offset": 47
+  },
+  {
+   "name": "2-3 Sacrificial Cave: Yellow Catseye",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 271,
+   "room_confidence": "high",
+   "game_items": [
+    97
+   ],
+   "vanilla": "Yellow Catseye",
+   "category": "treasure",
+   "requires": [
+    "Camp Key|Old Key"
+   ],
+   "detail": "Treasure chest at south end of cave",
+   "cut": false,
+   "offset": 48
+  },
+  {
+   "name": "2-3 Torture Shed: False Eye",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 287,
+   "room_confidence": "high",
+   "game_items": [
+    61
+   ],
+   "vanilla": "False Eye",
+   "category": "key",
+   "requires": [
+    "Camp Key|Old Key"
+   ],
+   "detail": "Dropped by Bitores Mendez",
+   "cut": false,
+   "offset": 49
+  },
+  {
+   "name": "2-3 Torture Shed: Spinel",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 287,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Camp Key|Old Key"
+   ],
+   "detail": "Under explosive barrel NW 1F",
+   "cut": false,
+   "offset": 50
+  },
+  {
+   "name": "2-3 Castle Road: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "2-3",
+   "room": 512,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "False Eye"
+   ],
+   "detail": "Right-hand barrel in clearing at top of hill",
+   "cut": false,
+   "offset": 51
+  },
+  {
+   "name": "3-1 Entrance Courtyard: Spinel",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 514,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Barrel at foot of stairs, middle of 1F",
+   "cut": false,
+   "offset": 52
+  },
+  {
+   "name": "3-1 Cannon Room: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 514,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Barrel, east side of room",
+   "cut": false,
+   "offset": 53
+  },
+  {
+   "name": "3-1 Gate Courtyard: Spinel",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ruined colonnade, SE of courtyard",
+   "cut": false,
+   "offset": 54
+  },
+  {
+   "name": "3-1 Gate Storage Building: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Crate on shelves, SE corner",
+   "cut": false,
+   "offset": 55
+  },
+  {
+   "name": "3-1 Gate Battlements: Gold Bangle",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "medium",
+   "game_items": [
+    143
+   ],
+   "vanilla": "Gold Bangle",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest SW corner behind Gate Storage Building",
+   "cut": false,
+   "offset": 56
+  },
+  {
+   "name": "3-1 Gate Inner Area: Spinel",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Inside torch next to door to Barracks",
+   "cut": false,
+   "offset": 57
+  },
+  {
+   "name": "3-1 Barracks: Platinum Sword",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 519,
+   "room_confidence": "high",
+   "game_items": [
+    196
+   ],
+   "vanilla": "Platinum Sword",
+   "category": "key",
+   "requires": [],
+   "detail": "Embedded in wall NW corner 1F",
+   "cut": false,
+   "offset": 58
+  },
+  {
+   "name": "3-1 Barracks: Golden Sword",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 519,
+   "room_confidence": "high",
+   "game_items": [
+    128
+   ],
+   "vanilla": "Golden Sword",
+   "category": "key",
+   "requires": [
+    "Platinum Sword"
+   ],
+   "detail": "Embedded in wall NW corner 2F; swapped for Platinum Sword",
+   "cut": true,
+   "offset": 59
+  },
+  {
+   "name": "3-1 Barracks: Spinel",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 519,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Lowest crate on shelves SE corner 2F",
+   "cut": false,
+   "offset": 60
+  },
+  {
+   "name": "3-1 Key: Castle Gate Key",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "high",
+   "game_items": [
+    167
+   ],
+   "vanilla": "Castle Gate Key",
+   "category": "key",
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword"
+   ],
+   "detail": "Treasure chest NW corner; zealots ambush",
+   "cut": false,
+   "offset": 61
+  },
+  {
+   "name": "3-1 Key: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 515,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword"
+   ],
+   "detail": "Barrel NW corner",
+   "cut": false,
+   "offset": 62
+  },
+  {
+   "name": "3-1 Audience Hall: Purple Gem",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 513,
+   "room_confidence": "high",
+   "game_items": [
+    201
+   ],
+   "vanilla": "Purple Gem",
+   "category": "treasure",
+   "requires": [
+    "Castle Gate Key"
+   ],
+   "detail": "Southern wall above you (arch over steps), opposite balcony",
+   "cut": false,
+   "offset": 63
+  },
+  {
+   "name": "3-1 Audience Hall: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 513,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Castle Gate Key"
+   ],
+   "detail": "Large vase SW corner of northern half",
+   "cut": false,
+   "offset": 64
+  },
+  {
+   "name": "3-1 Connecting Passage: Prison Key",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 513,
+   "room_confidence": "high",
+   "game_items": [
+    195
+   ],
+   "vanilla": "Prison Key",
+   "category": "key",
+   "requires": [
+    "Castle Gate Key"
+   ],
+   "detail": "On the painting in the SE alcove",
+   "cut": false,
+   "offset": 65
+  },
+  {
+   "name": "3-1 Water Hall: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 520,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Prison Key"
+   ],
+   "detail": "Small vase on cabinet, south wall east area",
+   "cut": false,
+   "offset": 66
+  },
+  {
+   "name": "3-1 Hall of Rites: Spinel",
+   "kind": "pickup",
+   "chapter": "3-1",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Prison Key"
+   ],
+   "detail": "In the eye of the southernmost upside-down statue",
+   "cut": false,
+   "offset": 67
+  },
+  {
+   "name": "3-2 Water Pool North: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 517,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "NW corner of lower pool",
+   "cut": false,
+   "offset": 68
+  },
+  {
+   "name": "3-2 Water Pool South: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 517,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Water, SE corner of lower pool",
+   "cut": false,
+   "offset": 69
+  },
+  {
+   "name": "3-2 Drainage Control Room: Butterfly Lamp",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 517,
+   "room_confidence": "high",
+   "game_items": [
+    184
+   ],
+   "vanilla": "Butterfly Lamp",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Treasure chest north side",
+   "cut": false,
+   "offset": 70
+  },
+  {
+   "name": "3-2 Sewer Exit: Spinel",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 517,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Barrel SE corner at top of ladder",
+   "cut": false,
+   "offset": 71
+  },
+  {
+   "name": "3-2 Pendulum Passage: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 517,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Floor of northern platform",
+   "cut": false,
+   "offset": 72
+  },
+  {
+   "name": "3-2 Hall of Rites Balcony: Elegant Mask",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    198
+   ],
+   "vanilla": "Elegant Mask",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest inside glass cabinet, north end of east balcony",
+   "cut": false,
+   "offset": 73
+  },
+  {
+   "name": "3-2 Hall of Rites Balcony: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Large vase, south end of west balcony",
+   "cut": false,
+   "offset": 74
+  },
+  {
+   "name": "3-2 Hall of Rites: Illuminados Pendant",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    152
+   ],
+   "vanilla": "Illuminados Pendant",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by the Leader Zealot (red robe) after the Dungeons",
+   "cut": false,
+   "offset": 75
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #1",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #1 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 76
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #2",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #2 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 77
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #3",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #3 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 78
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #4",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #4 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 79
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #5",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #5 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 80
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #6",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #6 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 81
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #7",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #7 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 82
+  },
+  {
+   "name": "3-2 Hall of Rites: Spinel #8",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 516,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Castle Ganado #8 of 8 appearing after the Dungeons",
+   "cut": false,
+   "offset": 83
+  },
+  {
+   "name": "3-2 Gallery: Gallery Key",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 521,
+   "room_confidence": "high",
+   "game_items": [
+    163
+   ],
+   "vanilla": "Gallery Key",
+   "category": "key",
+   "requires": [],
+   "detail": "Dropped by Leader Zealot who runs to the Gatling gun",
+   "cut": false,
+   "offset": 84
+  },
+  {
+   "name": "3-2 Gallery: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 521,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small vase on ledge NE",
+   "cut": false,
+   "offset": 85
+  },
+  {
+   "name": "3-2 Gallery Portrait Room: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 521,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Gallery Key"
+   ],
+   "detail": "Eye socket of deer head on southern wall",
+   "cut": false,
+   "offset": 86
+  },
+  {
+   "name": "3-2 Drawing Room: Goat Ornament",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 521,
+   "room_confidence": "medium",
+   "game_items": [
+    31
+   ],
+   "vanilla": "Goat Ornament",
+   "category": "key",
+   "requires": [
+    "Gallery Key"
+   ],
+   "detail": "Chest on central platform after deactivating security (switch by east door + switch passage)",
+   "cut": true,
+   "offset": 87
+  },
+  {
+   "name": "3-2 Drawing Room: Spinel",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 521,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Gallery Key"
+   ],
+   "detail": "On a chair, north side of 2F",
+   "cut": false,
+   "offset": 88
+  },
+  {
+   "name": "3-2 Cloister: Spinel",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament"
+   ],
+   "detail": "Embedded in wall above western doorway",
+   "cut": false,
+   "offset": 89
+  },
+  {
+   "name": "3-2 Hallway: Velvet Blue #1",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament"
+   ],
+   "detail": "On the central fountain (1 of 2)",
+   "cut": false,
+   "offset": 90
+  },
+  {
+   "name": "3-2 Hallway: Velvet Blue #2",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament"
+   ],
+   "detail": "On the central fountain (2 of 2)",
+   "cut": false,
+   "offset": 91
+  },
+  {
+   "name": "3-2 Hallway: Spinel",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament"
+   ],
+   "detail": "On the central fountain",
+   "cut": false,
+   "offset": 92
+  },
+  {
+   "name": "3-2 NE: Moonstone (Left half)",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    105
+   ],
+   "vanilla": "Moonstone (Left half)",
+   "category": "key",
+   "requires": [],
+   "detail": "On fountain NE corner of maze",
+   "cut": false,
+   "offset": 93
+  },
+  {
+   "name": "3-2 Hedge Maze: Moonstone (Right half)",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    58
+   ],
+   "vanilla": "Moonstone (Right half)",
+   "category": "key",
+   "requires": [],
+   "detail": "On fountain in centre of maze",
+   "cut": false,
+   "offset": 94
+  },
+  {
+   "name": "3-2 Hedge Maze: Red Gem",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    200
+   ],
+   "vanilla": "Red Gem",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest at end of inner south route",
+   "cut": false,
+   "offset": 95
+  },
+  {
+   "name": "3-2 Hedge Maze: Spinel",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ground at end of north route",
+   "cut": false,
+   "offset": 96
+  },
+  {
+   "name": "3-2 Hedge Maze: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-2",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Barrel under bridge by entrance gates",
+   "cut": false,
+   "offset": 97
+  },
+  {
+   "name": "3-3 Courtyard Lounge: Spinel #1",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Moonstone (Left half)",
+    "Moonstone (Right half)"
+   ],
+   "detail": "Small vase on cabinet SE of bed area",
+   "cut": false,
+   "offset": 98
+  },
+  {
+   "name": "3-3 Courtyard Lounge: Spinel #2",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Moonstone (Left half)",
+    "Moonstone (Right half)"
+   ],
+   "detail": "Embedded in canopy above bed",
+   "cut": false,
+   "offset": 99
+  },
+  {
+   "name": "3-3 Courtyard Merchant Room: Mirror w/ Pearls & Rubies",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 523,
+   "room_confidence": "high",
+   "game_items": [
+    145
+   ],
+   "vanilla": "Mirror w/ Pearls & Rubies",
+   "category": "treasure",
+   "requires": [
+    "Moonstone (Left half)",
+    "Moonstone (Right half)"
+   ],
+   "detail": "Inside wardrobe SE corner",
+   "cut": false,
+   "offset": 100
+  },
+  {
+   "name": "3-3 Display Room: Hourglass w/ Gold Decor",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 524,
+   "room_confidence": "high",
+   "game_items": [
+    150
+   ],
+   "vanilla": "Hourglass w/ Gold Decor",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest on pedestal in middle of the cage room",
+   "cut": false,
+   "offset": 101
+  },
+  {
+   "name": "3-3 Exhibition Room North: Rocket Launcher",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 527,
+   "room_confidence": "high",
+   "game_items": [
+    53
+   ],
+   "vanilla": "Rocket Launcher",
+   "category": "weapon",
+   "requires": [],
+   "detail": "Inside glass display cabinet in middle of room",
+   "cut": false,
+   "offset": 102
+  },
+  {
+   "name": "3-3 Exhibition Room North: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 527,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small vase on table NE",
+   "cut": false,
+   "offset": 103
+  },
+  {
+   "name": "3-3 Connecting Passage, merchant corridor: Spinel",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 518,
+   "room_confidence": "low",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small vase middle of passage, west side",
+   "cut": false,
+   "offset": 104
+  },
+  {
+   "name": "3-3 Instruction Hall - Luis death room: Spinel",
+   "kind": "pickup",
+   "chapter": "3-3",
+   "room": 518,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small vase on right-hand cabinet, south balcony",
+   "cut": false,
+   "offset": 105
+  },
+  {
+   "name": "4-1 Treasure Chamber: Broken Butterfly",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    41
+   ],
+   "vanilla": "Broken Butterfly",
+   "category": "weapon",
+   "requires": [],
+   "detail": "Large chest north side; loaded with 6 Magnum rounds",
+   "cut": false,
+   "offset": 106
+  },
+  {
+   "name": "4-1 Treasure Chamber: Elegant Perfume Bottle",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 522,
+   "room_confidence": "high",
+   "game_items": [
+    144
+   ],
+   "vanilla": "Elegant Perfume Bottle",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small chest NE corner; needs Ashley",
+   "cut": false,
+   "offset": 107
+  },
+  {
+   "name": "4-1 Platform A South: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 528,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Large vase north side",
+   "cut": false,
+   "offset": 108
+  },
+  {
+   "name": "4-1 Dragon Hall Access: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 528,
+   "room_confidence": "low",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Large vase right of archway to Platform A North",
+   "cut": false,
+   "offset": 109
+  },
+  {
+   "name": "4-1 Dragon Room: Lion Ornament",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 546,
+   "room_confidence": "high",
+   "game_items": [
+    30
+   ],
+   "vanilla": "Lion Ornament",
+   "category": "key",
+   "requires": [],
+   "detail": "Large chest top of north stairs, after destroying the north dragon statue",
+   "cut": false,
+   "offset": 110
+  },
+  {
+   "name": "4-1 Dragon Room: Illuminados Pendant",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 546,
+   "room_confidence": "high",
+   "game_items": [
+    152
+   ],
+   "vanilla": "Illuminados Pendant",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest appearing after destroying the west dragon statue",
+   "cut": false,
+   "offset": 111
+  },
+  {
+   "name": "4-1 Platform B South: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 537,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Small vase east side",
+   "cut": false,
+   "offset": 112
+  },
+  {
+   "name": "4-1 Platform B North: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 537,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Large vase SW corner",
+   "cut": false,
+   "offset": 113
+  },
+  {
+   "name": "4-1 Main Gallery Hallway: Spinel #1",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 529,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "On 1st statue, west side",
+   "cut": false,
+   "offset": 114
+  },
+  {
+   "name": "4-1 Main Gallery Hallway: Green Gem",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 529,
+   "room_confidence": "high",
+   "game_items": [
+    199
+   ],
+   "vanilla": "Green Gem",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "On 2nd statue, west side",
+   "cut": false,
+   "offset": 115
+  },
+  {
+   "name": "4-1 Main Gallery Hallway: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 529,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "On 3rd statue, west side",
+   "cut": false,
+   "offset": 116
+  },
+  {
+   "name": "4-1 Main Gallery Hallway: Spinel #2",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 529,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "On 4th statue, west side",
+   "cut": false,
+   "offset": 117
+  },
+  {
+   "name": "4-1 Main Gallery Lounge: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 529,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Cabinet NW corner",
+   "cut": false,
+   "offset": 118
+  },
+  {
+   "name": "4-1 West Wing Storeroom: Queen's Grail",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 530,
+   "room_confidence": "high",
+   "game_items": [
+    111
+   ],
+   "vanilla": "Queen's Grail",
+   "category": "key",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Chest north side",
+   "cut": false,
+   "offset": 119
+  },
+  {
+   "name": "4-1 West Wing Storeroom: Elegant Chessboard",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 530,
+   "room_confidence": "high",
+   "game_items": [
+    147
+   ],
+   "vanilla": "Elegant Chessboard",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Cabinet SE corner",
+   "cut": false,
+   "offset": 120
+  },
+  {
+   "name": "4-1 West Wing Storeroom: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 530,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Crate south side",
+   "cut": false,
+   "offset": 121
+  },
+  {
+   "name": "4-1 West Wing Storeroom: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 530,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "Barrel middle of room",
+   "cut": false,
+   "offset": 122
+  },
+  {
+   "name": "4-1 East Wing Chamber: King's Grail",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 534,
+   "room_confidence": "high",
+   "game_items": [
+    110
+   ],
+   "vanilla": "King's Grail",
+   "category": "key",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament"
+   ],
+   "detail": "On pedestal/chair in middle of room (armor knights)",
+   "cut": false,
+   "offset": 123
+  },
+  {
+   "name": "4-1 Ballroom Access: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 531,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Right-hand small vase on cabinet SE corner",
+   "cut": false,
+   "offset": 124
+  },
+  {
+   "name": "4-1 Ballroom Outer Balcony: Butterfly Lamp",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 531,
+   "room_confidence": "high",
+   "game_items": [
+    184
+   ],
+   "vanilla": "Butterfly Lamp",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Chest north end of upper balcony",
+   "cut": false,
+   "offset": 125
+  },
+  {
+   "name": "4-1 Ballroom: Nest Eye #1",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 531,
+   "room_confidence": "high",
+   "game_items": [
+    185,
+    186,
+    187
+   ],
+   "vanilla": "Green Eye",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Destroy hanging nest; up to 8 eyes (random colour) appear on the floor",
+   "cut": false,
+   "offset": 126
+  },
+  {
+   "name": "4-1 Ballroom: Nest Eye #2",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 531,
+   "room_confidence": "high",
+   "game_items": [
+    185,
+    186,
+    187
+   ],
+   "vanilla": "Red Eye",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Destroy hanging nest; up to 8 eyes (random colour) appear on the floor",
+   "cut": false,
+   "offset": 127
+  },
+  {
+   "name": "4-1 Ballroom: Nest Eye #3",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 531,
+   "room_confidence": "high",
+   "game_items": [
+    185,
+    186,
+    187
+   ],
+   "vanilla": "Blue Eye",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Destroy hanging nest; up to 8 eyes (random colour) appear on the floor",
+   "cut": false,
+   "offset": 128
+  },
+  {
+   "name": "4-1 Clock Tower: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 532,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Torch south side of bridge near Ballroom Merchant Room door",
+   "cut": false,
+   "offset": 129
+  },
+  {
+   "name": "4-1 Clock Tower: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 532,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Barrel next to door to Ballroom Merchant Room",
+   "cut": false,
+   "offset": 130
+  },
+  {
+   "name": "4-1 Throne Room Crossing: Gold Bangle",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 532,
+   "room_confidence": "medium",
+   "game_items": [
+    143
+   ],
+   "vanilla": "Gold Bangle",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "Dropped by the Leader Zealot at the end of the bridge",
+   "cut": false,
+   "offset": 131
+  },
+  {
+   "name": "4-1 Throne Room Access: Spinel #1",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 536,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "White statue left of stair foot",
+   "cut": false,
+   "offset": 132
+  },
+  {
+   "name": "4-1 Throne Room Access: Spinel #2",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 536,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
+   "detail": "White statue right of stair foot",
+   "cut": false,
+   "offset": 133
+  },
+  {
+   "name": "4-1 Pit: Crown",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 553,
+   "room_confidence": "high",
+   "game_items": [
+    154
+   ],
+   "vanilla": "Crown",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On dead body, north side",
+   "cut": false,
+   "offset": 134
+  },
+  {
+   "name": "4-1 Pit: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 553,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ground among dead bodies",
+   "cut": false,
+   "offset": 135
+  },
+  {
+   "name": "4-1 Waterway Passage 1: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 553,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "1st lateral drain pipe, west side",
+   "cut": false,
+   "offset": 136
+  },
+  {
+   "name": "4-1 Waterway Passage 1: Spinel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 553,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "2nd lateral drain pipe, west side",
+   "cut": false,
+   "offset": 137
+  },
+  {
+   "name": "4-1 Verdugo, Processing Plant Control Room: Crown Jewel",
+   "kind": "pickup",
+   "chapter": "4-1",
+   "room": 545,
+   "room_confidence": "medium",
+   "game_items": [
+    155
+   ],
+   "vanilla": "Crown Jewel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Dropped by Verdugo when defeated",
+   "cut": false,
+   "offset": 138
+  },
+  {
+   "name": "4-2 Mine Entrance: Spinel",
+   "kind": "pickup",
+   "chapter": "4-2",
+   "room": 544,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Barrel next to the Merchant",
+   "cut": false,
+   "offset": 139
+  },
+  {
+   "name": "4-2 Mine Tunnel: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-2",
+   "room": 547,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Right-most minecart in central clearing",
+   "cut": false,
+   "offset": 140
+  },
+  {
+   "name": "4-2 Mine: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-2",
+   "room": 547,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Minecart north side near trolley switch",
+   "cut": false,
+   "offset": 141
+  },
+  {
+   "name": "4-2 Mine: Dynamite",
+   "kind": "pickup",
+   "chapter": "4-2",
+   "room": 547,
+   "room_confidence": "high",
+   "game_items": [
+    141
+   ],
+   "vanilla": "Dynamite",
+   "category": "key",
+   "requires": [],
+   "detail": "In minecart delivered after trolley switch -> circuit breaker -> trolley switch",
+   "cut": true,
+   "offset": 142
+  },
+  {
+   "name": "4-2 South Cavern: Royal Insignia",
+   "kind": "pickup",
+   "chapter": "4-2",
+   "room": 541,
+   "room_confidence": "high",
+   "game_items": [
+    156
+   ],
+   "vanilla": "Royal Insignia",
+   "category": "treasure",
+   "requires": [
+    "Dynamite"
+   ],
+   "detail": "On stone elevator platform east side",
+   "cut": false,
+   "offset": 143
+  },
+  {
+   "name": "4-3 Ruins Approach: Spinel",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 549,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Bird's nest in tree in middle of main area",
+   "cut": false,
+   "offset": 144
+  },
+  {
+   "name": "4-3 Dilapidated Entrance Hall: Spinel",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 549,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Table SW corner of ruin",
+   "cut": false,
+   "offset": 145
+  },
+  {
+   "name": "4-3 Dilapidated Building: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 549,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "In the well SW corner",
+   "cut": false,
+   "offset": 146
+  },
+  {
+   "name": "4-3 Sand Ruins Entrance Passage: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 538,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Crate in wall alcove north side",
+   "cut": false,
+   "offset": 147
+  },
+  {
+   "name": "4-3 Sand Ruins Main Chamber: Velvet Blue #1",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 538,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Corner of small area west side",
+   "cut": false,
+   "offset": 148
+  },
+  {
+   "name": "4-3 Sand Ruins Main Chamber: Velvet Blue #2",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 538,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ground SE corner",
+   "cut": false,
+   "offset": 149
+  },
+  {
+   "name": "4-3 Dwelling 2F: Key to the Mine",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 538,
+   "room_confidence": "medium",
+   "game_items": [
+    123
+   ],
+   "vanilla": "Key to the Mine",
+   "category": "key",
+   "requires": [],
+   "detail": "Small stone pedestal middle of 2F; triggers villager wave",
+   "cut": false,
+   "offset": 150
+  },
+  {
+   "name": "4-3 Treasure Chamber: Staff of Royalty",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 538,
+   "room_confidence": "medium",
+   "game_items": [
+    112
+   ],
+   "vanilla": "Staff of Royalty",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Inside the sarcophagus in the middle of the room",
+   "cut": false,
+   "offset": 151
+  },
+  {
+   "name": "4-3 Sand Mine Entrance: Spinel #1",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 539,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Key to the Mine"
+   ],
+   "detail": "Ground east side",
+   "cut": false,
+   "offset": 152
+  },
+  {
+   "name": "4-3 Sand Mine Entrance: Spinel #2",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 539,
+   "room_confidence": "medium",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [
+    "Key to the Mine"
+   ],
+   "detail": "Hanging lantern east side",
+   "cut": false,
+   "offset": 153
+  },
+  {
+   "name": "4-3 Sand Mine Entrance: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 539,
+   "room_confidence": "medium",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [
+    "Key to the Mine"
+   ],
+   "detail": "Barrel NW of lower area",
+   "cut": false,
+   "offset": 154
+  },
+  {
+   "name": "4-3 Sand Mine Exit Chamber: Stone of Sacrifice",
+   "kind": "pickup",
+   "chapter": "4-3",
+   "room": 539,
+   "room_confidence": "high",
+   "game_items": [
+    130
+   ],
+   "vanilla": "Stone of Sacrifice",
+   "category": "key",
+   "requires": [
+    "Key to the Mine"
+   ],
+   "detail": "Stone pedestal middle of room",
+   "cut": false,
+   "offset": 155
+  },
+  {
+   "name": "4-4 West Structure 1F: Velvet Blue",
+   "kind": "pickup",
+   "chapter": "4-4",
+   "room": 550,
+   "room_confidence": "high",
+   "game_items": [
+    86
+   ],
+   "vanilla": "Velvet Blue",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Small vase SE corner 1F",
+   "cut": false,
+   "offset": 156
+  },
+  {
+   "name": "4-4 West Structure 3F: Spinel",
+   "kind": "pickup",
+   "chapter": "4-4",
+   "room": 550,
+   "room_confidence": "high",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Large vase SE corner 3F",
+   "cut": false,
+   "offset": 157
+  },
+  {
+   "name": "4-4 Tower: Gold Bangle",
+   "kind": "pickup",
+   "chapter": "4-4",
+   "room": 551,
+   "room_confidence": "high",
+   "game_items": [
+    143
+   ],
+   "vanilla": "Gold Bangle",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest SW corner of inner walkway (drop-down nook)",
+   "cut": false,
+   "offset": 158
+  },
+  {
+   "name": "4-4 Merchant Room by Lower Battlements: Spinel",
+   "kind": "pickup",
+   "chapter": "4-4",
+   "room": 551,
+   "room_confidence": "low",
+   "game_items": [
+    87
+   ],
+   "vanilla": "Spinel",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Crate on large boxes east side",
+   "cut": false,
+   "offset": 159
+  },
+  {
+   "name": "5-1 Entrance Path: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 768,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Crate at top of climbable rocks, SE path",
+   "cut": false,
+   "offset": 160
+  },
+  {
+   "name": "5-1 Caverns: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 769,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On large boxes at south tunnel entrance",
+   "cut": false,
+   "offset": 161
+  },
+  {
+   "name": "5-1 Secret Cave: Golden Lynx",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 769,
+   "room_confidence": "medium",
+   "game_items": [
+    209
+   ],
+   "vanilla": "Golden Lynx",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Chest on rocky platform; blow up explosive drum to enter",
+   "cut": false,
+   "offset": 162
+  },
+  {
+   "name": "5-1 Lounge: Red Stone of Faith",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 772,
+   "room_confidence": "medium",
+   "game_items": [
+    211
+   ],
+   "vanilla": "Red Stone of Faith",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Silver briefcase SW corner",
+   "cut": false,
+   "offset": 163
+  },
+  {
+   "name": "5-1 Main Passage: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 773,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Filing-cabinet drawer, west wall",
+   "cut": false,
+   "offset": 164
+  },
+  {
+   "name": "5-1 Stairway Passage: Brass Pocket Watch",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 774,
+   "room_confidence": "low",
+   "game_items": [
+    89
+   ],
+   "vanilla": "Brass Pocket Watch",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Crate SW corner of room under the stairs",
+   "cut": false,
+   "offset": 165
+  },
+  {
+   "name": "5-1 Main Operating Room: Freezer Card Key",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 775,
+   "room_confidence": "high",
+   "game_items": [
+    132
+   ],
+   "vanilla": "Freezer Card Key",
+   "category": "key",
+   "requires": [],
+   "detail": "On dead body east side",
+   "cut": false,
+   "offset": 166
+  },
+  {
+   "name": "5-1 Small Operating Room: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 775,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Glass medicine cabinet NE corner",
+   "cut": false,
+   "offset": 167
+  },
+  {
+   "name": "5-1 Freezer: Waste Disposal Card Key",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 776,
+   "room_confidence": "high",
+   "game_items": [
+    146
+   ],
+   "vanilla": "Waste Disposal Card Key",
+   "category": "key",
+   "requires": [
+    "Freezer Card Key"
+   ],
+   "detail": "Reprogram Freezer Card Key at terminal in SE room (consumes Freezer Card Key)",
+   "cut": true,
+   "offset": 168
+  },
+  {
+   "name": "5-1 Freezer: Infrared Scope",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 776,
+   "room_confidence": "high",
+   "game_items": [
+    197
+   ],
+   "vanilla": "Infrared Scope",
+   "category": "attachment",
+   "requires": [
+    "Freezer Card Key"
+   ],
+   "detail": "Frozen cabinet NE room; thaw with SE room controls",
+   "cut": true,
+   "offset": 169
+  },
+  {
+   "name": "5-1 West Corridor: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 774,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [
+    "Freezer Card Key"
+   ],
+   "detail": "Silver briefcase end of southern offshoot",
+   "cut": false,
+   "offset": 170
+  },
+  {
+   "name": "5-1 Waste Disposal Area: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 779,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [
+    "Waste Disposal Card Key"
+   ],
+   "detail": "SE waste container south side",
+   "cut": false,
+   "offset": 171
+  },
+  {
+   "name": "5-1 Laboratory Control Center: Storage Room Card Key",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 777,
+   "room_confidence": "high",
+   "game_items": [
+    131
+   ],
+   "vanilla": "Storage Room Card Key",
+   "category": "key",
+   "requires": [
+    "Waste Disposal Card Key"
+   ],
+   "detail": "Dropped by the Iron Maiden",
+   "cut": false,
+   "offset": 172
+  },
+  {
+   "name": "5-1 Main Laboratory: Emerald",
+   "kind": "pickup",
+   "chapter": "5-1",
+   "room": 777,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [
+    "Waste Disposal Card Key"
+   ],
+   "detail": "One of four small glass cryotubes",
+   "cut": false,
+   "offset": 173
+  },
+  {
+   "name": "5-2 Merchant Room, Maintenance Area / crash site: Green Stone of Judgement",
+   "kind": "pickup",
+   "chapter": "5-2",
+   "room": 789,
+   "room_confidence": "low",
+   "game_items": [
+    210
+   ],
+   "vanilla": "Green Stone of Judgement",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Silver briefcase north side",
+   "cut": false,
+   "offset": 174
+  },
+  {
+   "name": "5-3 Maintenance Stairway Passage / Furnace room: Emerald",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 790,
+   "room_confidence": "low",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Behind glass above stairs (skylight); shoot glass",
+   "cut": false,
+   "offset": 175
+  },
+  {
+   "name": "5-3 Throne Room: Emerald",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 792,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "On the throne",
+   "cut": false,
+   "offset": 176
+  },
+  {
+   "name": "5-3 Throne Room: Elegant Headdress",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 792,
+   "room_confidence": "high",
+   "game_items": [
+    90
+   ],
+   "vanilla": "Elegant Headdress",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Embedded on archway above, west side",
+   "cut": false,
+   "offset": 177
+  },
+  {
+   "name": "5-3 Merchant Passageway: Emerald",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 794,
+   "room_confidence": "medium",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ground under the stairs",
+   "cut": false,
+   "offset": 178
+  },
+  {
+   "name": "5-3 Underground Passage: Emerald",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 797,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [],
+   "detail": "Ceiling of SW cave with ladder to campsite",
+   "cut": false,
+   "offset": 179
+  },
+  {
+   "name": "5-3 Underground Passage: Blue Stone of Treason",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 797,
+   "room_confidence": "high",
+   "game_items": [
+    212
+   ],
+   "vanilla": "Blue Stone of Treason",
+   "category": "treasure",
+   "requires": [],
+   "detail": "End of SE offshoot passage",
+   "cut": false,
+   "offset": 180
+  },
+  {
+   "name": "5-3 Pillared Platform: Piece of the Holy Beast, Panther",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 796,
+   "room_confidence": "high",
+   "game_items": [
+    133
+   ],
+   "vanilla": "Piece of the Holy Beast, Panther",
+   "category": "key",
+   "requires": [],
+   "detail": "Acquired automatically on entering",
+   "cut": true,
+   "offset": 181
+  },
+  {
+   "name": "5-3 Tower Roof: Piece of the Holy Beast, Eagle",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 796,
+   "room_confidence": "high",
+   "game_items": [
+    135
+   ],
+   "vanilla": "Piece of the Holy Beast, Eagle",
+   "category": "key",
+   "requires": [],
+   "detail": "West side of wooden platform, west edge of roof",
+   "cut": false,
+   "offset": 182
+  },
+  {
+   "name": "5-3 Tower Roof: Piece of the Holy Beast, Serpent",
+   "kind": "pickup",
+   "chapter": "5-3",
+   "room": 796,
+   "room_confidence": "high",
+   "game_items": [
+    134
+   ],
+   "vanilla": "Piece of the Holy Beast, Serpent",
+   "category": "key",
+   "requires": [],
+   "detail": "Dropped by Krauser",
+   "cut": false,
+   "offset": 183
+  },
+  {
+   "name": "5-4 Old Ruins: Emerald #1",
+   "kind": "pickup",
+   "chapter": "5-4",
+   "room": 801,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [
+    "Piece of the Holy Beast, Panther",
+    "Piece of the Holy Beast, Eagle",
+    "Piece of the Holy Beast, Serpent"
+   ],
+   "detail": "Top of stone pillar at top of western path",
+   "cut": false,
+   "offset": 184
+  },
+  {
+   "name": "5-4 Old Ruins: Emerald #2",
+   "kind": "pickup",
+   "chapter": "5-4",
+   "room": 801,
+   "room_confidence": "high",
+   "game_items": [
+    161
+   ],
+   "vanilla": "Emerald",
+   "category": "treasure",
+   "requires": [
+    "Piece of the Holy Beast, Panther",
+    "Piece of the Holy Beast, Eagle",
+    "Piece of the Holy Beast, Serpent"
+   ],
+   "detail": "Top of stone pillar arch, north side",
+   "cut": false,
+   "offset": 185
+  },
+  {
+   "name": "5-4 Underground Chambers: Pearl Pendant",
+   "kind": "pickup",
+   "chapter": "5-4",
+   "room": 805,
+   "room_confidence": "high",
+   "game_items": [
+    88
+   ],
+   "vanilla": "Pearl Pendant",
+   "category": "treasure",
+   "requires": [
+    "Piece of the Holy Beast, Panther",
+    "Piece of the Holy Beast, Eagle",
+    "Piece of the Holy Beast, Serpent"
+   ],
+   "detail": "Shallow stone pedestal behind ladder in northern chamber",
+   "cut": false,
+   "offset": 186
+  },
+  {
+   "name": "5-4 Commando Base Control Room: Emergency Lock Card Key",
+   "kind": "pickup",
+   "chapter": "5-4",
+   "room": 807,
+   "room_confidence": "high",
+   "game_items": [
+    116
+   ],
+   "vanilla": "Emergency Lock Card Key",
+   "category": "key",
+   "requires": [
+    "Piece of the Holy Beast, Panther",
+    "Piece of the Holy Beast, Eagle",
+    "Piece of the Holy Beast, Serpent"
+   ],
+   "detail": "Held by a Soldier Ganado who appears when you try a switch in Switch Room 1 or 2",
+   "cut": false,
+   "offset": 187
+  },
+  {
+   "name": "Defeat Del Lago",
+   "kind": "boss",
+   "chapter": "1-3",
+   "room": 267,
+   "em_id": 47,
+   "requires": [],
+   "offset": 188
+  },
+  {
+   "name": "Defeat El Gigante (Quarry)",
+   "kind": "boss",
+   "chapter": "2-1",
+   "room": 281,
+   "em_id": 43,
+   "requires": [],
+   "offset": 189
+  },
+  {
+   "name": "Defeat El Gigante (Gorge)",
+   "kind": "boss",
+   "chapter": "2-3",
+   "room": 286,
+   "em_id": 43,
+   "requires": [],
+   "offset": 190
+  },
+  {
+   "name": "Defeat Bitores Mendez",
+   "kind": "boss",
+   "chapter": "2-3",
+   "room": 287,
+   "em_id": 53,
+   "requires": [
+    "Camp Key|Old Key"
+   ],
+   "offset": 191
+  },
+  {
+   "name": "Defeat Verdugo",
+   "kind": "boss",
+   "chapter": "4-1",
+   "room": 545,
+   "em_id": 44,
+   "requires": [],
+   "offset": 192
+  },
+  {
+   "name": "Defeat El Gigante (Furnace)",
+   "kind": "boss",
+   "chapter": "4-2",
+   "room": 548,
+   "em_id": 43,
+   "requires": [
+    "Dynamite"
+   ],
+   "offset": 193
+  },
+  {
+   "name": "Defeat Ramon Salazar",
+   "kind": "boss",
+   "chapter": "4-4",
+   "room": 552,
+   "em_id": 56,
+   "requires": [],
+   "offset": 194
+  },
+  {
+   "name": "Defeat U-3",
+   "kind": "boss",
+   "chapter": "5-3",
+   "room": 795,
+   "em_id": 50,
+   "requires": [],
+   "offset": 195
+  },
+  {
+   "name": "Defeat Jack Krauser",
+   "kind": "boss",
+   "chapter": "5-3",
+   "room": 796,
+   "em_id": 57,
+   "requires": [],
+   "offset": 196
+  },
+  {
+   "name": "Merchant: Buy Handgun",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    35
+   ],
+   "requires": [],
+   "offset": 197
+  },
+  {
+   "name": "Merchant: Buy Shotgun",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    44
+   ],
+   "requires": [],
+   "offset": 198
+  },
+  {
+   "name": "Merchant: Buy Rifle",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    46
+   ],
+   "requires": [],
+   "offset": 199
+  },
+  {
+   "name": "Merchant: Buy Scope (Rifle)",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    68
+   ],
+   "requires": [],
+   "offset": 200
+  },
+  {
+   "name": "Merchant: Buy TMP",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    48
+   ],
+   "requires": [],
+   "offset": 201
+  },
+  {
+   "name": "Merchant: Buy Rocket Launcher",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    53
+   ],
+   "requires": [],
+   "offset": 202
+  },
+  {
+   "name": "Merchant: Buy Attache Case M",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    125
+   ],
+   "requires": [],
+   "offset": 203
+  },
+  {
+   "name": "Merchant: Buy First Aid Spray",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    5
+   ],
+   "requires": [],
+   "offset": 204
+  },
+  {
+   "name": "Merchant: Buy Treasure Map (Village)",
+   "kind": "merchant",
+   "chapter": "1-2",
+   "game_items": [
+    169
+   ],
+   "requires": [],
+   "offset": 205
+  },
+  {
+   "name": "Merchant: Buy Stock (TMP)",
+   "kind": "merchant",
+   "chapter": "1-3",
+   "game_items": [
+    67
+   ],
+   "requires": [],
+   "offset": 206
+  },
+  {
+   "name": "Merchant: Buy Red9",
+   "kind": "merchant",
+   "chapter": "2-2",
+   "game_items": [
+    37
+   ],
+   "requires": [],
+   "offset": 207
+  },
+  {
+   "name": "Merchant: Buy Stock (Red9)",
+   "kind": "merchant",
+   "chapter": "2-2",
+   "game_items": [
+    66
+   ],
+   "requires": [],
+   "offset": 208
+  },
+  {
+   "name": "Merchant: Buy Punisher",
+   "kind": "merchant",
+   "chapter": "2-3",
+   "game_items": [
+    33
+   ],
+   "requires": [],
+   "offset": 209
+  },
+  {
+   "name": "Merchant: Buy Blacktail",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    39
+   ],
+   "requires": [],
+   "offset": 210
+  },
+  {
+   "name": "Merchant: Buy Broken Butterfly",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    41
+   ],
+   "requires": [],
+   "offset": 211
+  },
+  {
+   "name": "Merchant: Buy Riot Gun",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    148
+   ],
+   "requires": [],
+   "offset": 212
+  },
+  {
+   "name": "Merchant: Buy Rifle (semi-auto)",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    47
+   ],
+   "requires": [],
+   "offset": 213
+  },
+  {
+   "name": "Merchant: Buy Scope (semi-auto rifle)",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    69
+   ],
+   "requires": [],
+   "offset": 214
+  },
+  {
+   "name": "Merchant: Buy Mine Thrower",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    54
+   ],
+   "requires": [],
+   "offset": 215
+  },
+  {
+   "name": "Merchant: Buy Attache Case L",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    126
+   ],
+   "requires": [],
+   "offset": 216
+  },
+  {
+   "name": "Merchant: Buy Treasure Map (Castle)",
+   "kind": "merchant",
+   "chapter": "3-1",
+   "game_items": [
+    84
+   ],
+   "requires": [],
+   "offset": 217
+  },
+  {
+   "name": "Merchant: Buy Attache Case XL",
+   "kind": "merchant",
+   "chapter": "3-3",
+   "game_items": [
+    127
+   ],
+   "requires": [],
+   "offset": 218
+  },
+  {
+   "name": "Merchant: Buy Striker",
+   "kind": "merchant",
+   "chapter": "4-1",
+   "game_items": [
+    45
+   ],
+   "requires": [],
+   "offset": 219
+  },
+  {
+   "name": "Merchant: Buy Killer7",
+   "kind": "merchant",
+   "chapter": "5-1",
+   "game_items": [
+    42
+   ],
+   "requires": [],
+   "offset": 220
+  },
+  {
+   "name": "Merchant: Buy Treasure Map (Island)",
+   "kind": "merchant",
+   "chapter": "5-1",
+   "game_items": [
+    85
+   ],
+   "requires": [],
+   "offset": 221
+  },
+  {
+   "name": "Merchant: Buy Tactical Vest",
+   "kind": "merchant",
+   "chapter": "5-1",
+   "game_items": [
+    254
+   ],
+   "requires": [],
+   "offset": 222
+  },
+  {
+   "name": "Blue Medallions: Merchant Reward",
+   "kind": "medallion_reward",
+   "chapter": "1-3",
+   "game_items": [
+    33
+   ],
+   "requires": [],
+   "offset": 223
+  },
+  {
+   "name": "Shooting Gallery A: Leon w/ rocket launcher Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    220
+   ],
+   "requires": [],
+   "offset": 224
+  },
+  {
+   "name": "Shooting Gallery A: Leon w/ shotgun Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    221
+   ],
+   "requires": [],
+   "offset": 225
+  },
+  {
+   "name": "Shooting Gallery A: Leon w/ handgun Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    222
+   ],
+   "requires": [],
+   "offset": 226
+  },
+  {
+   "name": "Shooting Gallery A: Ashley Graham Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    223
+   ],
+   "requires": [],
+   "offset": 227
+  },
+  {
+   "name": "Shooting Gallery A: Luis Sera Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    224
+   ],
+   "requires": [],
+   "offset": 228
+  },
+  {
+   "name": "Shooting Gallery A: Ada Wong Cap",
+   "kind": "bottle_cap",
+   "chapter": "3-1",
+   "game_items": [
+    240
+   ],
+   "requires": [],
+   "offset": 229
+  },
+  {
+   "name": "Shooting Gallery B: Don Jose Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    225
+   ],
+   "requires": [],
+   "offset": 230
+  },
+  {
+   "name": "Shooting Gallery B: Don Diego Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    226
+   ],
+   "requires": [],
+   "offset": 231
+  },
+  {
+   "name": "Shooting Gallery B: Don Esteban Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    227
+   ],
+   "requires": [],
+   "offset": 232
+  },
+  {
+   "name": "Shooting Gallery B: Don Manuel Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    228
+   ],
+   "requires": [],
+   "offset": 233
+  },
+  {
+   "name": "Shooting Gallery B: Dr. Salvador Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    229
+   ],
+   "requires": [],
+   "offset": 234
+  },
+  {
+   "name": "Shooting Gallery B: Bella Sisters Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-1",
+   "game_items": [
+    241
+   ],
+   "requires": [],
+   "offset": 235
+  },
+  {
+   "name": "Shooting Gallery C: Merchant Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    230
+   ],
+   "requires": [],
+   "offset": 236
+  },
+  {
+   "name": "Shooting Gallery C: Zealot w/ scythe Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    231
+   ],
+   "requires": [],
+   "offset": 237
+  },
+  {
+   "name": "Shooting Gallery C: Zealot w/ shield Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    232
+   ],
+   "requires": [],
+   "offset": 238
+  },
+  {
+   "name": "Shooting Gallery C: Zealot w/ bowgun Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    233
+   ],
+   "requires": [],
+   "offset": 239
+  },
+  {
+   "name": "Shooting Gallery C: Leader Zealot Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    234
+   ],
+   "requires": [],
+   "offset": 240
+  },
+  {
+   "name": "Shooting Gallery C: Don Pedro Cap",
+   "kind": "bottle_cap",
+   "chapter": "4-2",
+   "game_items": [
+    242
+   ],
+   "requires": [],
+   "offset": 241
+  },
+  {
+   "name": "Shooting Gallery D: Soldier w/ dynamite Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    235
+   ],
+   "requires": [],
+   "offset": 242
+  },
+  {
+   "name": "Shooting Gallery D: Soldier w/ stun-rod Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    236
+   ],
+   "requires": [],
+   "offset": 243
+  },
+  {
+   "name": "Shooting Gallery D: Soldier w/ Hammer Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    237
+   ],
+   "requires": [],
+   "offset": 244
+  },
+  {
+   "name": "Shooting Gallery D: Isabel Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    238
+   ],
+   "requires": [],
+   "offset": 245
+  },
+  {
+   "name": "Shooting Gallery D: Maria Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    239
+   ],
+   "requires": [],
+   "offset": 246
+  },
+  {
+   "name": "Shooting Gallery D: J.J Cap",
+   "kind": "bottle_cap",
+   "chapter": "5-1",
+   "game_items": [
+    243
+   ],
+   "requires": [],
+   "offset": 247
+  }
+ ]
+}

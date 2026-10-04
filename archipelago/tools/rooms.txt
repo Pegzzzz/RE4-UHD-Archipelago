@@ -1,0 +1,109 @@
+r100: Woods | Woods - Bridge
+r101: Village | Village - Near Chief's House | Village - Near Farm* | Village - In House | Village - In House 2* | Village - In House 3
+r102: Underpass - Entrance | Underpass - Cave Body | Underpass - Merchant
+r103: Farm | Farm - Windmill
+r104: Quarry | Quarry - Right Half* | Quarry - Left Half* | Quarry - Door*
+r105: Chief's House | Chief's House - Front | Chief's House - Puzzle | Chief's House - Shed
+r106: The Old House - Road | The Old House - Tunnel | The Old House - Shed* | The Old House - Inside The House | The Old House - Luis
+r107: Water Processing | Water Processing - Long Hall* | Water Processing - Treasure | Water Processing - Well*
+r108: Church - Graveyard | Church - Entrance* | Church - Puzzle* | Church - Hut
+r109: Colosseum - Entrance | Colosseum - Exit
+r10a: Swamp | Swamp - Hut* | Swamp - Bridge*
+r10b: Lake | Lake - Lookout | Lake - Boat
+r10c: Waterfall (night) | Waterfall - Repell (night) | Waterfall - Bridge (night) | Waterfall - Lever (night) | Waterfall - Behind Waterfall (night)
+r10d: Merchant Area (night)
+r10e: Canal (night) | Canal - Merchant (Night) | Canal - Door
+r10f: Gondola - Door (night) | Gondola - Merchant 1(night) | Gondola - Merchant 2(night) | Gondola - Start Ride(night) | Gondola - Cave Entrance(night) | Gondola - End Ride(night)
+r111: Village (night)
+r112: Underpass - Entrace (night) | Underpass - Cave Body (night) | Underpass - Merchant (night)
+r113: Farm (night) | Farm - Windmill (night)
+r117: Inside Church (night) | Inside Church - Switch (night)
+r118: Church (night) | Church - Puzzle (night) | Church - Hut (night) | Church - Graveyard (night) | Church - Door (night)
+r119: Colosseum - Entrace (night) | Colosseum - Exit (night)
+r11a: Swamp (night) | Swamp - Bridge (night)
+r11b: Lake (night) | Lake - Boat (night)
+r11c: Cabin (night)
+r11d: Split Road - Checkpoint (night) | Split Road - Checkpoint 2 (night)
+r11e: Split Road - Long Road(night) | Split Road - After El Gigante
+r11f: Barn - Mendez Boss Fight (night) | Barn - Front
+r120: Opening
+r200: Way To The Castle | Way To The Castle - Landing | Way To The Castle - Gate
+r201: Hall | Hall - Garrador Introduction | Hall - Key | Hall - After Fire | Hall - After Big Door | Hall - Overlook
+r202: Catapult Road | Catapult Road - Under Cannon | Catapult Road - Cannon | Catapult Road - Stairway | Catapult Road - After Door
+r203: Castle Gate | Castle Gate - First Room | Castle Gate - Second Room (Key) | Castle Gate - Gate
+r204: Main Corridor | Main Corridor - Cage | Main Corridor - Treasure | Main Corridor - Save
+r205: Prison Area | Prison Area - Flooded Room | Prison Area - After Swinging Axes | Prison Area - Water | Prison Area - Treasure
+r206: Main Hall
+r207: Barracks | Barracks - Sword One | Barracks - Sword Two
+r208: Water Hall | Water Hall - Pressure Plate Room | Water Hall - After Staircase Lowered | Water Hall - End
+r209: Reception Room | Reception Room - Puzzle Room | Reception Room - After Puzzle | Reception Room - End
+r20a: Hallway | Hallway - To Gallery | Hallway - Coop Door | Hallway - Door To Hedge Maze
+r20b: Hedge Maze - Fountain One | Hedge Maze - Fountain Two | Hedge Maze - Treasure One | Hedge Maze - Treasure Two | Hedge Maze - Treasure Three | Hedge Maze - Bedroom | Hedge Maze - Merchant Room | Hedge Maze - Door
+r20c: Gallery | Gallery - Shooting Range | Gallery - To Hallway | Gallery - Cage
+r20d: Butler's Quarters | Butler's Quarters - Bedroom | Butler's Quarters - Living Room | Butler's Quarters - Upper Hallway
+r20e: Spare Room | Spare Room - Bottom Of Stairs
+r20f: Gallery Room Two | Gallery Room Two - Lever | Gallery Room Two - Sitting Area
+r210: Trolly Room | Trolly Room - Destination | Trolly Room - Across The Moat
+r211: Main Hall | Main Hall - Barred Off Room | Main Hall - Puzzle
+r212: Armoury | Armoury - Spike Ceiling | Armoury - End Of Hall
+r213: Novistador Nest | Novistador Nest - End
+r214: Clock Tower (Outside) | Clock Tower - Upper Floor (Outside) | Clock Tower - Door To Gatekeeper (Outside)
+r215: False Bottom Room
+r216: Armor Room | Armor Room - Center
+r217: Clock Tower (inside) | Clock Tower - Lever (inside)
+r218: Gatekeeper | Gatekeeper - After
+r219: Trolly Two | Trolly Two - Destination
+r21a: Dungeon One | Dungeon One - Alter | Dungeon One - Spike Room
+r21b: Minecart Ride - Start | Minecart Ride - Destination
+r21d: Novistador Ravine | Novistador Ravine - Switch One | Novistador Ravine - Switch Two | Novistador Ravine - Crushers | Novistador Ravine - End
+r220: Merchant Area
+r221: Novistador Boss | Novistador Boss - Elevator Room | Novistador Boss - Room One | Novistador Boss - Fuse
+r222: Dragon Room | Dragon Room - Center | Dragon Room - End
+r223: Mine Shaft | Mine Shaft - Lever | Mine Shaft - Circuit Breaker
+r224: El Gigante Lava Arena
+r225: Dungeon Entrance | Dungeon Entrance - Ruins | Dungeon Entrance - Trap Door | Dungeon Entrance - End House
+r226: Cathedral | Cathedral - Lever | Cathedral - Center
+r227: Tower | Tower - Elevator | Tower - End Elevator
+r228: Salazar Fight
+r229: Spike Pit | Spike Pit - Exit
+r22a: Tower Exterior | Tower Exterior - Repel | Tower Exterior - Boat Ramp
+r22b: End Of Chapter
+r22c: Merchant Target Practice Minigame
+r300: Island | Island - Puzzle | Island - QTE
+r301: Second Island Level | Second Island Level - Door | Second Island Level - Merchant
+r303: Prison Kitchen | Prison Kitchen - Burning Ganado
+r304: Cellar | Cellar - Cameras | Cellar - Treasure
+r305: Locker Room | Locker Room - Merchant | Locker Room - End
+r306: Main Hall | Main Hall - Operating Room | Main Hall - Cryo Storage
+r307: Operating Room | Operating Room - Security System | Operating Room - Key Card
+r308: Cryo Storage
+r309: Lab - Office | Lab - Working Area
+r30a: Communication Tower | Communication Tower - Top Of Tower
+r30b: Garbage Room | Garbage Room - End | Garbage Room - Switch
+r30c: Electrical Room | Electrical Room - Ashlee
+r30d: Employee Area | Employee Area - Button | Employee Area - End
+r30e: Reading Room | Reading Room - End
+r30f: Truck Room
+r310: Garbage Room Bottom | Garbage Room Bottom - Iron Maiden
+r311: Cooling System | Cooling System - Main Room
+r312: Merchant Room
+r315: Post Truck
+r316: Chapel | Chapel - End
+r317: Krauser Knife Battle
+r318: Laser Room | Laser Room - After Lasers
+r31a: Cave Entrance | Cave Entrance - Merchant
+r31b: U-3 | U-3 - Cage | U-3 - Post Cage | U-3 - End
+r31c: Krauser Fight | Krauser Fight - Puzzle Door | Krauser Fight - Panther Piece | Krauser Fight - Eagle Piece
+r31d: Pass Through | Pass Through - Cave | Pass Through - End
+r320: Complex | Complex - Electric Door | Complex - Switch Big Door | Complex - Switch 2 Right | Complex - Switch 2 Left
+r321: MIIIIIIIKEEEEE
+r324: Unused Level | Unused Level - Tower | Unused Level - Landing
+r325: Ada Cutscene
+r326: Prison | Prison - End
+r327: Courtyard  | Courtyard - Other Side Of Door | Courtyard - Button | Courtyard - Button 2 | Courtyard - Key Card
+r328: Another Unused Level
+r329: Ashlee Electric Chair
+r330: Leon Electric Chair | Leon Electric Chair - After
+r331: Final Merchant
+r332: Saddler Fight
+r333: Jetski | Jetski - Start | Jetski - End

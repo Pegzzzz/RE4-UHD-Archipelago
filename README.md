@@ -1,3 +1,31 @@
+# RE4 UHD Archipelago
+
+An [Archipelago](https://archipelago.gg) multiworld randomizer for **Resident Evil 4 (Steam Ultimate HD Edition)**.
+
+This repository is a fork of [re4_tweaks](https://github.com/nipkownix/re4_tweaks) by nipkownix, emoose and
+contributors. All of re4_tweaks is still here; an Archipelago module was added on top. The original
+re4_tweaks README follows below.
+
+- **Players:** see the [setup guide](archipelago/apworld/re4uhd/docs/setup_en.md). Downloads are on the Releases page.
+- **What's shuffled:** key items, world weapons and every fixed treasure; optional boss, Merchant and shooting-gallery
+  checks. Goal: defeat Saddler.
+
+### Layout
+
+| Path | What |
+|---|---|
+| `dllmain/Archipelago.cpp` | Game-side module: localhost bridge, check detection, item delivery, overlay |
+| `archipelago/apworld/re4uhd/` | The APWorld (items, locations, logic, options) and the launcher client |
+| `archipelago/tools/` | Research data, `build_data.py` (regenerates the location table), packaging scripts |
+| `.github/workflows/archipelago.yml` | Builds `dinput8.dll` and `re4uhd.apworld`, tags `v*` publish a release |
+
+Location data comes from community research (Evil Resource, StrategyWiki) mapped to the game's internal room ids.
+Some room ids are unverified; the mod logs any pickup it can't match to `Bin32/re4_tweaks/archipelago.log`.
+
+Archipelago integration by Pegz. re4_tweaks is used under its original license (see `License.txt`).
+
+---
+
 ![re4_tweaks](https://raw.githubusercontent.com/nipkownix/nipkownix.github.io/master/assets/img/RE4T/re4_t.svg) 
 
 ### Description

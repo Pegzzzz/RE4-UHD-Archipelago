@@ -1,0 +1,1362 @@
+[
+{
+"id": 0,
+"enum": "Bullet_45in_H",
+"name": "Magnum Ammo"
+},
+{
+"id": 1,
+"enum": "Grenade",
+"name": "Hand Grenade"
+},
+{
+"id": 2,
+"enum": "Flame_Grenade",
+"name": "Incendiary Grenade"
+},
+{
+"id": 3,
+"enum": "VP70",
+"name": "Matilda"
+},
+{
+"id": 4,
+"enum": "Bullet_9mm_H",
+"name": "Handgun Ammo"
+},
+{
+"id": 5,
+"enum": "Spray",
+"name": "First Aid Spray"
+},
+{
+"id": 6,
+"enum": "Herb_G",
+"name": "Green Herb"
+},
+{
+"id": 7,
+"enum": "Bullet_223in",
+"name": "Rifle Ammo"
+},
+{
+"id": 8,
+"enum": "Hen_Egg",
+"name": "Chicken Egg"
+},
+{
+"id": 9,
+"enum": "Iodine_Egg",
+"name": "Brown Chicken Egg"
+},
+{
+"id": 10,
+"enum": "Golden_Egg",
+"name": "Gold Chicken Egg"
+},
+{
+"id": 11,
+"enum": "Luis_Drug",
+"name": "Luis_Drug"
+},
+{
+"id": 12,
+"enum": "Parasite_Sample",
+"name": "Plaga Sample"
+},
+{
+"id": 13,
+"enum": "Krauser_Knife",
+"name": "Krauser_Knife"
+},
+{
+"id": 14,
+"enum": "Light_Grenade",
+"name": "Flash Grenade"
+},
+{
+"id": 15,
+"enum": "Salazar_Crest",
+"name": "Salazar Family Insignia"
+},
+{
+"id": 16,
+"enum": "Bow_Gun",
+"name": "Bowgun"
+},
+{
+"id": 17,
+"enum": "Bullet_Bow_Gun",
+"name": "Bowgun Bolts"
+},
+{
+"id": 18,
+"enum": "Herb_G_G",
+"name": "Green Herb (X2)"
+},
+{
+"id": 19,
+"enum": "Herb_G_G_G",
+"name": "Green Herb (X3)"
+},
+{
+"id": 20,
+"enum": "Herb_G_R",
+"name": "Mixed Herbs (G+R)"
+},
+{
+"id": 21,
+"enum": "Herb_G_R_Y",
+"name": "Mixed Herbs (G+R+Y)"
+},
+{
+"id": 22,
+"enum": "Herb_G_Y",
+"name": "Mixed Herbs (G+Y)"
+},
+{
+"id": 23,
+"enum": "Ada_RPG",
+"name": "Rocket Launcher (Special)"
+},
+{
+"id": 24,
+"enum": "Bullet_12gg",
+"name": "Shotgun Shells"
+},
+{
+"id": 25,
+"enum": "Herb_R",
+"name": "Red Herb"
+},
+{
+"id": 26,
+"enum": "Bullet_5in",
+"name": "Handcannon Ammo"
+},
+{
+"id": 27,
+"enum": "Key_Sand_Clock",
+"name": "Hourgalss w/ gold decor (key item)"
+},
+{
+"id": 28,
+"enum": "Herb_Y",
+"name": "Yellow Herb"
+},
+{
+"id": 29,
+"enum": "Piece_Of_Slate",
+"name": "Stone Tablet"
+},
+{
+"id": 30,
+"enum": "Golden_Gem",
+"name": "Lion Ornament"
+},
+{
+"id": 31,
+"enum": "Silver_Gem",
+"name": "Goat Ornament"
+},
+{
+"id": 32,
+"enum": "Bullet_9mm_M",
+"name": "TMP Ammo"
+},
+{
+"id": 33,
+"enum": "FN57",
+"name": "Punisher (FN57)"
+},
+{
+"id": 34,
+"enum": "Scope_PRL_412",
+"name": "Scope (P.R.L. 412)"
+},
+{
+"id": 35,
+"enum": "Ruger",
+"name": "Handgun"
+},
+{
+"id": 36,
+"enum": "Ruger_SA",
+"name": "Ruger_SA"
+},
+{
+"id": 37,
+"enum": "Mauser",
+"name": "Red9"
+},
+{
+"id": 38,
+"enum": "Mauser_ST",
+"name": "Mauser_ST"
+},
+{
+"id": 39,
+"enum": "XD9",
+"name": "Blacktail"
+},
+{
+"id": 40,
+"enum": "New_Weapon_SC",
+"name": "New_Weapon_SC"
+},
+{
+"id": 41,
+"enum": "Civilian",
+"name": "Broken Butterfly"
+},
+{
+"id": 42,
+"enum": "Gov",
+"name": "Killer7"
+},
+{
+"id": 43,
+"enum": "Ada_New_Weapon",
+"name": "Ada_New_Weapon"
+},
+{
+"id": 44,
+"enum": "Shotgun",
+"name": "Shotgun"
+},
+{
+"id": 45,
+"enum": "Striker",
+"name": "Striker"
+},
+{
+"id": 46,
+"enum": "S_Field",
+"name": "Rifle"
+},
+{
+"id": 47,
+"enum": "HK_Sniper",
+"name": "Rifle (semi-auto)"
+},
+{
+"id": 48,
+"enum": "Styer",
+"name": "TMP"
+},
+{
+"id": 49,
+"enum": "R513_Key_0a",
+"name": "Activation Key (blue) (r513)"
+},
+{
+"id": 50,
+"enum": "Styer_St",
+"name": "Styer_St"
+},
+{
+"id": 51,
+"enum": "R513_Key_0b",
+"name": "Activation Key (red) (r513)"
+},
+{
+"id": 52,
+"enum": "Thompson",
+"name": "Chicago Typewriter"
+},
+{
+"id": 53,
+"enum": "RPG7",
+"name": "Rocket Launcher"
+},
+{
+"id": 54,
+"enum": "Mine",
+"name": "Mine Thrower"
+},
+{
+"id": 55,
+"enum": "SW500",
+"name": "Handcannon"
+},
+{
+"id": 56,
+"enum": "Knife",
+"name": "Knife"
+},
+{
+"id": 57,
+"enum": "Cupric_Gem",
+"name": "Serpent Ornament"
+},
+{
+"id": 58,
+"enum": "Moon_Spall_1",
+"name": "Moonstone (right half)"
+},
+{
+"id": 59,
+"enum": "Cult_Key",
+"name": "Insignia Key"
+},
+{
+"id": 60,
+"enum": "Cult_Crest",
+"name": "Round Insignia"
+},
+{
+"id": 61,
+"enum": "False_Eye",
+"name": "False Eye"
+},
+{
+"id": 62,
+"enum": "Krauser_Machine_Gun",
+"name": "Custom TMP"
+},
+{
+"id": 63,
+"enum": "Silencer_9mm",
+"name": "Silencer (Handgun)"
+},
+{
+"id": 64,
+"enum": "Punisher",
+"name": "Punisher (Item_40)"
+},
+{
+"id": 65,
+"enum": "PRL_412",
+"name": "P.R.L. 412"
+},
+{
+"id": 66,
+"enum": "Stock_Mauser",
+"name": "Stock (Red9)"
+},
+{
+"id": 67,
+"enum": "Stock_Styer",
+"name": "Stock (TMP)"
+},
+{
+"id": 68,
+"enum": "Scope_Sniper",
+"name": "Scope (Rifle)"
+},
+{
+"id": 69,
+"enum": "Scope_HK_Sniper",
+"name": "Scope (semi-auto rifle)"
+},
+{
+"id": 70,
+"enum": "Bullet_Mine_A",
+"name": "Mine-Darts"
+},
+{
+"id": 71,
+"enum": "Ada_Shot_Gun",
+"name": "Shotgun (Ada)"
+},
+{
+"id": 72,
+"enum": "File_13",
+"name": "Capture Luis Sera"
+},
+{
+"id": 73,
+"enum": "File_14",
+"name": "Target Practice"
+},
+{
+"id": 74,
+"enum": "File_15",
+"name": "Luis' Memo"
+},
+{
+"id": 75,
+"enum": "File_16",
+"name": "Castellan Memo"
+},
+{
+"id": 76,
+"enum": "File_17",
+"name": "Female Intruder"
+},
+{
+"id": 77,
+"enum": "File_18",
+"name": "Butler's Memo"
+},
+{
+"id": 78,
+"enum": "File_19",
+"name": "Sample Retrieved"
+},
+{
+"id": 79,
+"enum": "File_20",
+"name": "Ritual Preparation"
+},
+{
+"id": 80,
+"enum": "File_21",
+"name": "Luis' Memo 2"
+},
+{
+"id": 81,
+"enum": "HK_Sniper_Thermo",
+"name": "HK_Sniper_Thermo"
+},
+{
+"id": 82,
+"enum": "Krauser_Bow",
+"name": "Krauser's Bow"
+},
+{
+"id": 83,
+"enum": "Ada_Machine_Gun",
+"name": "Chicago Typewriter (Ada)"
+},
+{
+"id": 84,
+"enum": "Treasure_Map_2",
+"name": "Treasure Map (Castle)"
+},
+{
+"id": 85,
+"enum": "Treasure_Map_3",
+"name": "Treasure Map (Island)"
+},
+{
+"id": 86,
+"enum": "Ore_White",
+"name": "Velvet Blue"
+},
+{
+"id": 87,
+"enum": "Ore_Black",
+"name": "Spinel"
+},
+{
+"id": 88,
+"enum": "Pearl_Pendant",
+"name": "Pearl Pendant"
+},
+{
+"id": 89,
+"enum": "Brass_Fob_Watch",
+"name": "Brass Pocket Watch"
+},
+{
+"id": 90,
+"enum": "Silver_Whistle",
+"name": "Elegant Headdress"
+},
+{
+"id": 91,
+"enum": "Gold_Dish",
+"name": "Antique Pipe"
+},
+{
+"id": 92,
+"enum": "Platinum_Cup",
+"name": "Gold Bangle w/ Pearls"
+},
+{
+"id": 93,
+"enum": "Crystal_Mask",
+"name": "Amber Ring"
+},
+{
+"id": 94,
+"enum": "Beer_Stein",
+"name": "Beerstein"
+},
+{
+"id": 95,
+"enum": "Agate_Green",
+"name": "Green Catseye"
+},
+{
+"id": 96,
+"enum": "Garnett_Red",
+"name": "Red Catseye"
+},
+{
+"id": 97,
+"enum": "Amber_Yellow",
+"name": "Yellow Catseye"
+},
+{
+"id": 98,
+"enum": "Beer_Stein_G",
+"name": "Beerstein w/ (G)"
+},
+{
+"id": 99,
+"enum": "Beer_Stein_R",
+"name": "Beerstein w/ (R)"
+},
+{
+"id": 100,
+"enum": "Beer_Stein_Y",
+"name": "Beerstein w/ (Y)"
+},
+{
+"id": 101,
+"enum": "Beer_Stein_G_R",
+"name": "Beerstein w/ (G, R)"
+},
+{
+"id": 102,
+"enum": "Beer_Stein_G_Y",
+"name": "Beerstein w/ (G, Y)"
+},
+{
+"id": 103,
+"enum": "Beer_Stein_R_Y",
+"name": "Beerstein w/ (R, Y)"
+},
+{
+"id": 104,
+"enum": "Beer_Stein_G_R_Y",
+"name": "Beerstein w/ (G, R, Y)"
+},
+{
+"id": 105,
+"enum": "Moon_Spall_2",
+"name": "Moonstone (Left half)"
+},
+{
+"id": 106,
+"enum": "Bullet_45in_M",
+"name": "Chicago Typewriter Ammo"
+},
+{
+"id": 107,
+"enum": "S_Field_Sc",
+"name": "S_Field_Sc"
+},
+{
+"id": 108,
+"enum": "HK_Sniper_Sc",
+"name": "HK_Sniper_Sc"
+},
+{
+"id": 109,
+"enum": "Omake_RPG",
+"name": "Infinite Launcher"
+},
+{
+"id": 110,
+"enum": "Pagan_Grail_1",
+"name": "King's Grail"
+},
+{
+"id": 111,
+"enum": "Pagan_Grail_2",
+"name": "Queen's Grail"
+},
+{
+"id": 112,
+"enum": "Pagan_Rod",
+"name": "Staff of Royalty"
+},
+{
+"id": 113,
+"enum": "Ingot_Bar",
+"name": "Gold Bar"
+},
+{
+"id": 114,
+"enum": "Bullet_Arrow",
+"name": "Arrows"
+},
+{
+"id": 115,
+"enum": "Time_Bonus",
+"name": "Bonus Time"
+},
+{
+"id": 116,
+"enum": "R327_Card_Key",
+"name": "Emergency Lock Card Key (R327)"
+},
+{
+"id": 117,
+"enum": "Point_Bonus",
+"name": "Bonus Points"
+},
+{
+"id": 118,
+"enum": "Key_Green_Gem",
+"name": "Green Catseye (key item)"
+},
+{
+"id": 119,
+"enum": "Ruby",
+"name": "Ruby"
+},
+{
+"id": 120,
+"enum": "Gold_Box_S_Std",
+"name": "Treasure Box S"
+},
+{
+"id": 121,
+"enum": "Gold_Box_L_Std",
+"name": "Treasure Box L"
+},
+{
+"id": 122,
+"enum": "Moon_Crest",
+"name": "Blue Moonstone"
+},
+{
+"id": 123,
+"enum": "Seal_Key",
+"name": "Key to the Mine"
+},
+{
+"id": 124,
+"enum": "Attache_Case_S",
+"name": "Attache Case S"
+},
+{
+"id": 125,
+"enum": "Attache_Case_M",
+"name": "Attache Case M"
+},
+{
+"id": 126,
+"enum": "Attache_Case_L",
+"name": "Attache Case L"
+},
+{
+"id": 127,
+"enum": "Attache_Case_O",
+"name": "Attache Case XL"
+},
+{
+"id": 128,
+"enum": "Golden_Sword",
+"name": "Golden Sword"
+},
+{
+"id": 129,
+"enum": "Key_To_R50b",
+"name": "Iron Key (r50b)"
+},
+{
+"id": 130,
+"enum": "Dragon_Dream",
+"name": "Stone of Sacrifice"
+},
+{
+"id": 131,
+"enum": "Key_To_R30c",
+"name": "Storage Room Card Key (r30c)"
+},
+{
+"id": 132,
+"enum": "Key_To_R308",
+"name": "Freezer Card Key (r308)"
+},
+{
+"id": 133,
+"enum": "Crest_A",
+"name": "Piece of the Holy Beast, Panther"
+},
+{
+"id": 134,
+"enum": "Crest_B",
+"name": "Piece of the Holy Beast, Serpent"
+},
+{
+"id": 135,
+"enum": "Crest_C",
+"name": "Piece of the Holy Beast, Eagle"
+},
+{
+"id": 136,
+"enum": "Key_To_Jet_Ski",
+"name": "Jet-ski Key"
+},
+{
+"id": 137,
+"enum": "Smelly_Pendant",
+"name": "Dirty Pearl Pendant"
+},
+{
+"id": 138,
+"enum": "Smelly_Fob_Watch",
+"name": "Dirty Brass Pocket Watch"
+},
+{
+"id": 139,
+"enum": "Key_To_Shrine",
+"name": "Old Key"
+},
+{
+"id": 140,
+"enum": "Key_To_Barrier",
+"name": "Camp Key"
+},
+{
+"id": 141,
+"enum": "Dynamite",
+"name": "Dynamite"
+},
+{
+"id": 142,
+"enum": "Key_To_Control_Room",
+"name": "Lift Activation Key"
+},
+{
+"id": 143,
+"enum": "Gold_Bracelet",
+"name": "Gold Bangle"
+},
+{
+"id": 144,
+"enum": "Perfume_Bottle",
+"name": "Elegant Perfume Bottle"
+},
+{
+"id": 145,
+"enum": "Pearl_Ruby_Mirror",
+"name": "Mirro w/ Pearls & Rubies"
+},
+{
+"id": 146,
+"enum": "Key_To_R30b",
+"name": "Waste Disposal Card Key (r30b)"
+},
+{
+"id": 147,
+"enum": "Plush_Chessboard",
+"name": "Elegant Chessboard"
+},
+{
+"id": 148,
+"enum": "Riot_Gun",
+"name": "Riot Gun"
+},
+{
+"id": 149,
+"enum": "Black_Bass",
+"name": "Black Bass"
+},
+{
+"id": 150,
+"enum": "Sand_Clock",
+"name": "Hourgalss w/ gold decor"
+},
+{
+"id": 151,
+"enum": "Black_Bass_L",
+"name": "Black Bass (L)"
+},
+{
+"id": 152,
+"enum": "Evil_Gem",
+"name": "Illuminados Pendant"
+},
+{
+"id": 153,
+"enum": "S_Field_Thermo",
+"name": "S_Field_Thermo"
+},
+{
+"id": 154,
+"enum": "Pot_Holed_Crown",
+"name": "Crown"
+},
+{
+"id": 155,
+"enum": "Kingdom_Heart",
+"name": "Crown Jewel"
+},
+{
+"id": 156,
+"enum": "Royal_Crest",
+"name": "Royal Insignia"
+},
+{
+"id": 157,
+"enum": "Crown_Heart",
+"name": "Crown with Jewels"
+},
+{
+"id": 158,
+"enum": "Crown_Crest",
+"name": "Crown with an insignia"
+},
+{
+"id": 159,
+"enum": "Crown_Heart_Crest",
+"name": "Salazar Family Crown"
+},
+{
+"id": 160,
+"enum": "Item_A0",
+"name": "Rifle Ammo (Infrared)"
+},
+{
+"id": 161,
+"enum": "Spinel_02",
+"name": "Emerald"
+},
+{
+"id": 162,
+"enum": "Pedestal",
+"name": "Pedestal (Bottle Caps)"
+},
+{
+"id": 163,
+"enum": "Key_To_Salon",
+"name": "Gallery Key"
+},
+{
+"id": 164,
+"enum": "Crest_Right",
+"name": "Emblem (Right half)"
+},
+{
+"id": 165,
+"enum": "Crest_Left",
+"name": "Emblem (Left half)"
+},
+{
+"id": 166,
+"enum": "Crest_Full",
+"name": "Hexagonal Emblem"
+},
+{
+"id": 167,
+"enum": "Key_To_201",
+"name": "Castle Gate Key"
+},
+{
+"id": 168,
+"enum": "Herb_R_Y",
+"name": "Mixed Herbs (R+Y)"
+},
+{
+"id": 169,
+"enum": "Treasure_Map",
+"name": "Treasure Map (Village)"
+},
+{
+"id": 170,
+"enum": "Scope_Mine",
+"name": "Scope (Mine Thrower)"
+},
+{
+"id": 171,
+"enum": "Mine_SC",
+"name": "Mine_SC"
+},
+{
+"id": 172,
+"enum": "File_01",
+"name": "Playing Manual 1"
+},
+{
+"id": 173,
+"enum": "File_02",
+"name": "Info on Ashley"
+},
+{
+"id": 174,
+"enum": "File_03",
+"name": "Playing Manual 2"
+},
+{
+"id": 175,
+"enum": "File_04",
+"name": "Alert Order"
+},
+{
+"id": 176,
+"enum": "File_05",
+"name": "About the Blue Medallions"
+},
+{
+"id": 177,
+"enum": "File_06",
+"name": "Chief's Note"
+},
+{
+"id": 178,
+"enum": "File_07",
+"name": "Closure of the Church"
+},
+{
+"id": 179,
+"enum": "File_08",
+"name": "Anonymous Letter"
+},
+{
+"id": 180,
+"enum": "File_09",
+"name": "Playing Manual 3"
+},
+{
+"id": 181,
+"enum": "File_10",
+"name": "Sera and the 3rd Party"
+},
+{
+"id": 182,
+"enum": "File_11",
+"name": "Two Routes"
+},
+{
+"id": 183,
+"enum": "File_12",
+"name": "Village's Last Defense"
+},
+{
+"id": 184,
+"enum": "Lantern",
+"name": "Butterfly Lamp"
+},
+{
+"id": 185,
+"enum": "Lantern_Stone_G",
+"name": "Green Eye"
+},
+{
+"id": 186,
+"enum": "Lantern_Stone_R",
+"name": "Red Eye"
+},
+{
+"id": 187,
+"enum": "Lantern_Stone_Y",
+"name": "Blue Eye"
+},
+{
+"id": 188,
+"enum": "Lantern_G",
+"name": "Butterfly Lamp w/ (G)"
+},
+{
+"id": 189,
+"enum": "Lantern_R",
+"name": "Butterfly Lamp w/ (R)"
+},
+{
+"id": 190,
+"enum": "Lantern_Y",
+"name": "Butterfly Lamp w/ (B)"
+},
+{
+"id": 191,
+"enum": "Lantern_G_R",
+"name": "Butterfly Lamp w/ (G, R)"
+},
+{
+"id": 192,
+"enum": "Lantern_G_Y",
+"name": "Butterfly Lamp w/ (G, B)"
+},
+{
+"id": 193,
+"enum": "Lantern_R_Y",
+"name": "Butterfly Lamp w/ (R, B)"
+},
+{
+"id": 194,
+"enum": "Lantern_G_R_Y",
+"name": "Butterfly Lamp w/ (R, G, B)"
+},
+{
+"id": 195,
+"enum": "Dungeon_Key",
+"name": "Prison Key"
+},
+{
+"id": 196,
+"enum": "Silver_Sword",
+"name": "Platinum Sword"
+},
+{
+"id": 197,
+"enum": "Scope_Thermo",
+"name": "Infrared Scope"
+},
+{
+"id": 198,
+"enum": "Mask",
+"name": "Elegant Mask"
+},
+{
+"id": 199,
+"enum": "Mask_Stone_G",
+"name": "Green Gem"
+},
+{
+"id": 200,
+"enum": "Mask_Stone_R",
+"name": "Red Gem"
+},
+{
+"id": 201,
+"enum": "Mask_Stone_Y",
+"name": "Purple Gem"
+},
+{
+"id": 202,
+"enum": "Mask_G",
+"name": "Elegant Mask w/ (G)"
+},
+{
+"id": 203,
+"enum": "Mask_R",
+"name": "Elegant Mask w/ (R)"
+},
+{
+"id": 204,
+"enum": "Mask_Y",
+"name": "Elegant Mask w/ (P)"
+},
+{
+"id": 205,
+"enum": "Mask_G_R",
+"name": "Elegant Mask w/ (G, R)"
+},
+{
+"id": 206,
+"enum": "Mask_G_Y",
+"name": "Elegant Mask w/ (G, P)"
+},
+{
+"id": 207,
+"enum": "Mask_R_Y",
+"name": "Elegant Mask w/ (R, P)"
+},
+{
+"id": 208,
+"enum": "Mask_G_R_Y",
+"name": "Elegant Mask w/ (R, G, P)"
+},
+{
+"id": 209,
+"enum": "Cat_Statue",
+"name": "Golden Lynx"
+},
+{
+"id": 210,
+"enum": "Cat_Stone_G",
+"name": "Green Stone of Judgement"
+},
+{
+"id": 211,
+"enum": "Cat_Stone_R",
+"name": "Red Stone of Faith"
+},
+{
+"id": 212,
+"enum": "Cat_Stone_Y",
+"name": "Blue Stone of Treason"
+},
+{
+"id": 213,
+"enum": "Cat_Statue_G",
+"name": "Golden Lynx w/ (G)"
+},
+{
+"id": 214,
+"enum": "Cat_Statue_R",
+"name": "Golden Lynx w/ (R)"
+},
+{
+"id": 215,
+"enum": "Cat_Statue_Y",
+"name": "Golden Lynx w/ (B)"
+},
+{
+"id": 216,
+"enum": "Cat_Statue_G_R",
+"name": "Golden Lynx w/ (G, R)"
+},
+{
+"id": 217,
+"enum": "Cat_Statue_G_Y",
+"name": "Golden Lynx w/ (G, B)"
+},
+{
+"id": 218,
+"enum": "Cat_Statue_R_Y",
+"name": "Golden Lynx w/ (R, B)"
+},
+{
+"id": 219,
+"enum": "Cat_Statue_G_R_Y",
+"name": "Golden Lynx w/ (R, G, B)"
+},
+{
+"id": 220,
+"enum": "Bottle_Cap_01",
+"name": "Leon w/ rocket launcher"
+},
+{
+"id": 221,
+"enum": "Bottle_Cap_02",
+"name": "Leon w/ shotgun"
+},
+{
+"id": 222,
+"enum": "Bottle_Cap_03",
+"name": "Leon w/ handgun"
+},
+{
+"id": 223,
+"enum": "Bottle_Cap_04",
+"name": "Ashley Graham"
+},
+{
+"id": 224,
+"enum": "Bottle_Cap_05",
+"name": "Luis Sera"
+},
+{
+"id": 225,
+"enum": "Bottle_Cap_06",
+"name": "Don Jose"
+},
+{
+"id": 226,
+"enum": "Bottle_Cap_07",
+"name": "Don Diego"
+},
+{
+"id": 227,
+"enum": "Bottle_Cap_08",
+"name": "Don Esteban"
+},
+{
+"id": 228,
+"enum": "Bottle_Cap_09",
+"name": "Don Manuel"
+},
+{
+"id": 229,
+"enum": "Bottle_Cap_10",
+"name": "Dr. Salvador"
+},
+{
+"id": 230,
+"enum": "Bottle_Cap_11",
+"name": "Merchant"
+},
+{
+"id": 231,
+"enum": "Bottle_Cap_12",
+"name": "Zealot w/ scythe"
+},
+{
+"id": 232,
+"enum": "Bottle_Cap_13",
+"name": "Zealot w/ shield"
+},
+{
+"id": 233,
+"enum": "Bottle_Cap_14",
+"name": "Zealot w/ bowgun"
+},
+{
+"id": 234,
+"enum": "Bottle_Cap_15",
+"name": "Leader Zealot"
+},
+{
+"id": 235,
+"enum": "Bottle_Cap_16",
+"name": "Soldier w/ dynamite"
+},
+{
+"id": 236,
+"enum": "Bottle_Cap_17",
+"name": "Soldier w/ stun-rod"
+},
+{
+"id": 237,
+"enum": "Bottle_Cap_18",
+"name": "Soldier w/ Hammer"
+},
+{
+"id": 238,
+"enum": "Bottle_Cap_19",
+"name": "Isabel"
+},
+{
+"id": 239,
+"enum": "Bottle_Cap_20",
+"name": "Maria"
+},
+{
+"id": 240,
+"enum": "Bottle_Cap_21",
+"name": "Ada Wong"
+},
+{
+"id": 241,
+"enum": "Bottle_Cap_22",
+"name": "Bella Sisters"
+},
+{
+"id": 242,
+"enum": "Bottle_Cap_23",
+"name": "Don Pedro"
+},
+{
+"id": 243,
+"enum": "Bottle_Cap_24",
+"name": "J.J"
+},
+{
+"id": 244,
+"enum": "File_22",
+"name": "Letter from Ada"
+},
+{
+"id": 245,
+"enum": "File_23",
+"name": "Luis' Memo 3"
+},
+{
+"id": 246,
+"enum": "File_24",
+"name": "Paper Airplane"
+},
+{
+"id": 247,
+"enum": "File_25",
+"name": "Our Plan"
+},
+{
+"id": 248,
+"enum": "File_26",
+"name": "Luis' Memo 4"
+},
+{
+"id": 249,
+"enum": "File_27",
+"name": "Krauser's Note"
+},
+{
+"id": 250,
+"enum": "File_28",
+"name": "Luis' Memo 5"
+},
+{
+"id": 251,
+"enum": "File_29",
+"name": "Our Mission"
+},
+{
+"id": 252,
+"enum": "File_30",
+"name": "File_30"
+},
+{
+"id": 253,
+"enum": "File_31",
+"name": "File_31"
+},
+{
+"id": 254,
+"enum": "Assault_Jacket",
+"name": "Tactical Vest"
+},
+{
+"id": 255,
+"enum": "aaa",
+"name": "aaa"
+},
+{
+"id": 256,
+"enum": "Punisher_KeyItem",
+"name": "Punisher_KeyItem"
+},
+{
+"id": 257,
+"enum": "Handgun_KeyItem",
+"name": "Handgun_KeyItem"
+},
+{
+"id": 258,
+"enum": "Shotgun_KeyItem",
+"name": "Shotgun_KeyItem"
+},
+{
+"id": 259,
+"enum": "MineThrower_KeyItem",
+"name": "MineThrower_KeyItem"
+},
+{
+"id": 260,
+"enum": "Handcannon_KeyItem",
+"name": "Handcannon_KeyItem"
+},
+{
+"id": 261,
+"enum": "MineThrowerwScope_KeyItem",
+"name": "MineThrowerwScope_KeyItem"
+},
+{
+"id": 262,
+"enum": "Mission_Directives_1",
+"name": "Mission Directives 1 (Ada)"
+},
+{
+"id": 263,
+"enum": "Mission_Directives_2",
+"name": "Mission Directives 2 (Ada)"
+},
+{
+"id": 264,
+"enum": "Mission_Directives_3",
+"name": "Mission Directives 3 (Ada)"
+},
+{
+"id": 265,
+"enum": "Mission_Directives_4",
+"name": "Mission Directives 4 (Ada)"
+},
+{
+"id": 266,
+"enum": "Mission_Directives_5",
+"name": "Mission Directives 5 (Ada)"
+},
+{
+"id": 267,
+"enum": "Mission1_Treasure_Map",
+"name": "Mission 1 Treasure Map (Ada)"
+},
+{
+"id": 268,
+"enum": "Mission2_Treasure_Map",
+"name": "Mission 2 Treasure Map (Ada)"
+},
+{
+"id": 269,
+"enum": "Mission3_Treasure_Map",
+"name": "Mission 3 Treasure Map (Ada)"
+},
+{
+"id": 270,
+"enum": "Mission4_Treasure_Map",
+"name": "Mission 4 Treasure Map (Ada)"
+},
+{
+"id": 271,
+"enum": "Mission5_Treasure_Map",
+"name": "Mission 5 Treasure Map (Ada)"
+}
+]

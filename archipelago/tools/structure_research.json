@@ -1,0 +1,1274 @@
+{
+ "meta": {
+  "game": "Resident Evil 4 (2005) Steam UHD, Leon main game",
+  "generated": "2026-10-04",
+  "room_list": "rooms.txt (names appear to be community labels from roomInfo.dat; some are misleading, e.g. r104 'Quarry' is the Valley, r109 'Colosseum' is the Quarry, r221 'Novistador Boss' is Verdugo's arena)"
+ },
+ "chapters": [
+  {
+   "chapter": "1-1",
+   "rooms": [
+    "r120?",
+    "r100",
+    "r101",
+    "r103",
+    "r106"
+   ],
+   "details": "Opening/Hunter's Lodge woods (r100) -> Village Square (r101, village battle until church bell; Dr. Salvador) -> Farm (r103; blue medallions note + 7 farm medallions) -> 'Beyond the Farm' (Homestead Ruins/Old House path, r106). Chapter ends in the Old House (r106 'The Old House - Luis'): Leon frees Luis from a wardrobe and Mendez knocks him out.",
+   "ends_in": "r106",
+   "ashley_controlled": false,
+   "point_of_no_return": "Bridge back to the start (r100 'Woods - Bridge') is destroyed; south gate/locked building in village locked after battle (open later).",
+   "backtracking": "Village/Farm hub stays open within Village part (1-1..1-3).",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_1-1",
+    "https://residentevil.fandom.com/wiki/Chapter_1-1_(Resident_Evil_4)",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ],
+   "notes": "r120 'Opening' assumed to be the intro cutscene room (unverified). rooms.txt labels for r106 match moddb 'path to old house where Luis is found'."
+  },
+  {
+   "chapter": "1-2",
+   "rooms": [
+    "r104",
+    "r107",
+    "r105"
+   ],
+   "details": "Wake up tied with Luis in Valley Storage Building -> Valley (r104; first Merchant at Valley Storage Yard, Hexagonal Emblem) -> Sewage Treatment Plant (r107 'Water Processing') -> Path to Village Square (South) -> Chief's Manor (r105; Insignia Key). Ends with Mendez choking Leon in the manor.",
+   "ends_in": "r105",
+   "ashley_controlled": false,
+   "point_of_no_return": "None hard; locked door behind the hut opened by Hexagonal Emblem leads one-way-ish to Village Storage.",
+   "backtracking": "Yes, area connects back toward the village via the manor.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_1-2",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-hunnigan-5",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ],
+   "notes": "IMPORTANT naming: rooms.txt calls r104 'Quarry' but moddb describes r104 as the Luis wake-up area; evilresource places that wake-up in the Valley Storage Building, so r104 = the Valley. The El Gigante Quarry is r109/r119 ('Colosseum' in rooms.txt)."
+  },
+  {
+   "chapter": "1-3",
+   "rooms": [
+    "r105",
+    "r101",
+    "r102",
+    "r108",
+    "r109",
+    "r10e",
+    "r10a",
+    "r10b"
+   ],
+   "details": "Chief's Manor -> Village (unbar door, locked building/Town Hall) -> Underground Passage (r102, Merchant) -> Graveyard/Church area (r108; pedestal puzzle; 8 church-area medallions incl. Wooden Walkway) -> Quarry clearing ('Holding Area', r109; no El Gigante yet) -> Underground dock / Quarry Merchant Hideout (r10e, Merchant shop; Punisher medallion reward here) -> Swamp (r10a) -> Lake (r10b): Del Lago boss. Chapter ends when Leon washes ashore (South Dock Shack).",
+   "ends_in": "r10b",
+   "ashley_controlled": false,
+   "point_of_no_return": "Boarding the motorboat starts Del Lago; chapter end.",
+   "backtracking": "Whole village hub (r101,r102,r103,r105,r108,r109,r10a,r10e) remains connected until the Church cutscene in 2-1.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_1-3",
+    "https://residentevil.fandom.com/wiki/Chapter_1-3_(Resident_Evil_4)",
+    "https://www.evilresource.com/resident-evil-4/maps/village/village-quarry-swamp/quarry",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ],
+   "notes": "r10e ('Canal - Merchant') identified as the underground dock/Quarry Merchant Hideout because moddb calls r10E the 'El Gigante save point' and evilresource says the hideout connects to the Quarry and (by boat) the Waterfall Cave Dock. Inferred, not directly sourced."
+  },
+  {
+   "chapter": "2-1",
+   "rooms": [
+    "r10b",
+    "r10d",
+    "r10c",
+    "r10e",
+    "r119",
+    "r11a?",
+    "r11b?",
+    "r118",
+    "r117"
+   ],
+   "details": "Start at South Dock Shack (Lake) -> Lake Cave Merchant Shack (r10d) -> Waterfall / river (r10c; Round Insignia; tentacle Ganado 5,000) -> Waterfall Cave Dock -> boat to Quarry Merchant Hideout (r10e night) -> Quarry 'Holding Area' (r119): mandatory El Gigante -> optional Swamp/Lake (r11a/r11b) -> Graveyard/Church exterior (r118) -> Church interior (r117): Ashley found, Saddler cutscene, escape through window ends chapter.",
+   "ends_in": "r117",
+   "ashley_controlled": false,
+   "ashley_joins": "r117 (end of 2-1)",
+   "point_of_no_return": "Triggering the cutscene inside the Church closes the path to holding area, swamp and lake (StrategyWiki).",
+   "backtracking": "Before the church cutscene, lake/swamp/quarry still reachable.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_2-1",
+    "https://residentevil.fandom.com/wiki/Chapter_2-1_(Resident_Evil_4)",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-hunnigan-9",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-hunnigan-11",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "2-2",
+   "rooms": [
+    "r118",
+    "r117?",
+    "r112",
+    "r111",
+    "r113",
+    "r106?",
+    "r11c"
+   ],
+   "details": "Graveyard sideyard (r118) -> (optional church) -> Underground tunnel (r112, Merchant) -> Village at night (r111) -> Farm at night (r113) -> rope bridge -> Abandoned Cabin (r11c): cabin defense with Luis; Luis leaves = chapter end.",
+   "ends_in": "r11c",
+   "ashley_controlled": false,
+   "ashley_with_leon": true,
+   "point_of_no_return": "Gates to the starting area and to the Chief's house are boarded permanently; gate to where you met Luis boarded permanently.",
+   "backtracking": "Limited to night village/farm.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_2-2",
+    "https://residentevil.fandom.com/wiki/Chapter_2-2_(Resident_Evil_4)",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-hunnigan-12"
+   ],
+   "notes": "Whether the farm->cabin path uses part of r106 is unverified."
+  },
+  {
+   "chapter": "2-3",
+   "rooms": [
+    "r11c",
+    "r11d|r11e",
+    "r10f",
+    "r11f",
+    "r10f",
+    "r200"
+   ],
+   "details": "Cabin -> split road: LEFT Barrier Station/camp (r11d, Bella Sisters) OR RIGHT Ravine/Gorge (r11e, El Gigante) -> Gondola (r10f, merchants) -> Torture Shed (r11f): Bitores Mendez boss -> False Eye -> retinal-scan gate -> Gondola/Outskirts -> Castle Road (r200): cross and raise the bridge = end of chapter and of the Village part.",
+   "ends_in": "r200",
+   "ashley_controlled": false,
+   "ashley_with_leon": true,
+   "point_of_no_return": "Raising the bridge at r200 ends the Village; the Castle drawbridge back is closed permanently in 3-1.",
+   "backtracking": "Both split-road paths can be done (StrategyWiki: 'you can, if you want, do both directions').",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_2-3",
+    "https://residentevil.fandom.com/wiki/Chapter_2-3_(Resident_Evil_4)",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "3-1",
+   "rooms": [
+    "r201",
+    "r202",
+    "r207",
+    "r203",
+    "r204",
+    "r208",
+    "r209|r20c"
+   ],
+   "details": "Castle entrance courtyard (r201, Merchant room) -> lower/upper battlements with cannons (r202) -> Barracks (r207, Platinum Sword) -> Castle Gate (r203) -> Audience Hall/Prison (r204?; optional-ish Garrador) -> Water Hall (r208, Ashley-crank puzzle) -> Basilica/Hall of Rites (Merchant, first Shooting Gallery venue): Ashley falls into a trap and is taken = chapter end.",
+   "ends_in": "Hall of Rites (room id uncertain: r209 or r20c)",
+   "ashley_controlled": false,
+   "ashley_lost": "end of 3-1",
+   "point_of_no_return": "Drawbridge back to the village closed permanently.",
+   "backtracking": "Castle Bailey 1/2/3 interconnected until the clock tower lever in 4-1.",
+   "confidence": "low",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_3-1",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/maps/castle/castle-bailey-2/hall-of-rites"
+   ],
+   "notes": "Castle room-id mapping is the weakest part: moddb names (r204 'chamber where Ashley is kidnapped', r209 'machine gun room with zealots', r20C 'dining room with painting puzzle') conflict with rooms.txt labels. Verify in-game."
+  },
+  {
+   "chapter": "3-2",
+   "rooms": [
+    "Hall of Rites",
+    "r205",
+    "Hall of Rites",
+    "r209?",
+    "r20a",
+    "r20b"
+   ],
+   "details": "Basilica -> Sewers (r205, Novistadors, pendulum axes) -> Basilica -> Gallery (portrait switch puzzle, Gatling leader zealot drops Gallery Key) -> Fountain/outside (r20a) -> Hedge maze (r20b, Courtyard Merchant Room, Moonstone halves) -> Salazar's bedroom: Ada encounter = chapter end.",
+   "ends_in": "r20b ('Hedge Maze - Bedroom')",
+   "ashley_controlled": false,
+   "point_of_no_return": "None noted.",
+   "backtracking": "Yes (castle hub).",
+   "confidence": "low",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_3-2",
+    "https://residentevil.fandom.com/wiki/Chapter_3-2_(Resident_Evil_4)",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "3-3",
+   "rooms": [
+    "r20b",
+    "r20c?",
+    "Display Room (?)",
+    "Connecting Passage (?)",
+    "r206"
+   ],
+   "details": "Hedge-maze merchant room -> dining hall (r20c? painting puzzle) -> Display Room cage trap: Garrador (mandatory) -> ledge over large room -> long corridor Merchant (Attache Case XL first sold here, 'Connecting Passage') -> Luis killed by Saddler (r206 per moddb) = chapter end.",
+   "ends_in": "r206",
+   "ashley_controlled": false,
+   "point_of_no_return": "None noted.",
+   "backtracking": "Yes.",
+   "confidence": "low",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_3-3",
+    "https://residentevil.fandom.com/wiki/Chapter_3-3_(Resident_Evil_4)",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/equipment/attache-case-xl"
+   ],
+   "notes": "Fandom places the chapter end at the Merchant; StrategyWiki at Luis' death. Room ids for Display Room / corridor unknown."
+  },
+  {
+   "chapter": "3-4",
+   "rooms": [
+    "r20f?",
+    "r20d",
+    "r20e",
+    "r20d",
+    "r20f?"
+   ],
+   "details": "Leon on 2F of concourse, Ashley on 1F. ASHLEY-CONTROLLED: Study/Servants' quarters (r20d 'Butler's Quarters') -> Storeroom with suits of armor (r20e 'Spare Room') -> back to study enclave -> ladder to concourse; Leon & Ashley reunite = chapter end.",
+   "ends_in": "r20f? (concourse)",
+   "ashley_controlled": true,
+   "ashley_segment_rooms": [
+    "r20d",
+    "r20e"
+   ],
+   "point_of_no_return": "Timed armor sequence; missable items.",
+   "backtracking": "Within Ashley segment only.",
+   "confidence": "medium (Ashley rooms r20d/r20e: moddb 'Ashley crawling area 1/2'); low for r20f",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_3-4",
+    "https://residentevil.fandom.com/wiki/Chapter_3-4_(Resident_Evil_4)",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "4-1",
+   "rooms": [
+    "Instruction Hall (?)",
+    "r20c?",
+    "r210",
+    "r222",
+    "r210",
+    "r211",
+    "r219",
+    "r212",
+    "r216",
+    "r214",
+    "r217",
+    "r218",
+    "r215",
+    "r213",
+    "r229",
+    "r221"
+   ],
+   "details": "Instruction Hall (start; Salazar call) -> Armory/Refectory -> Trolley one (r210) -> Lava lake / Dragon room (r222) -> Audience hall grail pedestals (r211) -> Trolley two (r219) -> Royal suite (new Shooting Gallery venue) -> Queen's chamber spiked ceiling (r212) -> King's chamber armor (r216) -> Clock tower (r214 outside, r217 inside) -> Escape route: 2 Garradors (r218) -> trap floor (r215) -> Novistador nest, Ashley carried off (r213) -> Pit (r229, Merchant) -> research corridor & elevator: Verdugo (r221). Ends with Saddler/Krauser cutscene.",
+   "ends_in": "r221",
+   "ashley_controlled": false,
+   "ashley_with_leon": "from start until r213",
+   "point_of_no_return": "Clock tower lever: 'Once you do there is no going back to the rest of the castle' (StrategyWiki).",
+   "backtracking": "Full castle backtracking until the clock tower lever.",
+   "confidence": "low-medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-1",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-salazar-3",
+    "https://www.evilresource.com/resident-evil-4/enemies/verdugo"
+   ]
+  },
+  {
+   "chapter": "4-2",
+   "rooms": [
+    "r220",
+    "r223",
+    "r224",
+    "r21d"
+   ],
+   "details": "Mine Entrance merchant + typewriter + 3rd Shooting Gallery venue (r220) -> Mines (r223, circuit breaker, Dr. Salvador) -> Melting Furnace: 2 El Gigantes (r224) -> Cavern with flying Novistadors and crushing columns (r21d) -> pedestal raises you to the surface = end.",
+   "ends_in": "r21d",
+   "ashley_controlled": false,
+   "point_of_no_return": "Crushing columns section is forward-only.",
+   "backtracking": "Limited.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-2",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/maps/castle/castle-mines/mine-entrance"
+   ]
+  },
+  {
+   "chapter": "4-3",
+   "rooms": [
+    "r225",
+    "r21a",
+    "r21b",
+    "r225?"
+   ],
+   "details": "Castle Ruins (r225, Merchant Shack) -> Ancient city / Sand Ruins dwelling (r21a?, 2 Dr. Salvadors) -> mine trolley ride (r21b, Salvadors) -> ruins/elevator = end.",
+   "ends_in": "r21b/r225 (elevator)",
+   "ashley_controlled": false,
+   "point_of_no_return": "'The door locks behind you here and you can't go back the way you came.'",
+   "backtracking": "No.",
+   "confidence": "low",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-3",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "4-4",
+   "rooms": [
+    "r226",
+    "r227",
+    "r228",
+    "r22a",
+    "r22b"
+   ],
+   "details": "Cathedral with Colossus statue (r226) -> Ritual tower (r227, merchant on ledge) -> Altar: Salazar boss (r228) -> underground passage merchant -> Docks (r22a): Ada's boat. r22b 'End Of Chapter' is the transition room.",
+   "ends_in": "r22a/r22b",
+   "ashley_controlled": false,
+   "point_of_no_return": "'There's no going back now so enter the tower up ahead.' Leaving the castle is permanent.",
+   "backtracking": "No.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-4",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "5-1",
+   "rooms": [
+    "r300",
+    "r301",
+    "r303",
+    "r304",
+    "r305",
+    "r306",
+    "r307",
+    "r308",
+    "r30b",
+    "r309",
+    "r30a?",
+    "r30c"
+   ],
+   "details": "Landing/Outpost J.J. (r300) -> cave system & Research Facility Approach merchant (r301) -> Kitchen (r303) -> Security / Ashley on monitors (r304) -> Research access: merchant + 4th Shooting Gallery venue (r305) -> research hub (r306) -> Surgery/first Regenerator (r307) -> Freezer, Infrared Scope (r308) -> Waste disposal (r30b) -> Labs, Iron Maiden drops Storage Room Card Key (r309) -> optional Communications Tower (r30a) -> Ashley's cell (r30c): reunion = end.",
+   "ends_in": "r30c",
+   "ashley_controlled": false,
+   "ashley_joins": "r30c",
+   "point_of_no_return": "None hard.",
+   "backtracking": "Facility interconnected; Radio Tower optional.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-1",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-saddler-1"
+   ]
+  },
+  {
+   "chapter": "5-2",
+   "rooms": [
+    "r30c",
+    "r30b",
+    "r310",
+    "r311",
+    "r30d",
+    "r30e",
+    "r30f",
+    "r312",
+    "r315",
+    "r316"
+   ],
+   "details": "Secure storage -> waste disposal drop (r30b) -> trash heap, 2 Iron Maidens (r310) -> foundry wrecking ball (r311) -> kennel corridor with Regenerators (r30d) -> closet merchant (r30e?) -> bulldozer garage: Ashley drives the bulldozer, player shoots (r30f; merchant r312) -> crash site/waiting room merchant (r315) -> power plant access: Saddler takes Ashley (r316) = end.",
+   "ends_in": "r316",
+   "ashley_controlled": "No (bulldozer driven by Ashley automatically; player controls Leon)",
+   "ashley_lost": "r316",
+   "point_of_no_return": "Service elevator door closes behind you (continue point).",
+   "backtracking": "Limited.",
+   "confidence": "low-medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-2",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "chapter": "5-3",
+   "rooms": [
+    "r316",
+    "r317",
+    "r318",
+    "r316?",
+    "r31a",
+    "r31b",
+    "r31d",
+    "r31c"
+   ],
+   "details": "Furnace room -> Krauser knife fight (r317, QTE) -> power plant / laser hall (r318) -> Saddler's room -> Cavern access merchant (r31a) -> Cavern: U-3 (r31b) -> Encampment merchant + 5th/last Shooting Gallery venue (r31d) -> Ancient Palace / Sand Ruins: Krauser boss on tower roof (r31c), drops Piece of the Holy Beast, Serpent = end.",
+   "ends_in": "r31c",
+   "ashley_controlled": false,
+   "point_of_no_return": "Ancient Palace: 'From this point you won't be able to get back to the shooting gallery.'",
+   "backtracking": "No after Ancient Palace.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-3",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/items/piece-of-the-holy-beast-serpent"
+   ]
+  },
+  {
+   "chapter": "5-4",
+   "rooms": [
+    "r320",
+    "r321",
+    "r325",
+    "r326",
+    "r327",
+    "r329",
+    "r330"
+   ],
+   "details": "Trenches/plateau with Mike's helicopter (r320) -> Mike shot down (r321) -> Ada cutscene (r325) -> Brig (r326) -> Army/Commando base, J.J. x2, merchant (r327) -> medical storage, Ashley freed (r329) -> Leon & Ashley remove parasites (r330) = end.",
+   "ends_in": "r330",
+   "ashley_controlled": false,
+   "ashley_joins": "r329",
+   "point_of_no_return": "Doors close behind you; 'the way back is blocked' after medical storage.",
+   "backtracking": "Limited.",
+   "confidence": "low-medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-4",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list",
+    "https://www.evilresource.com/resident-evil-4/files/communication-log-saddler-4"
+   ]
+  },
+  {
+   "chapter": "Final Chapter",
+   "rooms": [
+    "r330",
+    "r331",
+    "r332",
+    "r333"
+   ],
+   "details": "Basement -> Dock access, final Merchant (r331) -> Docks / Construction Site: Saddler boss (r332) -> escape tunnel on jet-ski (r333) = game end.",
+   "ends_in": "r333",
+   "ashley_controlled": false,
+   "point_of_no_return": "Elevator up to the docks (Ashley left behind) = final; last merchant at r331.",
+   "backtracking": "No.",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Final_chapter",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  }
+ ],
+ "bosses": [
+  {
+   "name": "Dr. Salvador (chainsaw)",
+   "chapter": "1-1",
+   "room": "r101",
+   "mandatory": false,
+   "reward": "Pesetas (large) 10,000",
+   "details": "Optional/conditional; village battle can be survived until the bell. Also appears 1-3 (path to village south), 4-2 mine, 4-3 sand ruins x2 + trolley x2 (10,000 each).",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-medium",
+    "https://www.evilresource.com/resident-evil-4/enemies/dr-salvador"
+   ]
+  },
+  {
+   "name": "Del Lago",
+   "chapter": "1-3",
+   "room": "r10b",
+   "mandatory": true,
+   "reward": "None found (chapter ends)",
+   "details": "Lake boss fought from motorboat; ends 1-3.",
+   "confidence": "high (encounter); reward unverified",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/del-lago",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_1-3"
+   ]
+  },
+  {
+   "name": "El Gigante #1 (Quarry)",
+   "chapter": "2-1",
+   "room": "r119",
+   "mandatory": true,
+   "reward": "Pesetas (large) 15,000",
+   "details": "Quarry clearing ('Colosseum' in rooms.txt). Freed dog from 1-1 helps.",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/maps/village/village-quarry-swamp/quarry",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large"
+   ]
+  },
+  {
+   "name": "El Gigante #2 (Gorge, right path)",
+   "chapter": "2-3",
+   "room": "r11e",
+   "mandatory": false,
+   "reward": "Pesetas (large) 15,000",
+   "details": "Only on the right/Ravine route; left route has Bella Sisters instead. Both routes can be done.",
+   "confidence": "high",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_2-3",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large"
+   ]
+  },
+  {
+   "name": "Bella Sisters (chainsaw sisters)",
+   "chapter": "2-3",
+   "room": "r11d",
+   "mandatory": false,
+   "reward": "Unknown",
+   "details": "Camp Center on left/Barrier Station route.",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/bella-sisters"
+   ]
+  },
+  {
+   "name": "Bitores Mendez",
+   "chapter": "2-3",
+   "room": "r11f",
+   "mandatory": true,
+   "reward": "Pesetas (large) 30,000 + False Eye (key item for retinal-scan gate)",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/items/false-eye",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_2-3"
+   ]
+  },
+  {
+   "name": "Garrador (Prison)",
+   "chapter": "3-1",
+   "room": "r204? (Prison, Castle Bailey 1)",
+   "mandatory": "uncertain (wakes when you kick the cell door)",
+   "reward": "Pesetas (medium) 15,000",
+   "confidence": "medium (room id low)",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/garrador",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-medium"
+   ]
+  },
+  {
+   "name": "Garrador (Display Room cage)",
+   "chapter": "3-3",
+   "room": "unknown (Display Room, Castle Bailey 2)",
+   "mandatory": true,
+   "reward": "Pesetas (medium) 15,000; Hourglass w/ gold decor in chest in cage",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/garrador",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_3-3"
+   ]
+  },
+  {
+   "name": "Garrador x2 (Antechamber / escape route)",
+   "chapter": "4-1",
+   "room": "r218",
+   "mandatory": "likely",
+   "reward": "Pesetas (medium) 15,000 each",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/garrador",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-1",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "name": "Verdugo",
+   "chapter": "4-1",
+   "room": "r221",
+   "mandatory": false,
+   "reward": "Crown Jewel (treasure)",
+   "details": "Can be outlasted until the elevator arrives; killing it drops the Crown Jewel.",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/crown-jewel",
+    "https://www.evilresource.com/resident-evil-4/enemies/verdugo",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "name": "El Gigante x2 (Melting Furnace)",
+   "chapter": "4-2",
+   "room": "r224",
+   "mandatory": "at least one (uncertain)",
+   "reward": "Pesetas (medium) 15,000 each",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-medium",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-2"
+   ]
+  },
+  {
+   "name": "Ramon Salazar",
+   "chapter": "4-4",
+   "room": "r228",
+   "mandatory": true,
+   "reward": "Pesetas (medium) 50,000",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-medium",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_4-4"
+   ]
+  },
+  {
+   "name": "J.J. (Outpost)",
+   "chapter": "5-1",
+   "room": "r300",
+   "mandatory": true,
+   "reward": "Pesetas (large) 15,000",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/jj",
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large"
+   ]
+  },
+  {
+   "name": "Iron Maiden (Laboratory)",
+   "chapter": "5-1",
+   "room": "r309",
+   "mandatory": true,
+   "reward": "Storage Room Card Key (key item)",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/items/storage-room-card-key",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "name": "Regenerators",
+   "chapter": "5-1/5-2",
+   "room": "r307,r308,r30d,...",
+   "mandatory": false,
+   "reward": "Pesetas 5,000 each (some)",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-1"
+   ]
+  },
+  {
+   "name": "Iron Maiden x2 (Waste Processing Plant)",
+   "chapter": "5-2",
+   "room": "r310",
+   "mandatory": "uncertain",
+   "reward": "Pesetas (large) 20,000 each",
+   "confidence": "medium",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "name": "Krauser (knife fight)",
+   "chapter": "5-3",
+   "room": "r317",
+   "mandatory": true,
+   "reward": "None (QTE cutscene)",
+   "confidence": "medium",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-3",
+    "https://www.moddb.com/games/resident-evil-4/tutorials/resident-evil-4-areas-list"
+   ]
+  },
+  {
+   "name": "U-3 ('It')",
+   "chapter": "5-3",
+   "room": "r31b",
+   "mandatory": true,
+   "reward": "Pesetas (large) 50,000",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://www.evilresource.com/resident-evil-4/enemies/u-3"
+   ]
+  },
+  {
+   "name": "Jack Krauser",
+   "chapter": "5-3",
+   "room": "r31c",
+   "mandatory": true,
+   "reward": "Piece of the Holy Beast, Serpent (key item)",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/items/piece-of-the-holy-beast-serpent",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-3"
+   ]
+  },
+  {
+   "name": "J.J. x2 (Commando Base main gate; Upper Storage Room)",
+   "chapter": "5-4",
+   "room": "r327? (maybe r320)",
+   "mandatory": "likely",
+   "reward": "Pesetas (large) 15,000 each (+Hand Grenade per StrategyWiki)",
+   "confidence": "medium (room low)",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/enemies/jj",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Chapter_5-4"
+   ]
+  },
+  {
+   "name": "Osmund Saddler",
+   "chapter": "Final Chapter",
+   "room": "r332",
+   "mandatory": true,
+   "reward": "Pesetas (large) 100,000",
+   "confidence": "high",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/treasures/pesetas-large",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Final_chapter"
+   ]
+  }
+ ],
+ "requests": [
+  {
+   "name": "Blue Medallions (Merchant's note 'About the Blue Medallions')",
+   "chapter": "1-1 to 1-3",
+   "rooms": [
+    "r103",
+    "r108"
+   ],
+   "targets": 15,
+   "breakdown": {
+    "Farm (r103)": 7,
+    "Cemetery/Church area (r108)": 8
+   },
+   "evilresource_breakdown": {
+    "Farm Yard": 5,
+    "Farm Exit": 2,
+    "Graveyard": 3,
+    "Church Courtyard": 1,
+    "Church Backyard": 1,
+    "Wooden Walkway": 3
+   },
+   "reward": "10+ destroyed: Punisher given free by Merchant; all 15: Punisher with Firepower Lv.2 upgrade",
+   "claim_where": "Merchant in 1-3 (underground dock, r10e per StrategyWiki 1-3)",
+   "fallback": "If missed, Punisher sold for 20,000 from Ch 2-3.",
+   "note_location": "Hanging from a tree in the southern fenced area of the Farm Yard (r103).",
+   "confidence": "high (counts/rewards); medium (claim location, deadline)",
+   "source": [
+    "https://www.evilresource.com/resident-evil-4/miscellaneous-objects/blue-medallion",
+    "https://www.evilresource.com/resident-evil-4/files/about-the-blue-medallions",
+    "https://strategywiki.org/wiki/Resident_Evil_4/Side_quests",
+    "https://www.evilresource.com/resident-evil-4/weaponry/punisher"
+   ]
+  },
+  {
+   "name": "NO OTHER MERCHANT REQUESTS IN RE4 (2005)",
+   "details": "'Catch the big fish', 'Find the rat', additional medallion sets, spinel rewards, etc. are Resident Evil 4 Remake (2023) requests. The 2005 game has only the single blue-medallion side quest (plus the shooting gallery). 'Capture Luis Sera' is a lore file, not a request. Fishing exists (Black Bass in lake) but no request.",
+   "confidence": "high",
+   "source": [
+    "https://strategywiki.org/wiki/Resident_Evil_4/Side_quests",
+    "https://www.shacknews.com/article/134735/all-blue-medallions-in-resident-evil-4"
+   ]
+  }
+ ],
+ "shooting_gallery": {
+  "minigame_room": "r22c ('Merchant Target Practice Minigame')",
+  "venues": [
+   {
+    "venue": 1,
+    "chapter": "3-1",
+    "room": "Hall of Rites / Basilica (room id r209 or r20c, uncertain)",
+    "games": [
+     "A"
+    ],
+    "background": "Village",
+    "confidence": "medium"
+   },
+   {
+    "venue": 2,
+    "chapter": "4-1",
+    "room": "Royal suite area merchant (Castle Bailey 3; id unknown)",
+    "games": [
+     "A",
+     "B"
+    ],
+    "background": "Village",
+    "confidence": "medium"
+   },
+   {
+    "venue": 3,
+    "chapter": "4-2",
+    "room": "r220 (Mine Entrance, merchant)",
+    "games": [
+     "A",
+     "B",
+     "C"
+    ],
+    "background": "Castle",
+    "confidence": "medium"
+   },
+   {
+    "venue": 4,
+    "chapter": "5-1",
+    "room": "r305 ('Locker Room - Merchant', research access)",
+    "games": [
+     "A",
+     "B",
+     "C",
+     "D"
+    ],
+    "background": "Castle",
+    "confidence": "medium"
+   },
+   {
+    "venue": 5,
+    "chapter": "5-3",
+    "room": "r31d (Encampment tunnel, merchant) - last chance",
+    "games": [
+     "A",
+     "B",
+     "C",
+     "D"
+    ],
+    "background": "Castle",
+    "confidence": "medium"
+   }
+  ],
+  "game_unlock_order": {
+   "A": "3-1",
+   "B": "4-1",
+   "C": "4-2",
+   "D": "5-1"
+  },
+  "scoring": {
+   "hit": 50,
+   "headshot_male": 100,
+   "headshot_female": 200,
+   "salazar": 500,
+   "ashley": -1000
+  },
+  "prizes": {
+   "total_bottle_caps": 24,
+   "per_game": 6,
+   "normal_cap": "score 3,000+ (one cap per play)",
+   "rare_cap": "score 4,000+ or hit all targets without hitting Ashley",
+   "in_game_file_text": "File says 1 cap per 1,000 points and special cap at 3,500 or all targets - conflicts with guides (3,000/4,000).",
+   "row_completion_cash": {
+    "A": 15000,
+    "B": 25000,
+    "C": 35000,
+    "D": 50000
+   },
+   "caps": {
+    "A": [
+     "Leon w/ rocket launcher",
+     "Leon w/ shotgun",
+     "Leon w/ handgun",
+     "Ashley",
+     "Luis",
+     "Ada (rare)"
+    ],
+    "B": [
+     "Villager (axe)",
+     "Villager (sickle)",
+     "Villager",
+     "Villager (pitchfork)",
+     "Chainsaw man",
+     "Bella Sisters (rare)"
+    ],
+    "C": [
+     "Merchant",
+     "Zealot (scythe)",
+     "Zealot (shield)",
+     "Zealot (bowgun)",
+     "Leader zealot",
+     "Don Pedro / villager parasite (rare)"
+    ],
+    "D": [
+     "Soldier (dynamite)",
+     "Soldier (stun rod)",
+     "Soldier (hammer)",
+     "Female villager",
+     "Female villager (knife)",
+     "J.J. (rare)"
+    ]
+   },
+   "achievement": "'What Are They Worth?' (all 24 caps)"
+  },
+  "confidence": "medium",
+  "source": [
+   "https://strategywiki.org/wiki/Resident_Evil_4/Side_quests",
+   "https://steamcommunity.com/sharedfiles/filedetails/?id=287562785",
+   "https://www.evilresource.com/resident-evil-4/files/target-practice",
+   "https://www.trueachievements.com/a154429/what-are-they-worth-achievement"
+  ]
+ },
+ "merchant_stock": [
+  {
+   "item": "Handgun",
+   "price": 8000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/handgun",
+   "confidence": "high",
+   "starting_item": true
+  },
+  {
+   "item": "Shotgun",
+   "price": 20000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/shotgun",
+   "confidence": "high",
+   "free_location": "Main House 2F wall, Village Square (r101)"
+  },
+  {
+   "item": "Rifle",
+   "price": 12000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/rifle",
+   "confidence": "high"
+  },
+  {
+   "item": "Scope (rifle)",
+   "price": 7000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/scope-rifle",
+   "confidence": "high"
+  },
+  {
+   "item": "TMP",
+   "price": 10000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/tmp",
+   "confidence": "high"
+  },
+  {
+   "item": "Rocket Launcher",
+   "price": 30000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/rocket-launcher",
+   "confidence": "high",
+   "free_location": "Exhibition Room North, Castle Bailey 2"
+  },
+  {
+   "item": "Attache Case M",
+   "price": 24000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/equipment/attache-case-m",
+   "confidence": "high"
+  },
+  {
+   "item": "First Aid Spray",
+   "price": 5000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/items/first-aid-spray",
+   "confidence": "high"
+  },
+  {
+   "item": "Treasure Map (Village)",
+   "price": 3000,
+   "chapter": "1-2",
+   "first_merchant": "Valley Storage Yard",
+   "room": "r104",
+   "source": "https://www.evilresource.com/resident-evil-4/miscellaneous-objects/treasure-map-village",
+   "confidence": "high"
+  },
+  {
+   "item": "Stock (TMP)",
+   "price": 4000,
+   "chapter": "1-3",
+   "first_merchant": "Underground Passage",
+   "room": "r102",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/stock-tmp",
+   "confidence": "high"
+  },
+  {
+   "item": "Red9",
+   "price": 14000,
+   "chapter": "2-1",
+   "first_merchant": "Underground Passage",
+   "room": "r102/r112",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/red9",
+   "confidence": "medium",
+   "note": "Fandom says first buyable in 2-2 caves"
+  },
+  {
+   "item": "Stock (Red9)",
+   "price": 4000,
+   "chapter": "2-1",
+   "first_merchant": "Underground Passage",
+   "room": "r102/r112",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/stock-red9",
+   "confidence": "medium"
+  },
+  {
+   "item": "Punisher",
+   "price": 20000,
+   "chapter": "2-3 (or free with 10+ medallions in 1-3)",
+   "first_merchant": "Abandoned Cabin Yard",
+   "room": "r11c?",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/punisher",
+   "confidence": "high"
+  },
+  {
+   "item": "Blacktail",
+   "price": 24000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/blacktail",
+   "confidence": "high"
+  },
+  {
+   "item": "Broken Butterfly",
+   "price": 38000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/broken-butterfly",
+   "confidence": "high",
+   "free_location": "Treasure Chamber, Castle Bailey 2 (large chest)"
+  },
+  {
+   "item": "Riot Gun",
+   "price": 32000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/riot-gun",
+   "confidence": "high"
+  },
+  {
+   "item": "Rifle (semi-auto)",
+   "price": 35000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/rifle-semi-auto",
+   "confidence": "high"
+  },
+  {
+   "item": "Scope (semi-auto rifle)",
+   "price": 10000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/scope-semi-auto-rifle",
+   "confidence": "high"
+  },
+  {
+   "item": "Mine Thrower",
+   "price": 9800,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/mine-thrower",
+   "confidence": "high"
+  },
+  {
+   "item": "Attache Case L",
+   "price": 40000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/equipment/attache-case-l",
+   "confidence": "high"
+  },
+  {
+   "item": "Treasure Map (Castle)",
+   "price": 6000,
+   "chapter": "3-1",
+   "first_merchant": "Entrance Courtyard Merchant Room",
+   "room": "r201",
+   "source": "https://www.evilresource.com/resident-evil-4/miscellaneous-objects/treasure-map-castle",
+   "confidence": "high"
+  },
+  {
+   "item": "Attache Case XL",
+   "price": 73000,
+   "chapter": "3-3",
+   "first_merchant": "Castle's Connecting Passage",
+   "room": "unknown",
+   "source": "https://www.evilresource.com/resident-evil-4/equipment/attache-case-xl",
+   "confidence": "high"
+  },
+  {
+   "item": "Striker",
+   "price": 43000,
+   "chapter": "4-1",
+   "first_merchant": "Pit",
+   "room": "r229?",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/striker",
+   "confidence": "high"
+  },
+  {
+   "item": "Killer7",
+   "price": 77700,
+   "chapter": "5-1",
+   "first_merchant": "Research Facility Approach",
+   "room": "r301",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/killer7",
+   "confidence": "high"
+  },
+  {
+   "item": "Treasure Map (Island)",
+   "price": 9000,
+   "chapter": "5-1",
+   "first_merchant": "Research Facility Approach",
+   "room": "r301",
+   "source": "https://www.evilresource.com/resident-evil-4/miscellaneous-objects/treasure-map-island",
+   "confidence": "high"
+  },
+  {
+   "item": "Tactical Vest",
+   "price": 60000,
+   "chapter": "5-1",
+   "first_merchant": "Research Facility Merchant Room",
+   "room": "r305",
+   "source": "https://www.evilresource.com/resident-evil-4/equipment/tactical-vest",
+   "confidence": "high"
+  },
+  {
+   "item": "Matilda",
+   "price": 70000,
+   "chapter": "post-game",
+   "first_merchant": "after first clear",
+   "room": "-",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/matilda",
+   "confidence": "high"
+  },
+  {
+   "item": "Chicago Typewriter",
+   "price": 1000000,
+   "chapter": "post-game",
+   "first_merchant": "after first clear",
+   "room": "-",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/chicago-typewriter",
+   "confidence": "high"
+  },
+  {
+   "item": "Infinite Launcher",
+   "price": 1000000,
+   "chapter": "post-game",
+   "first_merchant": "after first clear",
+   "room": "-",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/infinite-launcher",
+   "confidence": "medium"
+  },
+  {
+   "item": "Handcannon",
+   "price": 0,
+   "chapter": "post-game",
+   "first_merchant": "after clear + 5 stars all Mercenaries stages/characters",
+   "room": "-",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/handcannon",
+   "confidence": "high"
+  },
+  {
+   "item": "Infrared Scope",
+   "price": null,
+   "chapter": "5-1",
+   "first_merchant": "NOT SOLD - found in Freezer (r308)",
+   "room": "r308",
+   "source": "https://www.evilresource.com/resident-evil-4/weaponry/infrared-scope",
+   "confidence": "high"
+  },
+  {
+   "item": "Attache Case (starting, 10x6?)",
+   "price": null,
+   "chapter": "start",
+   "first_merchant": "starting equipment",
+   "room": "-",
+   "source": "https://www.evilresource.com/resident-evil-4/equipment",
+   "confidence": "medium"
+  }
+ ],
+ "chapter_end_checks": [
+  {
+   "chapter": "1-1",
+   "end_room": "r106"
+  },
+  {
+   "chapter": "1-2",
+   "end_room": "r105"
+  },
+  {
+   "chapter": "1-3",
+   "end_room": "r10b"
+  },
+  {
+   "chapter": "2-1",
+   "end_room": "r117"
+  },
+  {
+   "chapter": "2-2",
+   "end_room": "r11c"
+  },
+  {
+   "chapter": "2-3",
+   "end_room": "r200"
+  },
+  {
+   "chapter": "3-1",
+   "end_room": "Hall of Rites (room id uncertain: r209 or r20c)"
+  },
+  {
+   "chapter": "3-2",
+   "end_room": "r20b ('Hedge Maze - Bedroom')"
+  },
+  {
+   "chapter": "3-3",
+   "end_room": "r206"
+  },
+  {
+   "chapter": "3-4",
+   "end_room": "r20f? (concourse)"
+  },
+  {
+   "chapter": "4-1",
+   "end_room": "r221"
+  },
+  {
+   "chapter": "4-2",
+   "end_room": "r21d"
+  },
+  {
+   "chapter": "4-3",
+   "end_room": "r21b/r225 (elevator)"
+  },
+  {
+   "chapter": "4-4",
+   "end_room": "r22a/r22b"
+  },
+  {
+   "chapter": "5-1",
+   "end_room": "r30c"
+  },
+  {
+   "chapter": "5-2",
+   "end_room": "r316"
+  },
+  {
+   "chapter": "5-3",
+   "end_room": "r31c"
+  },
+  {
+   "chapter": "5-4",
+   "end_room": "r330"
+  },
+  {
+   "chapter": "Final Chapter",
+   "end_room": "r333"
+  }
+ ]
+}

@@ -1,4 +1,5 @@
 #include "dllmain.h"
+#include "Archipelago.h"
 #include "Game.h"
 #include "ConsoleWnd.h"
 #include "SDK/filter00.h"
@@ -834,6 +835,8 @@ void __fastcall cSceSys__scheduler_Hook(void* thisptr, void* unused)
 			pending_functions_lock.lock();
 		}
 	}
+
+	Archipelago_Tick();
 
 	cSceSys__scheduler(thisptr, unused);
 }

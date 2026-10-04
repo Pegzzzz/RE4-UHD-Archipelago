@@ -28,7 +28,8 @@ void updateCheck()
 		spd::log()->info("{} -> Old .dll found and deleted", __FUNCTION__);
 	}
 
-	if (re4t::cfg->bNeverCheckForUpdates)
+	// Archipelago fork: never offer upstream re4_tweaks updates, they would replace this build
+	if (true || re4t::cfg->bNeverCheckForUpdates)
 	{
 		updt.UpdateStatus = UpdateStatus::Finished;
 		return;

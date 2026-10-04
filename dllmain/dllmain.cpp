@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <fstream>
 #include "dllmain.h"
+#include "Archipelago.h"
 #include "AutoUpdater.h"
 #include "ConsoleWnd.h"
 #include "Settings.h"
@@ -117,6 +118,9 @@ void Init_Main()
 	re4t::init::TitleMenu();
 
 	Trainer_Init();
+
+	// Archipelago multiworld support
+	re4t::init::Archipelago();
 }
 
 // Dll main function
