@@ -1772,6 +1772,237 @@ void T6()
 	End();
 }
 
+// =================================================================== 0.5.4: third audit
+void U1()
+{
+	Begin("U1. A case purchase that adds the case item and grows the case is one check, not two");
+	Setup(0x104);
+	sim::setGold(100000);
+	Tick(2);
+	size_t m = cl.got.size();
+	sim::setOpenFlag(sim::SS_SHOP);
+	sim::setStatus(sim::STA_INTO_SHOP, true);
+	Tick(2);
+	sim::setGold(sim::gold() - 24000);
+	sim::gameAdd(125, 1);
+	sim::setBoardSize(1);
+	Tick(2);
+	CloseShop();
+	auto c = ChecksSince(m);
+	Expect(c.size() == 1 && c[0] == L_BUY_CASE_M, "only Buy Attache Case M (got " + json(c).dump() + ")");
+	End();
+}
+
+void U2()
+{
+	Begin("U2. A location that keeps its own item doesn't also take another location by stage");
+	json sd = slotData;
+	for (auto& l : sd["locations"])
+		if (l.value("id", int64_t(0)) == L_FARM_SPINEL1)
+			l["keep"] = 1;
+	json saved = slotData;
+	slotData = sd;
+	Setup(0x103);
+	slotData = saved;
+	size_t m = cl.got.size();
+	Pickup(87, 1);
+	Tick(5);
+	auto c = ChecksSince(m);
+	Expect(c.size() == 1 && c[0] == L_FARM_SPINEL1, "only Farm Spinel #1 (got " + json(c).dump() + ")");
+	Expect(sim::count(87) == 1, "Spinel kept");
+	End();
+}
+
+void U3()
+{
+	Begin("U3. A new game on Easy is not linked; Normal is");
+	sim::reset(0x100);
+	sim::setDifficulty(3);
+	cl.config = Config(++nextTag);
+	size_t c0 = sim::conLines().size();
+	Deliver({ cl.config });
+	Tick(5);
+	Expect(sim::saveWork(60) != ap::kSaveMagic, "Easy: not linked");
+	Expect(ap::uiStatus == 5, "overlay says Easy isn't supported");
+	Deliver({ { {"cmd", "bind_save"} } });
+	Tick(3);
+	Expect(sim::saveWork(60) != ap::kSaveMagic, "bind_save refused on Easy");
+	(void)c0;
+	sim::reset(0x100);
+	sim::setDifficulty(5);
+	cl.config = Config(++nextTag);
+	Deliver({ cl.config });
+	Tick(5);
+	Expect(sim::saveWork(60) == ap::kSaveMagic, "Normal: linked");
+	End();
+}
+
+void U4()
+{
+	Begin("U4. Reloading or firing a weapon (its num field) never looks like a pickup");
+	Setup(0x101);
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	sim::setWeaponNum(35, 10);
+	Tick(5);
+	sim::setWeaponNum(35, 3);
+	Tick(5);
+	sim::setWeaponNum(35, 10);
+	Tick(5);
+	Expect(ChecksSince(m).empty(), "no checks");
+	Expect(!ConContains(c0, "[pickup] Handgun"), "no pickup logged");
+	Expect(sim::count(35) >= 1, "Handgun still there (not taken as a check)");
+	sim::setWeaponNum(35, 1);
+	End();
+}
+
+void U5()
+{
+	Begin("U5. Assignment Ada in island rooms: nothing is tracked or delivered");
+	Setup(0x301);
+	sim::setPlType(2); // Ada
+	size_t m = cl.got.size();
+	SetItems({ I_SHOTGUN });
+	Pickup(87, 1);
+	Tick(80);
+	Expect(ChecksSince(m).empty(), "no checks");
+	Expect(sim::count(44) == 0 && sim::count(87) == 1, "nothing delivered, nothing removed");
+	sim::setPlType(0);
+	End();
+}
+
+void U6()
+{
+	Begin("U6. Overlay: checks left in this area; 'waiting for server' under the disk config");
+	Setup(0x106);
+	Tick(40);
+	Expect(RenderContains("Archipelago checks in this area:"), "room count shown");
+	sim::reset(0x101);
+	uint32_t tag = ++nextTag;
+	sim::setSaveWork(60, ap::kSaveMagic);
+	sim::setSaveWork(61, tag);
+	json disk = Config(tag);
+	disk["from_disk"] = true;
+	Deliver({ disk });
+	Tick(5);
+	Expect(ap::uiStatus == 1 && RenderContains("waiting for server"), "waiting for server while only the disk config is known");
+	cl.config = Config(tag);
+	Deliver({ cl.config });
+	Tick(5);
+	Expect(ap::uiStatus == 2, "ready once live");
+	End();
+}
+
+#ifdef AP_E2E
+// =================================================================== end-to-end mode
+// Built with -DAP_E2E: no fake client. The real Archipelago client connects on 127.0.0.1:46400 and talks to a real
+// MultiServer (see e2e.sh). The simulated game plays a few things and checks what comes back through the server.
+bool WaitFor(const std::function<bool()>& cond, int ms)
+{
+	auto start = GetTickCount();
+	while (GetTickCount() - start < DWORD(ms))
+	{
+		Tick(1);
+		if (cond())
+			return true;
+		Sleep(4);
+	}
+	return false;
+}
+
+int main()
+{
+	setvbuf(stdout, nullptr, _IONBF, 0);
+	WSADATA w;
+	WSAStartup(MAKEWORD(2, 2), &w);
+	std::filesystem::remove_all("re4_tweaks");
+	sim::reset(0x100);
+	sim::setDifficulty(5);
+	re4t::init::Archipelago();
+	Begin("E2E. Real client + real MultiServer");
+	Expect(WaitFor([] { return ap::configured && !ap::configFromDisk; }, 90000), "the client sent the live config");
+	Expect(WaitFor([] { return ap::saveState == 1; }, 5000), "the new game is linked to the room's seed");
+	uint32_t tag = sim::saveWork(61);
+	printf("SAVE_TAG %u\n", tag);
+	// starting inventory (start_inventory in the YAML) arrives through the server
+	Expect(WaitFor([] { return sim::count(44) == 1; }, 30000), "start_inventory Shotgun delivered");
+	Expect(WaitFor([] { return ap::received.size() > 0 && ap::AppliedIndex() == ap::received.size(); }, 30000),
+		"every received item applied (" + std::to_string(ap::AppliedIndex()) + "/" + std::to_string(ap::received.size()) + ")");
+	// a treasure pickup: the check reaches the server and comes back as checked
+	Pickup(87, 1);
+	Expect(WaitFor([] { return ap::serverChecked.count(L_WOODS_SPINEL) > 0; }, 30000), "1-1 Woods: Spinel confirmed by the server");
+	Expect(sim::count(87) == 0, "the vanilla Spinel was taken");
+	// a placed ammo box: consumable spot in r100
+	size_t before = ap::serverChecked.size();
+	Pickup(4, 10);
+	Expect(WaitFor([before] { return ap::serverChecked.size() > before; }, 30000), "ammo spot confirmed by the server");
+	// the save stays linked to the same tag after a reconnect of the client is not tested here; goal:
+	sim::setRoom(0x333);
+	Expect(WaitFor([] { return (sim::saveWork(63) & 1) != 0; }, 5000), "jet-ski room: goal flag set");
+	WaitFor([] { return false; }, 3000); // let the goal go out
+	Expect(sim::saveWork(61) == tag, "save tag unchanged");
+	End();
+	printf("\n%d passed, %d failed\n", passes, failures);
+	for (auto& r : results)
+		printf("%s\n", r.c_str());
+	fflush(stdout);
+	_exit(failures ? 1 : 0);
+}
+#else
+void V1()
+{
+	Begin("V1. Key item already held: counted even after sweeping the room's ammo and walking out right away");
+	Setup(0x105);
+	sim::gameAdd(59, 1);
+	ap::Resnapshot();
+	Tick(5);
+	size_t m = cl.got.size();
+	Pickup(4, 10);            // placed ammo with its own flag
+	Tick(10);
+	sim::setRoomItemFlag(sim::nextRoomItemBit()); // the vanilla Insignia Key: merged, no inventory change
+	Tick(20);
+	sim::setRoom(0x106);      // straight out of the room
+	Tick(ap::kFlagBeforeFrames + ap::kDecideFrames + 40);
+	Expect(Has(ChecksSince(m), L_INSIGNIA_KEY), "Insignia Key location checked");
+	End();
+}
+
+void V2()
+{
+	Begin("V2. Case grows first and the case item shows up a few frames later: still one check");
+	Setup(0x104);
+	sim::setGold(100000);
+	Tick(2);
+	size_t m = cl.got.size();
+	sim::setOpenFlag(sim::SS_SHOP);
+	sim::setStatus(sim::STA_INTO_SHOP, true);
+	Tick(2);
+	sim::setGold(sim::gold() - 24000);
+	sim::setBoardSize(1);
+	Tick(3);
+	sim::gameAdd(125, 1);
+	Tick(3);
+	CloseShop();
+	Expect(ChecksSince(m).size() == 1, "one case check (got " + json(ChecksSince(m)).dump() + ")");
+	End();
+}
+
+void V3()
+{
+	Begin("V3. Death and continue are logged with the received index (to confirm checkpoints restore it)");
+	Setup(0x101);
+	auto checkpoint = sim::save();
+	size_t c0 = sim::conLines().size();
+	sim::setHp(0);
+	Tick(10);
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(5);
+	sim::restore(checkpoint);
+	Tick(5);
+	Expect(ConContains(c0, "[death] received index"), "death logged");
+	Expect(ConContains(c0, "[continue] received index"), "continue logged");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -1803,6 +2034,8 @@ int main()
 	Q1(); Q2(); Q3(); Q4();
 	R1(); R2(); R3(); R4(); R5(); R6(); R7(); R8();
 	T1(); T2(); T3(); T4(); T5(); T6();
+	U1(); U2(); U3(); U4(); U5(); U6();
+	V1(); V2(); V3();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)
@@ -1811,3 +2044,4 @@ int main()
 	fflush(stdout);
 	_exit(failures ? 1 : 0);
 }
+#endif

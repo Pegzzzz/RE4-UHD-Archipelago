@@ -10,6 +10,9 @@ Resident Evil 4 UHD:
   # Ammo, herbs, grenades and sprays placed in the world are checks (~450). Enemy drops don't count.
   consumable_checks: true
 
+  # Let those ammo/herb checks hold key items too (off: weapons and other useful items, never something needed).
+  consumable_progression: false
+
   # How many placed pesetas pickups per stage (village, castle, island) are checks: 0-50. You keep the money.
   # Enemy drops don't count. Filler-only.
   pesetas_checks: 25

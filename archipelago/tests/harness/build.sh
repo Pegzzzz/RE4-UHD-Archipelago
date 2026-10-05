@@ -18,6 +18,11 @@ sed -i 's/^\s*struct GLOBAL_WK::RTP\* Rtp_4F2C;/\tvoid* Rtp_4F2C;/' "$W/tree/dll
 sed -i 's/struct Message::MessageFont\*/void*/' "$W/tree/dllmain/SDK/message.h"
 sed -i 's/^enum ID_CLASS;/enum ID_CLASS : int;/; s/^enum ID_CLASS\s*$/enum ID_CLASS : int/' "$W/tree/dllmain/SDK/ID.h"
 
+# 1b. the game mod reports the APWorld release it belongs to: they must agree
+MODV=$(grep -o 'kModVersion = "[^"]*"' "$REPO/dllmain/Archipelago.cpp" | cut -d'"' -f2)
+WORLDV=$(python3 -c "import json; print(json.load(open('$REPO/archipelago/apworld/re4uhd/archipelago.json'))['world_version'])")
+[ "$MODV" = "$WORLDV" ] || { echo "kModVersion ($MODV) != world_version ($WORLDV)"; exit 1; }
+
 # 2. slot_data and location ids from the real APWorld
 SKIP_REQUIREMENTS_UPDATE=1 python3 "$H/gen_slot.py" "$W/slot_data.json" > "$W/gen_slot.log" 2>&1 || { tail -5 "$W/gen_slot.log"; exit 1; }
 

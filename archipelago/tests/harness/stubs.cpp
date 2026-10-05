@@ -309,6 +309,13 @@ namespace sim
 	void setHp(int hp) { G()->playerHpCur_4FB4 = int16_t(hp); }
 	int hp() { return G()->playerHpCur_4FB4; }
 	void setPlType(int t) { G()->pl_type_4FC8 = PlayerCharacter(t); }
+	void setDifficulty(int d) { G()->gameDifficulty_847C = GameDifficulty(d); }
+	void setWeaponNum(uint16_t id, uint16_t num)
+	{
+		for (int i = 1; i <= kMaxItems; i++)
+			if ((items[i].be_flag_4 & 1) && items[i].id_0 == ITEM_ID(id))
+				items[i].num_2 = num;
+	}
 	void setGold(int v) { G()->goldAmount_4FA8 = v; }
 	int gold() { return G()->goldAmount_4FA8; }
 	void setBoardSize(int s) { SS()->board_size_2AA = int8_t(s); }

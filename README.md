@@ -34,7 +34,7 @@ with that file if something goes wrong.
 | `dllmain/Archipelago.cpp` | Game-side module: localhost bridge, check detection, item delivery, overlay |
 | `archipelago/apworld/re4uhd/` | The APWorld (items, locations, logic, options) and the launcher client |
 | `archipelago/apworld/re4uhd/rando_bridge.py` | `/setup`: finds the game, installs the mod, drives re_duke's randomizer |
-| `archipelago/tests/harness/` | Runs the game module against a simulated game under wine (63 scenarios) |
+| `archipelago/tests/harness/` | Runs the game module against a simulated game under wine (72 scenarios, plus an end-to-end test with the real client and server) |
 | `archipelago/tools/` | Research data, `build_data.py` (regenerates the location table), packaging, `pattern_scan.py` |
 | `.github/workflows/archipelago.yml` | Builds `dinput8.dll` and `re4uhd.apworld`, runs all tests, publishes releases |
 

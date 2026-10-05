@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.5.3).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5.4).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -109,6 +109,7 @@ The YAML file holds your name and your choices for the randomizer.
 |---|---|---|
 | `shuffle_key_items` | Key items (Insignia Key, False Eye, Card Keys…) can be anywhere in the multiworld. `false` keeps them in their normal spots. | `true` |
 | `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). Enemy drops don't count. | `true` |
+| `consumable_progression` | Let those ammo/herb checks hold key items too. Off: they can still hold weapons and other useful things, never something you need to finish (the number of ammo/herb spots per room comes from guides and may be one too high). | `false` |
 | `pesetas_checks` | How many placed pesetas pickups (cabinets, crates, bird nests…) per stage are checks, 0–50. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `25` |
 | `merchant_checks` | The first time you buy each Merchant item, you send a check. They only hold minor items (the Merchant only sells the next attache case, and may not sell a gun you already have). | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
@@ -160,13 +161,16 @@ Whoever runs the multiworld does this once for the whole group.
 
 ## 6. Play
 
-1. Start **Resident Evil 4** and choose **New Game**. Use a fresh New Game for every new multiworld.
-2. Open the **Archipelago Launcher** → **Resident Evil 4 UHD Client**.
-3. In the client, type the room address in the top bar (for example `archipelago.gg:38281`) and press **Connect**.
+1. Open the **Archipelago Launcher** → **Resident Evil 4 UHD Client**.
+2. In the client, type the room address in the top bar (for example `archipelago.gg:38281`) and press **Connect**.
    Enter your YAML name when asked.
-4. Look at the top-left corner of the game: you should see *"Archipelago: connected as …"*.
+3. Start **Resident Evil 4** and choose **New Game** on **Normal** or **Professional** (Easy isn't supported: it cuts
+   rooms that hold checks). Use a fresh New Game for every new multiworld.
+4. Before you move, look at the top-left corner of the game: wait for *"Save linked to this Archipelago seed"*. If it
+   says *"waiting for…"*, the client isn't connected to the room yet, and nothing you pick up counts until it is.
 
-That's it — play the game.
+That's it — play the game. The top-left corner also shows how many checks are left in the area you're in
+("2 items, 3 ammo/herbs"), so you know when a room is done.
 
 > If Windows Firewall asks about the game or the client, allow it. They talk to each other on your own PC
 > (`127.0.0.1`, port `46400`), nothing is opened to the internet.
@@ -216,9 +220,12 @@ host to use `!release` / `!collect`.
 
 - **Merchant:** picking things up next to the Merchant counts normally; only real purchases count as Merchant
   checks. Attache cases and the tactical vest always take effect. If you equip a check-only purchase right away,
-  it's taken when you switch weapons.
+  it's taken when you switch weapons. Don't tune up a gun you just bought for its check: it's taken back, upgrades
+  and all.
 - **Holy Beast pieces (5-3/5-4):** always in their normal spots, so Krauser's arena can always be opened.
-- **A key item you already have:** picking up the normal copy still sends its check.
+- **A key item you already have:** picking up the normal copy still sends its check. (If the area counter still
+  shows it afterwards, `/check` it.)
+- **The re4_tweaks trainer:** don't spawn items with it; the mod can't tell them from pickups.
 - **Dying / continuing:** checks and items roll back with your save and are counted again when you redo them.
 - **Two saves / two multiworlds:** each save remembers its seed; a save from another seed can't send checks to your
   current room. Start from a normal **New Game** (not New Game+ / clear data).
@@ -242,6 +249,12 @@ Type these in the Resident Evil 4 UHD Client:
 ---
 
 ## 9. Troubleshooting
+
+**"The game mod is out of date"** (in game or in the client)
+You updated the APWorld but not the game mod. Close the game, type `/setup` in the client, start the game again.
+
+**"Easy isn't supported"**
+Start a New Game on Normal or Professional.
 
 **"Archipelago: waiting for the RE4 UHD Client"**
 The client isn't running or isn't connected. Open the client, connect to the room, and check that your firewall

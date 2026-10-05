@@ -308,3 +308,28 @@ class TestLogicAudit(RE4TestBase):
                                                                 "4-1 Treasure Chamber: Broken Butterfly",
                                                                 "2-1 Colosseum: Spinel #1"):
                 self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)
+
+
+class TestConsumablesNoProgression(RE4TestBase):
+    def test_no_progression_on_ammo(self) -> None:
+        from Fill import distribute_items_restrictive
+        from worlds.AutoWorld import call_all
+        call_all(self.multiworld, "pre_fill")
+        distribute_items_restrictive(self.multiworld)
+        consumable = {l["name"] for l in LOCATIONS if l.get("consumable")}
+        n = 0
+        for loc in self.multiworld.get_locations(self.player):
+            if loc.name in consumable:
+                n += 1
+                self.assertFalse(loc.item.advancement, f"{loc.name} holds {loc.item.name}")
+        self.assertGreater(n, 400)
+
+
+class TestConsumableProgressionOn(RE4TestBase):
+    options = {"consumable_progression": True}
+
+    def test_rule_off(self) -> None:
+        consumable = {l["name"] for l in LOCATIONS if l.get("consumable") and not l.get("excluded")}
+        loc = next(l for l in self.multiworld.get_locations(self.player) if l.name in consumable)
+        key = self.world.create_item("Insignia Key")
+        self.assertTrue(loc.item_rule(key))

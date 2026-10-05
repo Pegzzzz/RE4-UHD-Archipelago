@@ -24,10 +24,12 @@ generate as usual (or give it to whoever hosts).
 
 ## Playing
 
-1. Start the game and begin a **New Game** for each new seed.
-2. Open the Archipelago Launcher and click **Resident Evil 4 UHD Client**.
-3. Connect the client to the room (for example `archipelago.gg:38281`) and enter your slot name.
-4. In game, the top-left corner shows the connection state and every item sent or received.
+1. Open the Archipelago Launcher and click **Resident Evil 4 UHD Client**.
+2. Connect the client to the room (for example `archipelago.gg:38281`) and enter your slot name.
+3. Start the game and begin a **New Game** on **Normal** or **Professional** for each new seed (Easy cuts rooms with
+   checks and isn't supported).
+4. Wait for *"Save linked to this Archipelago seed"* in the top-left corner before you move; it also shows the
+   connection state, every item sent or received, and how many checks are left in the current area.
 
 The client and the game talk over `127.0.0.1:46400`. Allow it if your firewall asks.
 
@@ -37,7 +39,8 @@ The client and the game talk over `127.0.0.1:46400`. Allow it if your firewall a
   holds arrives a moment later, with a message.
 - Items arrive only during normal gameplay (not in menus, cutscenes or the Merchant). If the attache case is full,
   the game opens the usual "organize" screen.
-- Merchant checks fire on the first purchase of each item; you keep what you bought.
+- Merchant checks fire on the first purchase of each item. With `merchant_purchases: check_only` (the default) the
+  item is taken back when you leave the shop; it's somewhere in the multiworld. Attache cases and the vest stay.
 - Your save remembers how many Archipelago items it has already received, so dying, continuing, or loading an older
   save re-delivers items correctly.
 
@@ -45,7 +48,8 @@ The client and the game talk over `127.0.0.1:46400`. Allow it if your firewall a
 
 The village, castle and island each lock behind you. If an item you need is stuck in an area you can no longer
 reach, press **F1** to open the re4_tweaks menu, go to the **Trainer** tab and use **Area Jump** to go back.
-You can also ask the host to `!release`/`!collect`.
+If the mod missed a check you collected, type `/check <location>` in the client. You can also ask the host to
+`!release`/`!collect`.
 
 ## Random enemies (re_duke's randomizer)
 

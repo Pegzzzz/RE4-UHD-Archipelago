@@ -21,6 +21,8 @@ namespace sim
 	void setHp(int hp);
 	int hp();
 	void setPlType(int t);
+	void setDifficulty(int d);           // GLOBAL_WK gameDifficulty (3 Easy, 5 Normal, 6 Professional)
+	void setWeaponNum(uint16_t id, uint16_t num); // a weapon entry's num field (loaded ammo)
 	void setGold(int g);
 	int gold();
 	void setBoardSize(int s);

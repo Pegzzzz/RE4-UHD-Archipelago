@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional
 import Utils
 from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, handle_url_arg,
                           logger, server_loop)
+from MultiServer import mark_raw
 from NetUtils import ClientStatus, NetworkItem
 
 from . import rando_bridge
@@ -36,7 +37,17 @@ from . import rando_bridge
 GAME_NAME = "Resident Evil 4 UHD"
 GAME_HOST = "127.0.0.1"
 GAME_PORT = 46400
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2  # 2: checks/goal carry the save's seed tag, received items carry their location
+
+
+def world_version() -> str:
+    """This APWorld's version (archipelago.json), which the bundled game mod reports too."""
+    try:
+        import pkgutil
+        raw = pkgutil.get_data(__name__.rsplit(".", 1)[0], "archipelago.json")
+        return json.loads(raw.decode("utf-8")).get("world_version", "") if raw else ""
+    except Exception:
+        return ""
 
 
 def get_game_folder_setting() -> Optional[str]:
@@ -96,12 +107,13 @@ class RE4CommandProcessor(ClientCommandProcessor):
             logger.info(f"Game mod: {state}. Save received-item index: {self.ctx.game_received}")
         return True
 
+    @mark_raw
     def _cmd_setup(self, folder: str = "") -> bool:
         """Set up the game: install the Archipelago game mod, and (if your YAML uses re_duke_randomizer)
         prepare re_duke's randomizer and open it so you can click Generate Seed.
         Optional: the game folder, if it isn't found automatically (the folder that contains Bin32)."""
         if isinstance(self.ctx, RE4Context):
-            self.ctx.run_setup(folder.strip().strip('"') or None)
+            self.ctx.run_setup(folder.strip().strip('"').strip("'").rstrip("\\/") or None)
         return True
 
     def _cmd_rando(self) -> bool:
@@ -121,12 +133,13 @@ class RE4CommandProcessor(ClientCommandProcessor):
         return True
 
 
-    def _cmd_check(self, *location: str) -> bool:
+    @mark_raw
+    def _cmd_check(self, location: str = "") -> bool:
         """Send one of your own locations by hand, for a check the game mod missed.
         Example: /check 1-1 Old House Road: Spinel #1"""
         if not isinstance(self.ctx, RE4Context):
             return False
-        query = " ".join(location).strip()
+        query = location.strip().strip('"')
         if not self.ctx.slot:
             logger.info("Connect to the room first.")
             return False
@@ -207,7 +220,7 @@ class RE4Context(CommonContext):
             # slot doesn't use it, but it may be installed anyway: random enemies only, Merchant left alone so
             # this slot's Merchant checks still work, items/doors off
             settings = rando_bridge.rando_settings(0, True, True, False, False,
-                                                   1 + zlib.crc32((self.seed_name or "").encode()) % 99)
+                                                   1 + zlib.crc32(self.room_seed().encode()) % 99)
             logger.info("Your YAML doesn't use re_duke's randomizer (re_duke_randomizer: false), so the profile only "
                         "randomizes enemies and keeps items, doors and the Merchant normal.")
         game = game or self.game_folder()
@@ -285,11 +298,13 @@ class RE4Context(CommonContext):
         await self.send_connect()
 
     def on_package(self, cmd: str, args: Dict[str, Any]) -> None:
+        if cmd == "RoomInfo":
+            self._room_seed_name = args.get("seed_name") or ""
         if cmd == "Connected":
-            if getattr(self, "_last_slot", None) not in (None, (self.seed_name, self.slot)):
+            if getattr(self, "_last_slot", None) not in (None, (self.room_seed(), self.slot)):
                 self.goal_pending = False  # a different slot: an earlier slot's goal doesn't carry over
                 self.unsent_checks.clear()
-            self._last_slot = (self.seed_name, self.slot)
+            self._last_slot = (self.room_seed(), self.slot)
             self.slot_data = args.get("slot_data", {}) or {}
             if self.slot_data.get("death_link"):
                 Utils.async_start(self.update_death_link(True))
@@ -326,7 +341,7 @@ class RE4Context(CommonContext):
         receiving = args.get("receiving")
         if item.player == self.slot and receiving != self.slot:
             name = self.item_names.lookup_in_slot(item.item, receiving)
-            self.send_game({"cmd": "message", "text": f"Sent {name} to {self.player_names[receiving]}"})
+            self.send_game({"cmd": "message", "text": f"Sent {name} to {self.player_names.get(receiving, 'someone')}"})
 
     def on_deathlink(self, data: Dict[str, Any]) -> None:
         super().on_deathlink(data)
@@ -335,24 +350,35 @@ class RE4Context(CommonContext):
     def config_dict(self) -> Dict[str, Any]:
         return {
             "cmd": "config",
-            "seed": self.seed_name or "",
+            "seed": self.room_seed(),
             "slot": self.auth or "",
-            "save_tag": save_tag(self.seed_name or "", self.slot or 0, self.team or 0),
+            "save_tag": save_tag(self.room_seed(), self.slot or 0, self.team or 0),
             "slot_data": self.slot_data,
         }
 
     def expected_tag(self) -> Optional[int]:
         """The seed tag of the room we're connected to (None before connecting: then nothing can match)."""
-        if not self.slot or not self.seed_name:
+        if not self.slot or not self.room_seed():
             return None
-        return save_tag(self.seed_name, self.slot, self.team or 0)
+        return save_tag(self.room_seed(), self.slot, self.team or 0)
+
+    def room_seed(self) -> str:
+        """The seed name of the room we're connected to. Archipelago 0.6.8+ reports it as server_seed_name (seed_name
+        is only set from a patch file there); on 0.6.7 it's taken from RoomInfo here."""
+        return (getattr(self, "server_seed_name", None) or getattr(self, "_room_seed_name", None) or
+                self.seed_name or "")
+
+    def connected_to_slot(self) -> bool:
+        """Connected to a room and logged into a slot (after a connection loss CommonClient clears slot/team but
+        keeps slot_data: a config built then would carry the wrong seed tag)."""
+        return bool(self.slot_data) and self.slot is not None and bool(self.room_seed())
 
     def send_config(self) -> None:
-        if self.slot_data:
+        if self.connected_to_slot():
             self.send_game(self.config_dict())
 
     def send_items(self) -> None:
-        if not self.slot_data:
+        if not self.connected_to_slot():
             return
         items: List[Dict[str, Any]] = []
         # the full list, with where each item was found: the game skips copies of items Leon kept at their own
@@ -364,7 +390,7 @@ class RE4Context(CommonContext):
         self.send_game({"cmd": "items", "items": items})
 
     def send_checked(self) -> None:
-        if self.slot_data:
+        if self.connected_to_slot():
             self.send_game({"cmd": "checked", "locations": sorted(self.checked_locations)})
 
     # ---- game side --------------------------------------------------------------
@@ -380,8 +406,13 @@ class RE4Context(CommonContext):
         cmd = msg.get("cmd")
         if cmd == "hello":
             self.game_received = msg.get("received", -1)
-            if msg.get("version") != PROTOCOL_VERSION:
-                logger.warning("Game mod and client versions differ; update both from the same release.")
+            mod = msg.get("mod_version", "")
+            mine = world_version()
+            if msg.get("version") != PROTOCOL_VERSION or (mine and mod != mine):
+                logger.warning(f"The game mod ({mod or 'older than 0.5.4'}) doesn't match this APWorld ({mine}). "
+                               "Close the game, type /setup to update the game mod, then start the game again.")
+                self.send_game({"cmd": "message", "text": "Archipelago: the game mod is out of date. Close the game "
+                                                         "and type /setup in the client."})
             logger.info("Game mod connected.")
             self.send_config()
             self.send_items()
@@ -450,7 +481,7 @@ class RE4Context(CommonContext):
         if info.player == self.slot:
             self.send_game({"cmd": "message", "text": f"Found {name}"})
         else:
-            self.send_game({"cmd": "message", "text": f"Found {name} for {self.player_names[info.player]}"})
+            self.send_game({"cmd": "message", "text": f"Found {name} for {self.player_names.get(info.player, 'someone')}"})
 
     async def game_loop(self) -> None:
         while not self.exit_event.is_set():

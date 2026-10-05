@@ -16,6 +16,14 @@ class ConsumableChecks(DefaultOnToggle):
     display_name = "Consumable Checks"
 
 
+class ConsumableProgression(Toggle):
+    """Let ammo/herb/grenade checks hold progression items (key items, card keys...).
+    Off (recommended): they can still hold weapons and other useful items, just never something you need to finish.
+    How many ammo/herb spots each room has comes from community guides; if a guide counted one too many, that spot
+    can never be collected, and with this on, a key item could be stuck there."""
+    display_name = "Consumable Progression"
+
+
 class MerchantChecks(DefaultOnToggle):
     """The first purchase of each weapon or item the Merchant sells is a check.
     You still receive the item you bought."""
@@ -172,6 +180,7 @@ class EnemyRandomizerCompat(Toggle):
 class RE4Options(PerGameCommonOptions):
     shuffle_key_items: ShuffleKeyItems
     consumable_checks: ConsumableChecks
+    consumable_progression: ConsumableProgression
     merchant_checks: MerchantChecks
     merchant_purchases: MerchantPurchases
     bonus_treasure_checks: BonusTreasureChecks
@@ -193,7 +202,7 @@ class RE4Options(PerGameCommonOptions):
 
 
 OPTION_GROUPS = [
-    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, PesetasChecks, MerchantChecks, MerchantPurchases,
+    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, ConsumableProgression, PesetasChecks, MerchantChecks, MerchantPurchases,
                            BonusTreasureChecks, BossChecks, ShootingGalleryChecks]),
     OptionGroup("Starting Inventory", [StartingWeapon, StartingSupplies, StartingPesetas]),
     OptionGroup("Enemies", [RandomEnemyHealth]),

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.4
+Third audit (code read-through, a fresh review, game-mechanics research, and a new end-to-end test):
+- **Save tags fixed for Archipelago 0.6.7/0.6.8:** the client built the save's seed tag from a seed name those
+  versions don't set, so every multiworld got the same tag and a save from another seed wasn't recognized. It now
+  uses the room's seed. No config/items go to the game while the client is between server connections.
+- **Easy is refused** (it removes rooms with checks: Castle Gate Key, hedge maze/Moonstones, King's Grail, clock
+  tower). New games on Easy aren't linked; play Normal or Professional.
+- **Ammo/herb checks never hold progression** unless `consumable_progression: true` (room counts come from guides).
+  They still hold weapons and other useful items.
+- Weapons always count as one item (a gun's number field never looks like several guns).
+- A location holding its own vanilla item no longer also takes another location by stage.
+- One attache case purchase is one check even if the case grows a few frames before/after the item appears.
+- A key item Leon already holds is counted even if he leaves the room right away or picked up ammo just before.
+- Assignment Ada (island rooms) is ignored; the overlay shows how many item and ammo/herb checks are left in the
+  current area (filler-only/doubtful ones aren't counted); "waiting for server" shows while only last session's
+  config is known.
+- The game mod reports its version: the client says so if `/setup` wasn't run after updating.
+- Client: `/setup` and `/check` take their whole argument (paths, apostrophes); unknown player names can't drop the
+  connection.
+- Death/continue are logged with the received index, to confirm in game that checkpoints restore it.
+- New end-to-end test in CI: the game module (simulated game) + the real client + a real MultiServer, on
+  Archipelago 0.6.7 and 0.6.8.
+
 ## 0.5.3
 Second audit (independent code review plus a logic check against the community Manual, Evil Resource and
 StrategyWiki):

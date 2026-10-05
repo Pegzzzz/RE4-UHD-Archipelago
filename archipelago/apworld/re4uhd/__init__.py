@@ -205,6 +205,9 @@ class RE4World(World):
             if loc.get("excluded") or loc["kind"] in FILLER_ONLY_KINDS or loc["name"] in FILLER_ONLY_NAMES or \
                     set(loc.get("game_items", [])) & FILLER_ONLY_GAME_ITEMS:
                 location.progress_type = LocationProgressType.EXCLUDED  # may not be obtainable: filler only
+            elif loc.get("consumable") and not self.options.consumable_progression:
+                # room counts come from guides and may be one too high: never strand something needed there
+                location.item_rule = lambda item: not item.advancement
             region.locations.append(location)
 
         victory = RE4Location(self.player, "Defeat Saddler", None, regions["Final"])
@@ -288,6 +291,8 @@ class RE4World(World):
                 entry["cut"] = 1
             if l["kind"] in ("bonus", "pesetas"):
                 entry["stage"] = l["stage"]
+            if self.multiworld.get_location(l["name"], self.player).progress_type == LocationProgressType.EXCLUDED:
+                entry["x"] = 1  # filler-only / may not exist: the in-game "checks here" counter leaves it out
             if l.get("consumable"):
                 entry["c"] = 1
             elif l["kind"] == "pickup":

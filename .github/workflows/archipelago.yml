@@ -82,6 +82,12 @@ jobs:
           SKIP_REQUIREMENTS_UPDATE: "1"
         run: archipelago/tests/harness/build.sh
 
+      - name: End-to-end (game module + real client + real MultiServer)
+        env:
+          AP: ${{ github.workspace }}/ap
+          SKIP_REQUIREMENTS_UPDATE: "1"
+        run: archipelago/tests/harness/e2e.sh
+
   dll:
     name: Game mod (dinput8.dll)
     runs-on: windows-2025-vs2026

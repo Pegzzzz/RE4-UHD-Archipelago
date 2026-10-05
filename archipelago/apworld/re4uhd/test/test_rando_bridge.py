@@ -292,7 +292,7 @@ class TestClientRobustness(unittest.TestCase):
             ctx.send_game = lambda m: sent.append(m)
             ctx.slot = 1
             ctx.team = 0
-            ctx.seed_name = "S1"
+            ctx.server_seed_name = "S1"
             ctx.slot_data = {"keep_locations": [7741500]}
             ctx.item_names = type("N", (), {"lookup_in_slot": lambda self, i, s=None: str(i)})()
             ctx.items_received = [NetworkItem(7740059, 7741500, 1, 0), NetworkItem(7740062, 7741001, 2, 0)]
@@ -319,8 +319,63 @@ class TestClientRobustness(unittest.TestCase):
         async def run():
             ctx = C.RE4Context(None, None)
             self.assertIsNone(ctx.expected_tag())
-            ctx.slot, ctx.team, ctx.seed_name = 2, 0, "ABC"
+            # Archipelago 0.6.8+ reports the room's seed as server_seed_name (seed_name stays None)
+            ctx.slot, ctx.team, ctx.server_seed_name = 2, 0, "ABC"
             self.assertEqual(ctx.expected_tag(), C.save_tag("ABC", 2, 0))
+            self.assertEqual(ctx.config_dict()["save_tag"], C.save_tag("ABC", 2, 0))
+            ctx.server_seed_name = "XYZ"
+            self.assertNotEqual(ctx.expected_tag(), C.save_tag("ABC", 2, 0), "another seed, another tag")
+            await ctx.shutdown()
+
+        asyncio.run(run())
+
+
+class TestModVersionHandshake(unittest.TestCase):
+    """An out-of-date game mod (the APWorld was updated, /setup wasn't run) is reported in the client and in game."""
+
+    def test_mismatch_and_match(self) -> None:
+        import asyncio
+        from unittest import mock
+        from .. import client as C
+
+        async def run():
+            ctx = C.RE4Context(None, None)
+            sent, warnings = [], []
+            ctx.send_game = lambda m: sent.append(m)
+            with mock.patch.object(C.logger, "warning", lambda m, *a: warnings.append(m)):
+                await ctx.handle_game_message({"cmd": "hello", "version": 1, "save_tag": 0, "received": -1})
+                self.assertTrue(any("/setup" in w for w in warnings))
+                self.assertTrue(any(m.get("cmd") == "message" for m in sent))
+                warnings.clear()
+                await ctx.handle_game_message({"cmd": "hello", "version": C.PROTOCOL_VERSION,
+                                               "mod_version": C.world_version(), "save_tag": 0, "received": -1})
+                self.assertEqual(warnings, [])
+            self.assertTrue(C.world_version())
+            await ctx.shutdown()
+
+        asyncio.run(run())
+
+
+
+class TestNoConfigWithoutSlot(unittest.TestCase):
+    """After a server connection loss CommonClient clears slot/team but keeps slot_data: no config, items or
+    checked list may go to the game then (the seed tag would be wrong)."""
+
+    def test_gap(self) -> None:
+        import asyncio
+        from .. import client as C
+
+        async def run():
+            ctx = C.RE4Context(None, None)
+            sent = []
+            ctx.send_game = lambda m: sent.append(m)
+            ctx.slot_data = {"locations": []}
+            ctx.slot, ctx.team, ctx.server_seed_name = None, None, "S1"
+            ctx.send_config(); ctx.send_items(); ctx.send_checked()
+            self.assertEqual(sent, [])
+            ctx.slot, ctx.team = 1, 0
+            ctx.send_config()
+            self.assertEqual(sent[-1]["save_tag"], C.save_tag("S1", 1, 0))
             await ctx.shutdown()
 
         asyncio.run(run())

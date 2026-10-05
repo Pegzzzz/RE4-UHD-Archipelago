@@ -46,7 +46,8 @@ using json = nlohmann::json;
 namespace ap
 {
 	constexpr uint16_t kPort = 46400;
-	constexpr int kProtocolVersion = 1;
+	constexpr int kProtocolVersion = 2; // 2: checks/goal carry the seed tag, received items carry their location
+	constexpr const char* kModVersion = "0.5.4"; // the APWorld release this build belongs to (checked by the client)
 
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
 	constexpr int kSlotBits = 28;   // 32 slots (28..59) = 1024 location bits
@@ -68,7 +69,7 @@ namespace ap
 	constexpr int kLegacyAfterUnflagged = 8;
 	constexpr int kFlagSettleFrames = 15;    // a flip is only handed out once this old (lets nearby pickups register)
 	constexpr int kDecideFrames = kFlagAfterFrames + kFlagSettleFrames + 5; // a pickup without a flag by then is a drop
-	constexpr int kPrevRoomWatchFrames = 300; // keep watching the room just left (flags land ~1s after a pickup) // never saw a flag after this many supply pickups: count them all
+	constexpr int kPrevRoomWatchFrames = 300; // keep watching the room just left (flags land ~1s after a pickup)
 
 	constexpr uint16_t kRoomStart = 0x100;
 	constexpr uint16_t kRoomOpening = 0x120;
@@ -90,6 +91,7 @@ namespace ap
 		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
 		int stage = 0;           // bonus treasure / pesetas: 1 village, 2 castle, 3 island
 		bool keep = false;       // holds its own vanilla item for this player: send the check, leave the item
+		bool excluded = false;   // filler-only / may not exist: left out of the "checks here" counter
 	};
 
 	struct ItemDef
@@ -125,7 +127,9 @@ namespace ap
 	// ---------------- UI / log state (shared) -----------------------------------------------
 	std::mutex toastMutex;
 	std::deque<Toast> toasts;
-	std::atomic<int> uiStatus{ 0 }; // 0 waiting for client, 1 waiting for server, 2 ready, 3 save mismatch, 4 save not linked
+	std::atomic<int> uiStatus{ 0 }; // 0 waiting for client, 1 waiting for server, 2 ready, 3 save mismatch, 4 save not linked, 5 easy
+	std::atomic<int> uiRoomChecks{ 0 };   // item checks not yet collected in the current room (game thread computes)
+	std::atomic<int> uiRoomSupplies{ 0 }; // ammo/herb checks not yet collected in the current room
 	std::mutex logMutex;
 	std::deque<std::string> consoleQueue; // lines for con.log, flushed on the main thread
 	std::filesystem::path logFile;
@@ -159,6 +163,7 @@ namespace ap
 	uint64_t lastGrantFrame = 0;
 	uint64_t lastKillFrame = 0;
 	bool wasDead = false;
+	bool loggedContinue = true;
 	bool pendingKill = false;
 	bool goalReported = false;
 	int saveState = 0; // 0 unknown, 1 bound to this seed, 2 other seed, 3 not linked
@@ -195,10 +200,15 @@ namespace ap
 	struct Reveal { uint64_t frame; bool container; }; // container: popped out of a barrel/crate (both flags at once)
 	std::map<uint16_t, std::map<int, Reveal>> revealed; // room -> bit -> when it appeared
 	uint64_t roomEnteredFrame = 0;
-	uint64_t lastAnyPickupFrame = 0; // any item appearing in the inventory (for SilentTake)
+	uint64_t lastAnyPickupFrame = 0; // any item appearing in the inventory
+	// treasures/key items whose own room flag never turned up (frame, room): a flag that comes later is probably
+	// theirs (drops aren't listed: they never get a flag)
+	std::deque<std::pair<uint64_t, uint16_t>> flaglessPickups;
 	uint64_t lastCombineFrame = 0; // a treasure/key item went away (combined in the inventory screen)
 	bool itemDecreasedNow = false;  // some item went away in this frame's diff (a sale at the Merchant)
 	std::unordered_set<uint16_t> soldToMerchant; // sold this session: buying it back isn't a check-only purchase
+	uint64_t lastCaseGrowFrame = 0;
+	uint64_t lastCaseItemFrame = 0; // a case item (125-127) showed up: the case growing around then is the same purchase
 	uint64_t lastMerchantNearFrame = 0; // STA_INTO_SHOP: set the whole time Leon is near a Merchant, not just in the menu
 	uint32_t refusedIndex = UINT32_MAX; // received item the game refused: retried every few seconds
 	uint64_t refusedFrame = 0;
@@ -276,7 +286,16 @@ namespace ap
 	{
 		if (!clientConnected)
 			return;
-		std::string line = msg.dump() + "\n";
+		std::string line;
+		try
+		{
+			// invalid UTF-8 (a name, a log line) must never throw on the game thread
+			line = msg.dump(-1, ' ', false, json::error_handler_t::replace) + "\n";
+		}
+		catch (...)
+		{
+			return;
+		}
 		{
 			std::lock_guard<std::mutex> lock(outboxMutex);
 			if (outbox.size() > 4000)
@@ -444,7 +463,20 @@ namespace ap
 	bool IsMainGame()
 	{
 		GLOBAL_WK* g = GlobalPtr();
-		return g && g->curRoomId_4FAC < 0x400; // 0x4xx Mercenaries/Assignment Ada, 0x5xx Separate Ways
+		if (!g || g->curRoomId_4FAC >= 0x400) // 0x4xx Mercenaries, 0x5xx Separate Ways
+			return false;
+		// Assignment Ada reuses island rooms: only Leon's (and Ashley's) story counts
+		PlayerCharacter pc = g->pl_type_4FC8;
+		return pc == PlayerCharacter::Leon || pc == PlayerCharacter::Ashley || pc == PlayerCharacter::LeonAshley;
+	}
+
+	// Easy (and the internal "Amateur") cut whole rooms that hold checks: the Castle Gate Key room, the hedge maze
+	// with the Moonstones, the King's Grail room, the clock tower
+	bool IsEasyMode()
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		int d = g ? int(g->gameDifficulty_847C) : 0;
+		return d >= int(GameDifficulty::VeryEasy) && d < int(GameDifficulty::Medium);
 	}
 
 	bool IsLeon()
@@ -505,12 +537,38 @@ namespace ap
 		}
 	}
 
+	// How many of an item one inventory entry stands for: its stack size for stackable items, otherwise 1
+	// (a weapon's num field isn't a count, so it must never look like several weapons)
+	uint16_t EntryCount(const cItem* item)
+	{
+		static int16_t maxNum[272];
+		static bool init = false;
+		if (!init)
+		{
+			for (auto& m : maxNum)
+				m = -1;
+			init = true;
+		}
+		int id = int(item->id_0);
+		if (id < 0 || id >= 272)
+			return 1;
+		if (maxNum[id] < 0)
+		{
+			ITEM_INFO info;
+			bio4::itemInfo(ITEM_ID(id), &info);
+			maxNum[id] = int16_t(info.maxNum_4);
+		}
+		if (maxNum[id] <= 1)
+			return 1;
+		return item->num_2 ? item->num_2 : 1;
+	}
+
 	void TakeSnapshot(std::unordered_map<uint16_t, uint32_t>& inv, std::unordered_set<cItem*>& ptrs)
 	{
 		inv.clear();
 		ptrs.clear();
 		ForEachItem([&](cItem* item) {
-			uint16_t num = item->num_2 ? item->num_2 : 1;
+			uint16_t num = EntryCount(item);
 			inv[uint16_t(item->id_0)] += num;
 			ptrs.insert(item);
 			return true;
@@ -527,7 +585,7 @@ namespace ap
 		uint32_t total = 0;
 		ForEachItem([&](cItem* item) {
 			if (uint16_t(item->id_0) == id)
-				total += item->num_2 ? item->num_2 : 1;
+				total += EntryCount(item);
 			return true;
 		});
 		return total;
@@ -571,7 +629,7 @@ namespace ap
 				equippedLeft = true;
 				continue;
 			}
-			uint16_t num = item->num_2 ? item->num_2 : 1;
+			uint16_t num = EntryCount(item);
 			if (num > count)
 			{
 				item->num_2 = uint16_t(num - count);
@@ -696,9 +754,12 @@ namespace ap
 			// only a brand new game is linked automatically
 			// (not with the last session's config from disk: the new game may be for a new seed)
 			bool freshGame = (g->curRoomId_4FAC == kRoomStart || g->curRoomId_4FAC == kRoomOpening);
-			if (freshGame && !configFromDisk)
+			if (freshGame && IsEasyMode())
+				state = 5;
+			else if (freshGame && !configFromDisk)
 			{
 				BindSave();
+				Log("Difficulty " + std::to_string(int(g->gameDifficulty_847C)));
 				state = 1;
 			}
 			else
@@ -717,6 +778,13 @@ namespace ap
 					? "Waiting for the Archipelago client to connect to your room..."
 					: "This save belongs to a different Archipelago seed! Load the right save, or /bindsave to relink it.");
 			}
+			else if (state == 5)
+			{
+				Log("New game on Easy: not linked");
+				AddToast("Easy cuts rooms that hold checks. Start a New Game on Normal or Professional.");
+			}
+			else if (state == 1 && IsEasyMode())
+				AddToast("Warning: this save is on Easy, which cuts rooms that hold checks.");
 			else if (state == 3)
 			{
 				Log("Loaded save is not linked to Archipelago");
@@ -725,7 +793,7 @@ namespace ap
 					: "This save isn't linked to Archipelago. Start a New Game, or type /bindsave in the client.");
 			}
 		}
-		uiStatus = !clientConnected ? 0 : (state == 1 ? 2 : (state == 2 ? 3 : 4));
+		uiStatus = !clientConnected ? 0 : configFromDisk ? 1 : (state == 1 ? 2 : state == 2 ? 3 : state == 5 ? 5 : 4);
 		return state == 1;
 	}
 
@@ -790,7 +858,8 @@ namespace ap
 	// Returns true if the item came from a check (and must be removed).
 	bool HandlePickup(uint16_t id, uint16_t room, bool onlyCutscene)
 	{
-		auto pass = [&](bool stageWide) -> bool {
+		// 0 no match, 1 matched (remove the item), 2 matched a location that keeps its vanilla item
+		auto pass = [&](bool stageWide) -> int {
 			for (auto& loc : locations)
 			{
 				if (loc.kind != Kind::Pickup || loc.consumable || !HasItem(loc, id) || SaveBit(loc.offset))
@@ -803,13 +872,16 @@ namespace ap
 					SendLog("Matched " + std::string(ItemName(id)) + " in room r" + Hex(room) + " to location " +
 						std::to_string(loc.id) + " (room r" + Hex(loc.room) + " in the data) by stage");
 				SendCheck(loc, std::string("picked up ") + ItemName(id));
-				return !loc.keep;
+				return loc.keep ? 2 : 1;
 			}
-			return false;
+			return 0;
 		};
 
-		if (pass(false) || pass(true))
-			return true;
+		int matched = pass(false);
+		if (!matched)
+			matched = pass(true);
+		if (matched)
+			return matched == 1;
 
 		if (!onlyCutscene && IsTreasureType(id))
 		{
@@ -885,14 +957,16 @@ namespace ap
 
 	// A room item flag turned on with no item showing up in the inventory: the game merged a key item Leon already
 	// holds (his copy came from the multiworld). Counts for an unchecked key-item location in this room.
-	void SilentTake(uint16_t room)
+	void SilentTake(uint16_t room, uint64_t flipFrame)
 	{
 		GLOBAL_WK* g = GlobalPtr();
-		if (!IsLeon() || !g || g->curRoomId_4FAC != room)
+		if (!IsLeon() || !g)
 			return;
-		// an item showed up around then: this is most likely its late flag (e.g. a long look at a treasure)
-		if (lastAnyPickupFrame && frame - lastAnyPickupFrame < uint64_t(kFlagBeforeFrames + kDecideFrames) * 3)
-			return;
+		// a pickup in this room shortly before had no flag of its own: this is most likely its late flag
+		// (e.g. a long look at a treasure's description)
+		for (auto& [pf, proom] : flaglessPickups)
+			if (proom == room && pf <= flipFrame && flipFrame - pf < 900)
+				return;
 		for (auto& loc : locations)
 		{
 			if (loc.kind != Kind::Pickup || loc.consumable || loc.room != room || SaveBit(loc.offset))
@@ -909,6 +983,13 @@ namespace ap
 				}
 			}
 		}
+	}
+
+	void RememberFlagless(const SupplyPickup& p)
+	{
+		flaglessPickups.push_back({ p.frame, p.room });
+		while (flaglessPickups.size() > 32)
+			flaglessPickups.pop_front();
 	}
 
 	void SaveLearnedState()
@@ -960,7 +1041,7 @@ namespace ap
 				// nobody picked anything up near it (Ashley, a cutscene item, a barrel's contents appearing...),
 				// or the game took an item without the inventory growing: a key item Leon already holds
 				if (!revealed[f->room].count(f->bit))
-					SilentTake(f->room);
+					SilentTake(f->room, f->frame);
 				f = unclaimedFlips.erase(f);
 			}
 			else
@@ -973,6 +1054,8 @@ namespace ap
 			SupplyPickup& p = *it;
 			if (p.other)
 			{
+				if (!p.matched && frame - p.frame > kDecideFrames)
+					RememberFlagless(p);
 				if (p.matched || frame - p.frame > kDecideFrames)
 					it = pendingSupplies.erase(it);
 				else
@@ -1204,7 +1287,11 @@ namespace ap
 					}
 			}
 			else if (id >= 125 && id <= 127)
-				checked = CheckCasePurchase(id);
+			{
+				bool sizeJustGrew = lastCaseGrowFrame && frame - lastCaseGrowFrame <= kShopWindowFrames;
+				lastCaseItemFrame = frame; // the case size grows with the same purchase: one check, not two
+				checked = sizeJustGrew ? false : CheckCasePurchase(id);
+			}
 			else
 			{
 				for (auto& loc : locations)
@@ -1356,8 +1443,11 @@ namespace ap
 		}
 
 		// Attache case bought from the Merchant (case size changes instead of an item appearing)
-		if (caseSize > prevCaseSize && prevCaseSize >= 0 && (menu || nearMerchant || goldDelta < 0))
+		// (the item path runs first in this same function, so a same-frame case item is already recorded)
+		bool caseItemJustNow = lastCaseItemFrame && frame - lastCaseItemFrame <= kShopWindowFrames;
+		if (caseSize > prevCaseSize && prevCaseSize >= 0 && (menu || nearMerchant || goldDelta < 0) && !caseItemJustNow)
 		{
+			lastCaseGrowFrame = frame;
 			CheckCasePurchase(uint16_t(124 + caseSize));
 		}
 
@@ -1609,8 +1699,8 @@ namespace ap
 					Resnapshot();
 					if (++refusedTries < 30)
 						return false;
-					SendLog("Gave up adding " + label + " after 30 tries; ask the host to send it again (/send)");
-					AddToast("Couldn't add " + label + ". Ask the host to send it again.");
+					SendLog("Gave up adding " + label + " after 30 tries. Make room, then ask the host to type: /send <your name> " + label);
+					AddToast("Couldn't add " + label + ". Make room, then ask the host to /send it to you again.");
 				}
 				else
 					SendLog("Item " + label + " could not be added (game refused it)");
@@ -1680,6 +1770,8 @@ namespace ap
 		bool dead = g->playerHpCur_4FB4 <= 0 || Status(Flags_STATUS::STA_DIEDEMO);
 		if (dead && !wasDead)
 		{
+			Log("[death] received index " + std::to_string(AppliedIndex()) + ", gold " + std::to_string(g->goldAmount_4FA8));
+			loggedContinue = false;
 			pendingRemovals.clear(); // the game is about to roll back to the last checkpoint
 			pendingGrant = {};
 			pendingSupplies.clear();
@@ -1689,6 +1781,12 @@ namespace ap
 				Send({ {"cmd", "death"} });
 		}
 		wasDead = dead;
+		if (!dead && !loggedContinue)
+		{
+			// the first frame back after a death: shows whether the checkpoint restored the save work too
+			loggedContinue = true;
+			Log("[continue] received index " + std::to_string(AppliedIndex()) + ", gold " + std::to_string(g->goldAmount_4FA8));
+		}
 
 		if (pendingKill && SafeForInventory())
 		{
@@ -1755,6 +1853,7 @@ namespace ap
 			d.consumable = l.value("c", 0) != 0;
 			d.stage = l.value("stage", 0);
 			d.keep = l.value("keep", 0) != 0;
+			d.excluded = l.value("x", 0) != 0;
 			for (auto& i : l.value("items", json::array()))
 				d.items.push_back(i.get<int>());
 			if (d.offset < 0 || d.offset >= kBitSlots * 32)
@@ -1807,7 +1906,7 @@ namespace ap
 			try
 			{
 				std::ofstream f(configFile, std::ios::trunc);
-				f << msg.dump();
+				f << msg.dump(-1, ' ', false, json::error_handler_t::replace);
 			}
 			catch (...) {}
 		}
@@ -1880,6 +1979,8 @@ namespace ap
 						AddToast("This save is already linked to this seed");
 					else if (configFromDisk)
 						AddToast("Connect the client to the room first, then /bindsave");
+					else if (IsEasyMode())
+						AddToast("Easy cuts rooms that hold checks: play on Normal or Professional");
 					else if (configured && InMainLoop() && IsMainGame())
 					{
 						BindSave();
@@ -1915,7 +2016,7 @@ namespace ap
 	{
 		uint32_t* w = SaveWork();
 		bool linked = w && w[kSlotMagic] == kSaveMagic;
-		Send({ {"cmd", "hello"}, {"version", kProtocolVersion},
+		Send({ {"cmd", "hello"}, {"version", kProtocolVersion}, {"mod_version", kModVersion},
 			{"save_tag", linked ? w[kSlotTag] : 0},
 			{"received", linked ? int(w[kSlotIndex]) : -1} });
 	}
@@ -1935,6 +2036,8 @@ namespace ap
 		GLOBAL_WK* g = GlobalPtr();
 		if (!configured || !InMainLoop() || !IsMainGame())
 		{
+			uiRoomChecks = 0;
+			uiRoomSupplies = 0;
 			resetSnapshot = true;
 			if (!trackedBosses.empty() && !(g && g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::Option)))
 				FinalBossScan(prevRoom);
@@ -1994,6 +2097,15 @@ namespace ap
 
 		DiffInventory();
 		ResolveSupplies();
+		if (frame % 30 == 0)
+		{
+			int items = 0, supplies = 0;
+			for (auto& loc : locations)
+				if (loc.kind == Kind::Pickup && !loc.excluded && loc.room == int(g->curRoomId_4FAC) && !EventDone(loc))
+					(loc.consumable ? supplies : items)++;
+			uiRoomChecks = items;
+			uiRoomSupplies = supplies;
+		}
 		ProcessRemovals();
 		TrackBosses();
 		DiscoveryLog();
@@ -2040,7 +2152,9 @@ void Archipelago_Render()
 	GLOBAL_WK* g = GlobalPtr();
 	bool inGame = g && g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::MainLoop) && g->curRoomId_4FAC < 0x400;
 	bool showStatus = inGame && status != 2;
-	if (lines.empty() && !showStatus)
+	int roomChecks = (inGame && status == 2) ? ap::uiRoomChecks.load() : 0;
+	int roomSupplies = (inGame && status == 2) ? ap::uiRoomSupplies.load() : 0;
+	if (lines.empty() && !showStatus && roomChecks <= 0 && roomSupplies <= 0)
 		return;
 
 	ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_Always);
@@ -2055,9 +2169,13 @@ void Archipelago_Render()
 				status == 0 ? "Archipelago: waiting for the RE4 UHD Client" :
 				status == 1 ? "Archipelago: client connected, waiting for server" :
 				status == 3 ? "Archipelago: this save belongs to another seed (/bindsave)" :
+				status == 5 ? "Archipelago: Easy isn't supported - start a New Game on Normal or Professional" :
 				"Archipelago: save not linked - start a New Game or /bindsave";
 			ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.3f, 1.0f), "%s", text);
 		}
+		if (roomChecks > 0 || roomSupplies > 0)
+			ImGui::TextColored(ImVec4(0.6f, 0.85f, 1.0f, 0.8f), "Archipelago checks in this area: %d items, %d ammo/herbs",
+				roomChecks, roomSupplies);
 		for (auto& [text, alpha] : lines)
 			ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, alpha), "%s", text.c_str());
 	}
