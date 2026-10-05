@@ -29,6 +29,7 @@
 #include <atomic>
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <deque>
 #include <fstream>
 #include <map>
@@ -103,6 +104,8 @@ namespace ap
 		int64_t id = 0;
 		std::string name;
 		std::string from;
+		int64_t loc = -1;  // where it was found
+		bool own = false;  // found in this player's own world
 	};
 
 	struct Toast
@@ -167,7 +170,7 @@ namespace ap
 	struct PendingGrant { bool active = false; uint16_t id = 0; uint32_t index = 0; uint64_t closedSince = 0; };
 	PendingGrant pendingGrant;
 
-	struct TrackedEm { uint32_t guid; uint8_t id; int16_t lastHp = 0; int16_t maxHp = 0; };
+	struct TrackedEm { uint32_t guid; uint8_t id; int16_t lastHp = 0; int16_t maxHp = 0; bool dying = false; };
 	std::unordered_map<uint32_t, TrackedEm> trackedBosses; // key: index in EmMgr
 	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
 	uint32_t warnedUnknownIndex = UINT32_MAX;
@@ -189,12 +192,17 @@ namespace ap
 	// Hidden items (in a barrel/crate, or knocked down like an embedded Spinel) set their "found" flag when they
 	// appear; the pickup itself may come much later with no flag of its own. Each one is a credit for its room
 	// that one later unflagged pickup there can use.
-	std::map<uint16_t, std::map<int, uint64_t>> revealed; // room -> bit -> frame it appeared
+	struct Reveal { uint64_t frame; bool container; }; // container: popped out of a barrel/crate (both flags at once)
+	std::map<uint16_t, std::map<int, Reveal>> revealed; // room -> bit -> when it appeared
+	uint64_t roomEnteredFrame = 0;
+	uint64_t lastAnyPickupFrame = 0; // any item appearing in the inventory (for SilentTake)
 	uint64_t lastCombineFrame = 0; // a treasure/key item went away (combined in the inventory screen)
 	bool itemDecreasedNow = false;  // some item went away in this frame's diff (a sale at the Merchant)
+	std::unordered_set<uint16_t> soldToMerchant; // sold this session: buying it back isn't a check-only purchase
 	uint64_t lastMerchantNearFrame = 0; // STA_INTO_SHOP: set the whole time Leon is near a Merchant, not just in the menu
 	uint32_t refusedIndex = UINT32_MAX; // received item the game refused: retried every few seconds
 	uint64_t refusedFrame = 0;
+	int refusedTries = 0;
 	bool warnedEquipped = false;
 	struct SupplyPickup
 	{
@@ -259,21 +267,54 @@ namespace ap
 	}
 
 	// =============================================================================== network
+	// Messages to the client are queued and written by SenderThread, so the game thread never waits on the socket
+	std::mutex outboxMutex;
+	std::condition_variable outboxCv;
+	std::deque<std::string> outbox;
+
 	void Send(const json& msg)
 	{
-		std::string line = msg.dump() + "\n";
-		std::lock_guard<std::mutex> lock(sockMutex);
-		if (clientSock == INVALID_SOCKET)
+		if (!clientConnected)
 			return;
-		const char* data = line.data();
-		int left = int(line.size());
-		while (left > 0)
+		std::string line = msg.dump() + "\n";
 		{
-			int sent = send(clientSock, data, left, 0);
-			if (sent <= 0)
-				break;
-			data += sent;
-			left -= sent;
+			std::lock_guard<std::mutex> lock(outboxMutex);
+			if (outbox.size() > 4000)
+				outbox.pop_front(); // client not reading at all: drop the oldest (checks are resent from the save)
+			outbox.push_back(std::move(line));
+		}
+		outboxCv.notify_one();
+	}
+
+	void SenderThread()
+	{
+		while (true)
+		{
+			std::string line;
+			{
+				std::unique_lock<std::mutex> lock(outboxMutex);
+				outboxCv.wait(lock, [] { return !outbox.empty(); });
+				line = std::move(outbox.front());
+				outbox.pop_front();
+			}
+			std::lock_guard<std::mutex> lock(sockMutex);
+			if (clientSock == INVALID_SOCKET)
+				continue;
+			const char* data = line.data();
+			int left = int(line.size());
+			while (left > 0)
+			{
+				int sent = send(clientSock, data, left, 0);
+				if (sent <= 0)
+				{
+					// a half-written line would corrupt the stream: drop the connection, the client reconnects and
+					// everything is resent from the save
+					shutdown(clientSock, SD_BOTH);
+					break;
+				}
+				data += sent;
+				left -= sent;
+			}
 		}
 	}
 
@@ -326,6 +367,10 @@ namespace ap
 			DWORD sendTimeout = 2000; // never block the game thread for long if the client stops reading
 			setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (const char*)&sendTimeout, sizeof(sendTimeout));
 
+			{
+				std::lock_guard<std::mutex> lock(outboxMutex);
+				outbox.clear(); // meant for the previous connection
+			}
 			{
 				std::lock_guard<std::mutex> lock(sockMutex);
 				if (clientSock != INVALID_SOCKET)
@@ -668,7 +713,9 @@ namespace ap
 			if (state == 2)
 			{
 				Log("Loaded save belongs to a different seed");
-				AddToast("This save belongs to a different Archipelago seed! Type /bindsave in the client to relink it.");
+				AddToast(configFromDisk
+					? "Waiting for the Archipelago client to connect to your room..."
+					: "This save belongs to a different Archipelago seed! Load the right save, or /bindsave to relink it.");
 			}
 			else if (state == 3)
 			{
@@ -699,11 +746,14 @@ namespace ap
 		return SaveBit(loc.offset) || serverChecked.count(loc.id);
 	}
 
+	// Checks and the goal carry the save's seed tag so the client can drop anything meant for another seed.
+	// Nothing goes out under the last session's config (it may be another seed): the save remembers it all and
+	// it's resent once the client sends the live config.
 	void FlushChecks()
 	{
-		if (pendingChecks.empty() || !clientConnected)
+		if (pendingChecks.empty() || !clientConnected || configFromDisk)
 			return;
-		Send({ {"cmd", "check"}, {"locations", pendingChecks} });
+		Send({ {"cmd", "check"}, {"locations", pendingChecks}, {"tag", saveTag} });
 		pendingChecks.clear();
 	}
 
@@ -716,7 +766,8 @@ namespace ap
 			goalReported = true;
 			AddToast("Goal complete!");
 		}
-		Send({ {"cmd", "goal"} });
+		if (!configFromDisk)
+			Send({ {"cmd", "goal"}, {"tag", saveTag} });
 	}
 
 	bool HasItem(const LocationDef& loc, int id)
@@ -839,6 +890,9 @@ namespace ap
 		GLOBAL_WK* g = GlobalPtr();
 		if (!IsLeon() || !g || g->curRoomId_4FAC != room)
 			return;
+		// an item showed up around then: this is most likely its late flag (e.g. a long look at a treasure)
+		if (lastAnyPickupFrame && frame - lastAnyPickupFrame < uint64_t(kFlagBeforeFrames + kDecideFrames) * 3)
+			return;
 		for (auto& loc : locations)
 		{
 			if (loc.kind != Kind::Pickup || loc.consumable || loc.room != room || SaveBit(loc.offset))
@@ -868,6 +922,7 @@ namespace ap
 	}
 
 	bool TakeRevealCredit(uint16_t room, int* bitOut);
+	bool CheckCasePurchase(uint16_t caseItem);
 
 	void ResolveSupplies()
 	{
@@ -978,6 +1033,15 @@ namespace ap
 		}
 	}
 
+	// Forget the room snapshots (after a load, a death or a seed change the save data underneath is different)
+	void ResetRoomWatch()
+	{
+		roomFlags.room = 0xFFFF;
+		prevRoomFlags.room = 0xFFFF;
+		prevRoomUntil = 0;
+		unclaimedFlips.clear();
+	}
+
 	// Reports flags that turned on since the snapshot and updates it
 	void DiffRoomFlags(RoomFlagSnapshot& snap, ROOM_SAVE_DATA* rs)
 	{
@@ -998,11 +1062,16 @@ namespace ap
 							// taken flag well after the found flag: that hidden item is being picked up now
 							auto& credits = revealed[snap.room];
 							auto c = credits.find(bit);
-							if (c != credits.end() && frame - c->second > 30)
+							if (c != credits.end() && frame - c->second.frame > 30)
 								credits.erase(c);
 						}
 						else
-							revealed[snap.room][bit] = frame;
+						{
+							// item_flg already set (it's processed first): a container's contents popping out;
+							// otherwise a knocked-down item whose taken flag comes at the pickup
+							bool container = (snap.item[w] & (0x80000000u >> b)) != 0;
+							revealed[snap.room][bit] = { frame, container };
+						}
 					}
 				before[w] = now[w];
 			}
@@ -1047,6 +1116,7 @@ namespace ap
 				prevRoomUntil = frame + kPrevRoomWatchFrames;
 			}
 			TakeRoomSnapshot(roomFlags, g->curRoomId_4FAC, rs);
+			roomEnteredFrame = frame;
 			return;
 		}
 		DiffRoomFlags(roomFlags, rs);
@@ -1057,14 +1127,23 @@ namespace ap
 	{
 		auto& credits = revealed[room];
 		ROOM_SAVE_DATA* rs = RoomData ? RoomData->getRoomSavePtr(room) : nullptr;
+		GLOBAL_WK* g = GlobalPtr();
 		while (!credits.empty())
 		{
 			auto oldest = std::min_element(credits.begin(), credits.end(),
-				[](const auto& a, const auto& b) { return a.second < b.second; });
+				[](const auto& a, const auto& b) { return a.second.frame < b.second.frame; });
 			int bit = oldest->first;
+			Reveal r = oldest->second;
 			credits.erase(oldest);
+			uint32_t mask = 0x80000000u >> (bit % 32);
 			// gone after a death/reload rolled the room back: not a credit any more
-			if (rs && !(rs->item_find_flg_18[bit / 32] & (0x80000000u >> (bit % 32))))
+			if (rs && !(rs->item_find_flg_18[bit / 32] & mask))
+				continue;
+			// a container's contents only count during the visit they appeared in (left behind, they're gone);
+			// a knocked-down item only until its taken flag is set
+			if (r.container && !(g && g->curRoomId_4FAC == room && r.frame >= roomEnteredFrame))
+				continue;
+			if (!r.container && rs && (rs->item_flg_8[bit / 32] & mask))
 				continue;
 			*bitOut = bit;
 			return true;
@@ -1089,6 +1168,8 @@ namespace ap
 				(shop ? " shop" : pickup ? " pickup-screen" : " no-screen") + (flagged ? " placed-item-flag" : "") +
 				(goldDelta ? " gold " + std::to_string(goldDelta) : ""));
 		}
+
+		lastAnyPickupFrame = frame;
 
 		// 1. a received item that went through the "case full" screen
 		if (pendingGrant.active && pendingGrant.id == id)
@@ -1122,6 +1203,8 @@ namespace ap
 						checked = true;
 					}
 			}
+			else if (id >= 125 && id <= 127)
+				checked = CheckCasePurchase(id);
 			else
 			{
 				for (auto& loc : locations)
@@ -1132,12 +1215,14 @@ namespace ap
 						break;
 					}
 			}
+			// buying back something Leon just sold here (e.g. to free a weapon's purchase check): he keeps it
+			bool rebuy = soldToMerchant.erase(id) > 0;
 			// check-only mode: the item itself is shuffled into the multiworld, so take this copy back once the
 			// shop closes. Kept: the tactical vest (changes Leon's costume on purchase) and the stocks (attach to
 			// the gun right away, so there's no item left to take).
 			bool keeps = id == uint16_t(EItemId::Assault_Jacket) || id == uint16_t(EItemId::Stock_Mauser) ||
 				id == uint16_t(EItemId::Stock_Styer) || (id >= 124 && id <= 127); // attache cases always take effect
-			if (checked && merchantCheckOnly && !keeps)
+			if (checked && merchantCheckOnly && !keeps && !rebuy)
 			{
 				pendingRemovals.push_back({ id, 1, fresh });
 				AddToast(std::string("Merchant check: ") + ItemName(id) + " goes to the multiworld");
@@ -1184,6 +1269,29 @@ namespace ap
 			pendingRemovals.push_back({ id, removeCount, fresh });
 	}
 
+	// The Merchant only sells the next case size, and received Progressive Attache Cases skip sizes: any case
+	// purchase takes the first case location not yet checked
+	bool CheckCasePurchase(uint16_t caseItem)
+	{
+		LocationDef* best = nullptr;
+		int bestItem = 999;
+		for (auto& loc : locations)
+		{
+			if (loc.kind != Kind::Merchant || SaveBit(loc.offset))
+				continue;
+			for (int i : loc.items)
+				if (i >= 125 && i <= 127 && i < bestItem)
+				{
+					best = &loc;
+					bestItem = i;
+				}
+		}
+		if (!best)
+			return false;
+		SendCheck(*best, std::string("bought ") + ItemName(caseItem));
+		return true;
+	}
+
 	void DiffInventory()
 	{
 		GLOBAL_WK* g = GlobalPtr();
@@ -1211,7 +1319,11 @@ namespace ap
 			{
 				itemDecreasedNow = true;
 				if (IsInterestingType(id))
+				{
 					lastCombineFrame = frame;
+					if (lastShopCtxFrame && frame - lastShopCtxFrame <= kShopWindowFrames)
+						soldToMerchant.insert(id);
+				}
 			}
 		}
 
@@ -1246,10 +1358,7 @@ namespace ap
 		// Attache case bought from the Merchant (case size changes instead of an item appearing)
 		if (caseSize > prevCaseSize && prevCaseSize >= 0 && (menu || nearMerchant || goldDelta < 0))
 		{
-			int caseItem = 124 + caseSize;
-			for (auto& loc : locations)
-				if (loc.kind == Kind::Merchant && HasItem(loc, caseItem) && !SaveBit(loc.offset))
-					SendCheck(loc, std::string("bought ") + ItemName(caseItem));
+			CheckCasePurchase(uint16_t(124 + caseSize));
 		}
 
 		prevInv = std::move(cur);
@@ -1321,13 +1430,17 @@ namespace ap
 			for (auto& [idx, t] : trackedBosses)
 			{
 				int hp = t.lastHp;
+				bool dying = t.dying;
 				if (mgr && mgr->m_Array_4 && idx < mgr->m_nArray_8)
 				{
 					cEm* em = mgr->get(idx);
 					if (em->IsValid() && em->guid_F8 == t.guid)
+					{
 						hp = em->hp_324;
+						dying |= em->r_no_0_FC == uint8_t(cEm::Routine0::Die);
+					}
 				}
-				if (hp <= std::max<int>(0, t.maxHp / 20))
+				if (hp <= 0 || dying)
 				{
 					Log("Boss em " + Hex(t.id) + " at " + std::to_string(hp) + " HP when tracking stopped");
 					DefeatedBoss(t.id, room);
@@ -1358,11 +1471,12 @@ namespace ap
 			bool alive = g->playerHpCur_4FB4 > 0 && !Status(Flags_STATUS::STA_DIEDEMO);
 			if (gone)
 			{
-				// removed by its death cutscene before HP 0 was seen: count it if it was nearly dead
+				// removed by its death cutscene before HP 0 was seen: count it if it was in its dying routine
 				const TrackedEm& t = it->second;
-				if (alive && t.lastHp <= std::max<int>(1, t.maxHp / 20))
+				if (alive && (t.dying || t.lastHp <= 0))
 				{
-					Log("Boss em " + Hex(t.id) + " vanished at " + std::to_string(t.lastHp) + "/" + std::to_string(t.maxHp) + " HP");
+					Log("Boss em " + Hex(t.id) + " vanished while dying (" + std::to_string(t.lastHp) + "/" +
+						std::to_string(t.maxHp) + " HP)");
 					DefeatedBoss(t.id, room);
 				}
 				it = trackedBosses.erase(it);
@@ -1375,6 +1489,11 @@ namespace ap
 			else
 			{
 				it->second.lastHp = em->hp_324;
+				if (em->r_no_0_FC == uint8_t(cEm::Routine0::Die) && !it->second.dying)
+				{
+					it->second.dying = true;
+					Log("Boss em " + Hex(it->second.id) + " entered its dying routine at " + std::to_string(em->hp_324) + " HP");
+				}
 				++it;
 			}
 		}
@@ -1475,18 +1594,23 @@ namespace ap
 					pendingGrant = { true, gid, index, 0 };
 					done = false;
 				}
-				else if (info.type_2 == ITEM_TYPE_KEY_ITEM || info.type_2 == ITEM_TYPE_IMPORTANT)
+				else if ((info.type_2 == ITEM_TYPE_KEY_ITEM || info.type_2 == ITEM_TYPE_IMPORTANT) && before == 0)
 				{
-					// never lose a key item: try again in a few seconds
+					// never lose a key item: try again in a few seconds (a key item Leon already holds can't stack,
+					// so that one counts as delivered)
 					if (refusedIndex != index)
 					{
+						refusedTries = 0;
 						SendLog("Key item " + label + " could not be added yet; retrying");
 						AddToast("Couldn't add " + label + " yet, trying again...");
 					}
 					refusedIndex = index;
 					refusedFrame = frame;
 					Resnapshot();
-					return false;
+					if (++refusedTries < 30)
+						return false;
+					SendLog("Gave up adding " + label + " after 30 tries; ask the host to send it again (/send)");
+					AddToast("Couldn't add " + label + ". Ask the host to send it again.");
 				}
 				else
 					SendLog("Item " + label + " could not be added (game refused it)");
@@ -1529,6 +1653,18 @@ namespace ap
 			return;
 		if (index == refusedIndex && frame - refusedFrame < 300)
 			return;
+		// found at a location that holds its own vanilla item: Leon kept that copy, so nothing to deliver
+		{
+			const ReceivedItem& r = received[index];
+			if (r.own)
+				for (auto& loc : locations)
+					if (loc.keep && loc.id == r.loc)
+					{
+						SetAppliedIndex(index + 1);
+						Send({ {"cmd", "received"}, {"received", index + 1} });
+						return;
+					}
+		}
 		lastGrantFrame = frame;
 		if (ApplyItem(received[index], index))
 		{
@@ -1548,6 +1684,7 @@ namespace ap
 			pendingGrant = {};
 			pendingSupplies.clear();
 			undecidedSupplies.clear();
+			ResetRoomWatch();
 			if (deathLink && frame - lastKillFrame > 600)
 				Send({ {"cmd", "death"} });
 		}
@@ -1585,6 +1722,7 @@ namespace ap
 		pendingSupplies.clear();
 		undecidedSupplies.clear();
 		revealed.clear();
+		ResetRoomWatch();
 		goalReported = false;
 		saveState = 0;
 		resetSnapshot = true;
@@ -1679,17 +1817,17 @@ namespace ap
 	// Re-send everything this save has collected that the server hasn't confirmed (e.g. done while offline)
 	void ResendFromSave()
 	{
-		if (!configured || saveState != 1)
+		if (!configured || saveState != 1 || configFromDisk)
 			return;
 		std::vector<int64_t> missing;
 		for (auto& loc : locations)
 			if (SaveBit(loc.offset) && !serverChecked.count(loc.id))
 				missing.push_back(loc.id);
 		if (!missing.empty())
-			Send({ {"cmd", "check"}, {"locations", missing} });
+			Send({ {"cmd", "check"}, {"locations", missing}, {"tag", saveTag} });
 		if (uint32_t* w = SaveWork())
 			if (w[kSlotFlags] & kFlagGoal)
-				Send({ {"cmd", "goal"} });
+				Send({ {"cmd", "goal"}, {"tag", saveTag} });
 	}
 
 	void ProcessInbox()
@@ -1715,7 +1853,8 @@ namespace ap
 				{
 					received.clear();
 					for (auto& it : msg.value("items", json::array()))
-						received.push_back({ it.value("id", int64_t(0)), it.value("name", std::string()), it.value("from", std::string()) });
+						received.push_back({ it.value("id", int64_t(0)), it.value("name", std::string()), it.value("from", std::string()),
+							it.value("loc", int64_t(-1)), it.value("own", false) });
 				}
 				else if (cmd == "checked")
 				{
@@ -1739,6 +1878,8 @@ namespace ap
 					bool alreadyLinked = w && w[kSlotMagic] == kSaveMagic && w[kSlotTag] == saveTag;
 					if (alreadyLinked)
 						AddToast("This save is already linked to this seed");
+					else if (configFromDisk)
+						AddToast("Connect the client to the room first, then /bindsave");
 					else if (configured && InMainLoop() && IsMainGame())
 					{
 						BindSave();
@@ -1781,7 +1922,10 @@ namespace ap
 
 	void Tick()
 	{
-		frame++;
+		// "world time": doesn't run while loading a room, in Options or at the title, so pickups and their flags
+		// stay close together in frames even when a door or a menu comes between them
+		if (InMainLoop() && !OptionOpenFlag())
+			frame++;
 		FlushConsole();
 		ProcessInbox();
 
@@ -1792,7 +1936,7 @@ namespace ap
 		if (!configured || !InMainLoop() || !IsMainGame())
 		{
 			resetSnapshot = true;
-			if (!trackedBosses.empty())
+			if (!trackedBosses.empty() && !(g && g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::Option)))
 				FinalBossScan(prevRoom);
 			discoveryEms.clear();
 			// Title screen / new load: anything queued belongs to a game state that no longer exists
@@ -1801,7 +1945,8 @@ namespace ap
 				pendingRemovals.clear();
 				pendingGrant = {};
 				pendingSupplies.clear();
-				unclaimedFlips.clear();
+				ResetRoomWatch();
+				prevRoom = 0xFFFF; // a loaded save isn't "walking" into its room (no left-behind warning)
 				saveState = 0;
 			}
 			return;
@@ -1956,5 +2101,6 @@ void re4t::init::Archipelago()
 	catch (...) {}
 
 	std::thread(ap::NetThread).detach();
+	std::thread(ap::SenderThread).detach();
 	spd::log()->info("Archipelago module initialized");
 }

@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.5.2).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5.3).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -110,7 +110,7 @@ The YAML file holds your name and your choices for the randomizer.
 | `shuffle_key_items` | Key items (Insignia Key, False Eye, Card Keys…) can be anywhere in the multiworld. `false` keeps them in their normal spots. | `true` |
 | `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). Enemy drops don't count. | `true` |
 | `pesetas_checks` | How many placed pesetas pickups (cabinets, crates, bird nests…) per stage are checks, 0–50. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `25` |
-| `merchant_checks` | The first time you buy each Merchant item, you send a check. | `true` |
+| `merchant_checks` | The first time you buy each Merchant item, you send a check. They only hold minor items (the Merchant only sells the next attache case, and may not sell a gun you already have). | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
 | `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
 | `boss_checks` | Beating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks. They only hold minor items (Verdugo can be escaped, and boss detection hasn't been confirmed in a full playthrough yet). | `true` |
@@ -220,6 +220,8 @@ host to use `!release` / `!collect`.
 - **Holy Beast pieces (5-3/5-4):** always in their normal spots, so Krauser's arena can always be opened.
 - **A key item you already have:** picking up the normal copy still sends its check.
 - **Dying / continuing:** checks and items roll back with your save and are counted again when you redo them.
+- **Two saves / two multiworlds:** each save remembers its seed; a save from another seed can't send checks to your
+  current room. Start from a normal **New Game** (not New Game+ / clear data).
 
 ---
 
@@ -250,7 +252,7 @@ You loaded an old save. Start a **New Game**, or, if this really is the right sa
 
 **"This save belongs to a different Archipelago seed"**
 You loaded a save from another multiworld. Load the right save. `/bindsave` relinks it to the current one
-(it will receive all items again).
+(it will receive all items again); it only works while the client is connected to your room.
 
 **An item stayed in my inventory / a check wasn't sent**
 Some room data comes from community guides and may be off. Please report it (below) — the mod writes everything

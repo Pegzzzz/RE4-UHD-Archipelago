@@ -1548,9 +1548,11 @@ void R4()
 	sim::setEmMaxHp(0, 5000);
 	Tick(3);
 	size_t m = cl.got.size();
-	sim::setEm(0, 0x2F, 120, 71, true); // nearly dead
+	sim::setEm(0, 0x2F, 120, 71, true); // nearly dead...
+	sim::setEmRoutine(0, 3);              // ...and in its dying routine
 	Tick(3);
 	sim::setEm(0, 0x2F, 120, 71, false); // cutscene removes it before HP 0 is seen
+	sim::setEmRoutine(0, 0);
 	Tick(3);
 	Expect(Has(ChecksSince(m), L_DEL_LAGO), "Del Lago counted");
 	Setup(0x221);
@@ -1638,6 +1640,138 @@ void R8()
 	End();
 }
 
+// =================================================================== 0.5.3: second audit
+void T1()
+{
+	Begin("T1. Under the last session's config nothing is sent or bound; the live config sends it, tagged");
+	sim::reset(0x101);
+	uint32_t tag = ++nextTag;
+	sim::setSaveWork(60, ap::kSaveMagic);
+	sim::setSaveWork(61, tag);
+	json disk = Config(tag);
+	disk["from_disk"] = true;
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	Deliver({ disk });
+	Tick(200);
+	Pickup(44, 1);
+	Tick(10);
+	Expect(ChecksSince(m).empty(), "no check sent under the disk config");
+	Expect(ap::SaveBit(1), "but the save remembers it");
+	Deliver({ { {"cmd", "bind_save"} } });
+	Tick(3);
+	Expect(sim::saveWork(61) == tag, "bind_save refused under the disk config");
+	cl.config = Config(tag);
+	Deliver({ cl.config });
+	Tick(10);
+	json last = LastCmd("check");
+	Expect(Has(ChecksSince(m), L_SHOTGUN) && last.value("tag", uint32_t(0)) == tag, "sent with the seed tag once live");
+	(void)c0;
+	End();
+}
+
+void T2()
+{
+	Begin("T2. Merchant: a case purchase takes the first unchecked case check; buying back a sold gun keeps it");
+	Setup(0x104);
+	sim::setGold(200000);
+	sim::setBoardSize(1); // Case M already came from the multiworld
+	Tick(2);
+	size_t m = cl.got.size();
+	Buy(126, 50000);      // so the Merchant sells L
+	CloseShop();
+	auto c = ChecksSince(m);
+	Expect(Has(c, L_BUY_CASE_M) && !Has(c, L_BUY_CASE_L), "Buy Attache Case M checked first");
+	// Red9 received from the multiworld; sell it to free the purchase, then buy it back
+	sim::gameAdd(37, 1);
+	ap::Resnapshot();
+	sim::setOpenFlag(sim::SS_SHOP);
+	sim::setStatus(sim::STA_INTO_SHOP, true);
+	Tick(2);
+	sim::gameRemoveAll(37);
+	sim::setGold(sim::gold() + 7000);
+	Tick(2);
+	size_t m2 = cl.got.size();
+	sim::setGold(sim::gold() - 14000);
+	sim::gameAdd(37, 1);
+	Tick(2);
+	CloseShop();
+	Expect(Has(ChecksSince(m2), L_BUY_RED9), "Buy Red9 checked");
+	Expect(sim::count(37) == 1, "bought-back Red9 kept");
+	End();
+}
+
+void T3()
+{
+	Begin("T3. A barrel's contents left behind don't make a later drop count");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	sim::setRoomItemFlag(30); // barrel broken, item left on the floor
+	sim::setRoomFindFlag(30);
+	Tick(30);
+	sim::setRoom(0x107);
+	Tick(400);
+	sim::setRoom(0x106);      // back later
+	Tick(30);
+	Drop(4, 10);
+	Settle();
+	Expect(ChecksSince(m).empty(), "the drop doesn't count");
+	End();
+}
+
+void T4()
+{
+	Begin("T4. A received copy of an item Leon kept at its own location isn't delivered again");
+	json sd = slotData;
+	for (auto& l : sd["locations"])
+		if (l.value("id", int64_t(0)) == L_SHOTGUN)
+			l["keep"] = 1;
+	json saved = slotData;
+	slotData = sd;
+	Setup(0x101);
+	slotData = saved;
+	cl.items = json::array({ { {"i", 0}, {"id", I_SHOTGUN}, {"name", "Shotgun"}, {"from", ""}, {"loc", L_SHOTGUN}, {"own", true} },
+		{ {"i", 1}, {"id", I_RIFLE}, {"name", "Rifle"}, {"from", ""}, {"loc", L_WOODS_SPINEL}, {"own", true} } });
+	Deliver({ { {"cmd", "items"}, {"items", cl.items} } });
+	Tick(80);
+	Expect(sim::count(44) == 0, "no Shotgun delivered");
+	Expect(sim::count(46) == 1, "the Rifle from another location is delivered");
+	Expect(sim::saveWork(62) == 2, "both count as applied");
+	End();
+}
+
+void T5()
+{
+	Begin("T5. A door transition between a pickup and its flag doesn't push it past the window");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	Drop(4, 10);
+	sim::setRoutine(sim::R_ROOMINIT); // a long room load
+	Tick(400);
+	sim::setRoutine(sim::R_MAINLOOP);
+	sim::setRoom(0x107);
+	Tick(5);
+	sim::setRoomItemFlagIn(0x106, 12);
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "counted");
+	End();
+}
+
+void T6()
+{
+	Begin("T6. A late flag after a real pickup isn't taken as a key item Leon already holds");
+	Setup(0x105);
+	sim::gameAdd(59, 1);
+	ap::Resnapshot();
+	Tick(5);
+	size_t m = cl.got.size();
+	sim::gameAdd(87, 1);      // a treasure, looked at for a long time
+	Tick(ap::kDecideFrames + 50);
+	sim::setRoomItemFlag(6);  // its flag lands late
+	Tick(ap::kFlagBeforeFrames + ap::kDecideFrames + 20);
+	Expect(!Has(ChecksSince(m), L_INSIGNIA_KEY), "Insignia Key location not checked");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -1668,6 +1802,7 @@ int main()
 	P1(); P2(); P3(); P4(); P5(); P6(); P7();
 	Q1(); Q2(); Q3(); Q4();
 	R1(); R2(); R3(); R4(); R5(); R6(); R7(); R8();
+	T1(); T2(); T3(); T4(); T5(); T6();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

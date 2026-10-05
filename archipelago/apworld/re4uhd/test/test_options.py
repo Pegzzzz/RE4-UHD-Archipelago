@@ -283,3 +283,28 @@ class TestVanillaKeyItemsKept(RE4TestBase):
         from ..data_loader import LOCATION_NAME_TO_ID
         keep = set(self.world.fill_slot_data()["keep_locations"])
         self.assertIn(LOCATION_NAME_TO_ID["1-2 Chief's House: Insignia Key"], keep)
+
+
+class TestLogicAudit(RE4TestBase):
+    """0.5.3: requirements and filler-only checks from the logic audit."""
+
+    def test_requirements(self) -> None:
+        by_name = {l["name"]: l for l in LOCATIONS}
+        for name in ("4-1 Pit: Crown", "4-1 Waterway Passage 1: Spinel"):
+            self.assertTrue({"Lion Ornament", "King's Grail", "Queen's Grail"} <= set(by_name[name]["requires"]), name)
+        self.assertTrue({"Gallery Key", "Goat Ornament"} <= set(by_name["3-2 Hedge Maze: Moonstone (Right half)"]["requires"]))
+        self.assertIn("Prison Key", by_name["Shooting Gallery A: Leon w/ handgun Cap"]["requires"])
+        self.assertIn("Queen's Grail", by_name["Shooting Gallery B: Don Jose Cap"]["requires"])
+        self.assertIn("Infrared Scope", by_name["5-1 Laboratory Control Center: Storage Room Card Key"]["requires"])
+        self.assertIn("Gallery Key", CHAPTER_GATES["3-3"])
+        self.assertEqual(ITEMS_BY_NAME["Infrared Scope"]["classification"], "progression")
+        self.assertIn(137, by_name["1-1 Farm: Pearl Pendant"]["game_items"])
+        self.assertIn(138, by_name["1-2 Chief's House: Brass Pocket Watch"]["game_items"])
+
+    def test_filler_only(self) -> None:
+        from BaseClasses import LocationProgressType
+        for loc in self.multiworld.get_locations(self.player):
+            if loc.name.startswith("Merchant:") or loc.name in ("Blue Medallions: Merchant Reward", "1-1 Woods: Spinel",
+                                                                "4-1 Treasure Chamber: Broken Butterfly",
+                                                                "2-1 Colosseum: Spinel #1"):
+                self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)

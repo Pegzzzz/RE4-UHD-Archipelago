@@ -364,6 +364,7 @@ namespace sim
 	void setSaveWork(int i, uint32_t v) { G()->save_free_work_5310[i] = v; }
 
 	void setEmMaxHp(int idx, int16_t maxHp) { EM(idx)->hp_max_326 = maxHp; }
+	void setEmRoutine(int idx, uint8_t r0) { EM(idx)->r_no_0_FC = r0; }
 	void setRoomItemFlagIn(uint16_t room, int bit)
 	{
 		auto& rs = gRoomSaves[room];

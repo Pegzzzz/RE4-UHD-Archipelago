@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.5.3
+Second audit (independent code review plus a logic check against the community Manual, Evil Resource and
+StrategyWiki):
+- **Logic fixes that could make a seed unwinnable:** the 4-1 pit, waterway and Verdugo rooms now need the Grails and
+  ornaments; the 3-2 hedge maze (both Moonstones) and chapter 3-3 need the Gallery Key and Goat Ornament; shooting
+  gallery A needs the swords, Castle Gate Key and Prison Key, gallery B the Grails; the Storage Room Card Key (Iron
+  Maiden) needs the Infrared Scope, which is now a progression item. 40 test seeds with mixed options all beatable.
+- Filler-only now: Merchant checks and the medallion reward (he only sells the next attache case and may not sell
+  a gun you already own), and missable or doubtful pickups (Dr. Salvador's Rubies, the crow's Spinel, the 4-1
+  Treasure Chamber needing Ashley, Verdugo's Crown Jewel, five Spinels the Manual doesn't list).
+- The Pearl Pendant and Brass Pocket Watch also count in their "Dirty" form (dropped in the well).
+- Nothing is sent to the client under the last session's config, and checks/goal carry the save's seed tag, so a
+  save from another seed can never check or finish someone else's slot. `/bindsave` needs a live connection.
+- A case purchase takes the first unchecked case check (received cases skip sizes); buying back a gun you just sold
+  keeps it.
+- Timers only run in "world time" (not during room loads or Options), so a door between a pickup and its flag no
+  longer turns it into a drop. Room snapshots reset on load/death/seed change (no phantom flags). Barrel contents
+  left behind can't be "used" by a later drop.
+- "Already held key item" detection is skipped right after a real pickup (late flags). Bosses count from their
+  dying routine instead of an HP threshold, and Options doesn't end tracking. A key item that can't be added is
+  retried (but a non-stacking copy Leon already holds counts as delivered, and it gives up after 30 tries).
+- Messages to the client go through a send queue on their own thread (the game never waits on the client), and a
+  half-written message drops the connection instead of corrupting it.
+- The received-item list now carries where each item was found; the game skips copies Leon kept at their own
+  location (the save's index always counts the same list).
+
 ## 0.5.2
 A full audit of ways a check, an item or a run could be lost (from the real session log plus a code review):
 - **Merchant rooms:** the game keeps its "near the Merchant" flag on the whole time Leon is in a Merchant's area,

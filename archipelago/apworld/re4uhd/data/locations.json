@@ -14,6 +14,7 @@
    "requires": [],
    "detail": "Dropped by the furthest crow on the path in front of the starting position",
    "cut": false,
+   "excluded": true,
    "offset": 0
   },
   {
@@ -62,6 +63,7 @@
    "requires": [],
    "detail": "Held by the Dr. Salvador next to the gate to the Farm (before the bell rings)",
    "cut": false,
+   "excluded": true,
    "offset": 3
   },
   {
@@ -71,7 +73,8 @@
    "room": 259,
    "room_confidence": "high",
    "game_items": [
-    88
+    88,
+    137
    ],
    "vanilla": "Pearl Pendant",
    "category": "treasure",
@@ -126,6 +129,7 @@
    "requires": [],
    "detail": "Breakable crate on the table",
    "cut": false,
+   "excluded": true,
    "offset": 7
   },
   {
@@ -269,7 +273,8 @@
    "room": 261,
    "room_confidence": "high",
    "game_items": [
-    89
+    89,
+    138
    ],
    "vanilla": "Brass Pocket Watch",
    "category": "treasure",
@@ -330,6 +335,7 @@
    "requires": [],
    "detail": "Dr. Salvador at corner of main clearing leading to path",
    "cut": false,
+   "excluded": true,
    "offset": 19
   },
   {
@@ -612,6 +618,7 @@
    "requires": [],
    "detail": "Table inside west hut (El Gigante arena)",
    "cut": false,
+   "excluded": true,
    "offset": 36
   },
   {
@@ -628,6 +635,7 @@
    "requires": [],
    "detail": "Table inside east hut (El Gigante arena)",
    "cut": false,
+   "excluded": true,
    "offset": 37
   },
   {
@@ -644,6 +652,7 @@
    "requires": [],
    "detail": "Bird's nest at end of path leading to Graveyard",
    "cut": false,
+   "excluded": true,
    "offset": 38
   },
   {
@@ -804,6 +813,7 @@
    "requires": [],
    "detail": "Table, eastern hut (2 of 2)",
    "cut": false,
+   "excluded": true,
    "offset": 48
   },
   {
@@ -1577,7 +1587,10 @@
    ],
    "vanilla": "Moonstone (Left half)",
    "category": "key",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "On fountain NE corner of maze",
    "cut": false,
    "offset": 94
@@ -1593,7 +1606,10 @@
    ],
    "vanilla": "Moonstone (Right half)",
    "category": "key",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "On fountain in centre of maze",
    "cut": false,
    "offset": 95
@@ -1609,7 +1625,10 @@
    ],
    "vanilla": "Red Gem",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Chest at end of inner south route",
    "cut": false,
    "offset": 96
@@ -1625,7 +1644,10 @@
    ],
    "vanilla": "Spinel",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Ground at end of north route",
    "cut": false,
    "offset": 97
@@ -1641,7 +1663,10 @@
    ],
    "vanilla": "Velvet Blue",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Barrel under bridge by entrance gates",
    "cut": false,
    "offset": 98
@@ -1659,7 +1684,9 @@
    "category": "treasure",
    "requires": [
     "Moonstone (Left half)",
-    "Moonstone (Right half)"
+    "Moonstone (Right half)",
+    "Gallery Key",
+    "Goat Ornament"
    ],
    "detail": "Small vase on cabinet SE of bed area",
    "cut": false,
@@ -1678,7 +1705,9 @@
    "category": "treasure",
    "requires": [
     "Moonstone (Left half)",
-    "Moonstone (Right half)"
+    "Moonstone (Right half)",
+    "Gallery Key",
+    "Goat Ornament"
    ],
    "detail": "Embedded in canopy above bed",
    "cut": false,
@@ -1697,7 +1726,9 @@
    "category": "treasure",
    "requires": [
     "Moonstone (Left half)",
-    "Moonstone (Right half)"
+    "Moonstone (Right half)",
+    "Gallery Key",
+    "Goat Ornament"
    ],
    "detail": "Inside wardrobe SE corner",
    "cut": false,
@@ -1797,6 +1828,7 @@
    "requires": [],
    "detail": "Large chest north side; loaded with 6 Magnum rounds",
    "cut": false,
+   "excluded": true,
    "offset": 107
   },
   {
@@ -1813,6 +1845,7 @@
    "requires": [],
    "detail": "Small chest NE corner; needs Ashley",
    "cut": false,
+   "excluded": true,
    "offset": 108
   },
   {
@@ -2334,7 +2367,12 @@
    ],
    "vanilla": "Crown",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "On dead body, north side",
    "cut": false,
    "offset": 135
@@ -2350,7 +2388,12 @@
    ],
    "vanilla": "Velvet Blue",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Ground among dead bodies",
    "cut": false,
    "offset": 136
@@ -2366,7 +2409,12 @@
    ],
    "vanilla": "Velvet Blue",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "1st lateral drain pipe, west side",
    "cut": false,
    "offset": 137
@@ -2382,7 +2430,12 @@
    ],
    "vanilla": "Spinel",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "2nd lateral drain pipe, west side",
    "cut": false,
    "offset": 138
@@ -2398,9 +2451,15 @@
    ],
    "vanilla": "Crown Jewel",
    "category": "treasure",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Dropped by Verdugo when defeated",
    "cut": false,
+   "excluded": true,
    "offset": 139
   },
   {
@@ -2961,7 +3020,8 @@
    "vanilla": "Storage Room Card Key",
    "category": "key",
    "requires": [
-    "Waste Disposal Card Key"
+    "Waste Disposal Card Key",
+    "Infrared Scope"
    ],
    "detail": "Dropped by the Iron Maiden",
    "cut": false,
@@ -6105,7 +6165,10 @@
    ],
    "vanilla": "Yellow Herb",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Hedge Maze - Treasure (Courtyard Maze, SW route)",
    "offset": 358
   },
@@ -6121,7 +6184,10 @@
    ],
    "vanilla": "Green Herb",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Hedge Maze (Courtyard Maze, central structure)",
    "offset": 359
   },
@@ -6137,7 +6203,10 @@
    ],
    "vanilla": "First Aid Spray",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Hedge Maze - Treasure (Courtyard Maze, NW route)",
    "offset": 360
   },
@@ -6153,7 +6222,10 @@
    ],
    "vanilla": "TMP Ammo",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Hedge Maze - Treasure (Courtyard Maze, north route via east bridge)",
    "offset": 361
   },
@@ -6169,7 +6241,10 @@
    ],
    "vanilla": "Shotgun Shells",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Gallery Key",
+    "Goat Ornament"
+   ],
    "detail": "Hedge Maze - Treasure (Courtyard Maze, SE route)",
    "offset": 362
   },
@@ -6187,7 +6262,9 @@
    "category": "consumable",
    "requires": [
     "Moonstone (Left half)",
-    "Moonstone (Right half)"
+    "Moonstone (Right half)",
+    "Gallery Key",
+    "Goat Ornament"
    ],
    "detail": "Hedge Maze - Bedroom (Courtyard Lounge)",
    "offset": 363
@@ -6206,7 +6283,9 @@
    "category": "consumable",
    "requires": [
     "Moonstone (Left half)",
-    "Moonstone (Right half)"
+    "Moonstone (Right half)",
+    "Gallery Key",
+    "Goat Ornament"
    ],
    "detail": "Hedge Maze - Bedroom (Courtyard Lounge)",
    "offset": 364
@@ -6968,7 +7047,12 @@
    ],
    "vanilla": "TMP Ammo",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Spike Pit (Pit)",
    "offset": 406
   },
@@ -6984,7 +7068,12 @@
    ],
    "vanilla": "Magnum Ammo",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Spike Pit (Pit)",
    "offset": 407
   },
@@ -7000,7 +7089,12 @@
    ],
    "vanilla": "Yellow Herb",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Spike Pit (Pit)",
    "offset": 408
   },
@@ -7016,7 +7110,12 @@
    ],
    "vanilla": "Incendiary Grenade",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Spike Pit (Pit)",
    "offset": 409
   },
@@ -7032,7 +7131,12 @@
    ],
    "vanilla": "Red Herb",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Spike Pit - Exit (Waterway Passage 1)",
    "offset": 410
   },
@@ -7048,7 +7152,12 @@
    ],
    "vanilla": "Handgun Ammo",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Novistador Boss - Elevator Room (Processing Plant Elevator)",
    "offset": 411
   },
@@ -7064,7 +7173,12 @@
    ],
    "vanilla": "First Aid Spray",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Novistador Boss - Elevator Room (Processing Plant Elevator)",
    "offset": 412
   },
@@ -7080,7 +7194,12 @@
    ],
    "vanilla": "TMP Ammo",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Novistador Boss (Processing Plant Maintenance Room)",
    "offset": 413
   },
@@ -7096,7 +7215,12 @@
    ],
    "vanilla": "Shotgun Shells",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Novistador Boss (Processing Plant Control Room)",
    "offset": 414
   },
@@ -7112,7 +7236,12 @@
    ],
    "vanilla": "Green Herb",
    "category": "consumable",
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "detail": "Novistador Boss (Processing Plant Control Room)",
    "offset": 415
   },
@@ -10820,7 +10949,12 @@
    "chapter": "4-1",
    "room": 545,
    "em_id": 44,
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 640
   },
   {
@@ -11164,7 +11298,12 @@
    "game_items": [
     220
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 672
   },
   {
@@ -11174,7 +11313,12 @@
    "game_items": [
     221
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 673
   },
   {
@@ -11184,7 +11328,12 @@
    "game_items": [
     222
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 674
   },
   {
@@ -11194,7 +11343,12 @@
    "game_items": [
     223
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 675
   },
   {
@@ -11204,7 +11358,12 @@
    "game_items": [
     224
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 676
   },
   {
@@ -11214,7 +11373,12 @@
    "game_items": [
     240
    ],
-   "requires": [],
+   "requires": [
+    "Platinum Sword",
+    "Golden Sword",
+    "Castle Gate Key",
+    "Prison Key"
+   ],
    "offset": 677
   },
   {
@@ -11224,7 +11388,12 @@
    "game_items": [
     225
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 678
   },
   {
@@ -11234,7 +11403,12 @@
    "game_items": [
     226
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 679
   },
   {
@@ -11244,7 +11418,12 @@
    "game_items": [
     227
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 680
   },
   {
@@ -11254,7 +11433,12 @@
    "game_items": [
     228
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 681
   },
   {
@@ -11264,7 +11448,12 @@
    "game_items": [
     229
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 682
   },
   {
@@ -11274,7 +11463,12 @@
    "game_items": [
     241
    ],
-   "requires": [],
+   "requires": [
+    "Goat Ornament",
+    "Lion Ornament",
+    "King's Grail",
+    "Queen's Grail"
+   ],
    "offset": 683
   },
   {

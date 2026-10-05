@@ -25,10 +25,11 @@ components.append(Component("Resident Evil 4 UHD Client", func=launch_client,
 
 # Checks that may not be obtainable in every playthrough, or whose detection hasn't been confirmed in the real
 # game yet: they only ever hold filler.
-#  - bosses: some can be escaped (Verdugo) or die in a cutscene; detection is HP-based and unconfirmed
-#  - Buy Handgun: Leon starts with one, and the Merchant may not sell a weapon you already own
+#  - bosses: some can be escaped (Verdugo) or die in a cutscene; detection is unconfirmed
+#  - Merchant: he only sells the next attache case, and may not sell a weapon you already own (one received from
+#    the multiworld blocks its purchase check); the medallion reward needs medallions from areas that lock behind you
 #  - special bottle caps (Ada, Bella Sisters, Don Pedro, J.J.) need near-perfect shooting gallery scores
-FILLER_ONLY_KINDS = {"boss"}
+FILLER_ONLY_KINDS = {"boss", "merchant", "medallion_reward"}
 FILLER_ONLY_NAMES = {"Merchant: Buy Handgun"}
 FILLER_ONLY_GAME_ITEMS = {240, 241, 242, 243}
 

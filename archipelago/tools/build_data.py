@@ -323,6 +323,48 @@ for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
         locations.append({"name": f"{stage_name} Pesetas {i}", "kind": "pesetas", "stage": stage,
                           "index": i, "chapter": ch, "requires": [], "excluded": True})
 
+# ---- 0.5.3 logic audit (checked against the community Manual, Evil Resource and StrategyWiki) -------------
+# Requirements missing from the research: these rooms sit behind doors the logic didn't know about.
+GRAILS = ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"]
+EXTRA_ROOM_REQ = {
+    0x229: GRAILS, 0x221: GRAILS,                  # 4-1 pit / waterway / Verdugo: after the throne room
+    0x20b: ["Gallery Key", "Goat Ornament"],       # 3-2 hedge maze (and 3-3 courtyard): past the Gallery door
+}
+CAP_REQ = {"A": ["Platinum Sword", "Golden Sword", "Castle Gate Key", "Prison Key"],  # Basilica, after the Water Room
+           "B": GRAILS}                                                              # Royal Suite
+EXTRA_NAME_REQ = {
+    # the Iron Maiden drops it; Regenerators/Iron Maiden realistically need the thermal scope
+    "5-1 Laboratory Control Center: Storage Room Card Key": ["Infrared Scope"],
+}
+# Missable or one-time: filler-only
+MISSABLE = {
+    "1-1 Village Square: Ruby",          # Dr. Salvador must die before the bell rings
+    "1-1 Woods: Spinel",                 # crow drop; the crows fly off
+    "1-3 South: Ruby",                   # optional Dr. Salvador kill
+    "4-1 Treasure Chamber: Broken Butterfly",       # Ashley boosts Leon in; she's taken away later in 4-1
+    "4-1 Treasure Chamber: Elegant Perfume Bottle",
+    "4-1 Verdugo, Processing Plant Control Room: Crown Jewel",  # Verdugo can be escaped
+    # in our research but not in the Manual's treasure list: may not exist
+    "1-1 Farm: Spinel #2", "2-1 Colosseum: Spinel #1", "2-1 Colosseum: Spinel #2", "2-1 Church: Spinel",
+    "2-3 Gorge: Spinel #3",
+}
+# Treasures that change id when they fall into the well
+ALT_IDS = {"1-1 Farm: Pearl Pendant": [137], "1-2 Chief's House: Brass Pocket Watch": [138]}
+_by_loc = {l["name"]: l for l in locations}
+for name in list(EXTRA_NAME_REQ) + list(MISSABLE) + list(ALT_IDS):
+    assert name in _by_loc, name
+for l in locations:
+    reqs = list(l.get("requires") or [])
+    reqs += EXTRA_ROOM_REQ.get(l.get("room"), [])
+    if l["kind"] == "bottle_cap":
+        reqs += CAP_REQ.get(l["name"].split()[2].rstrip(":"), [])
+    reqs += EXTRA_NAME_REQ.get(l["name"], [])
+    l["requires"] = list(dict.fromkeys(reqs))
+    if l["name"] in MISSABLE:
+        l["excluded"] = True
+    if l["name"] in ALT_IDS:
+        l["game_items"] = l["game_items"] + ALT_IDS[l["name"]]
+
 # ---- ids ---------------------------------------------------------------------------
 for i, l in enumerate(locations):
     l["offset"] = i
@@ -360,7 +402,8 @@ def add_item(name, classification, gid=None, kind="game"):
 for k in KEY_ITEMS:
     add_item(k, "progression", game_id(k))
 for w in USEFUL_WEAPONS:
-    add_item(w, "useful", game_id(w))
+    # the Infrared Scope gates the Storage Room Card Key (Iron Maiden / Regenerators): progression
+    add_item(w, "progression" if w == "Infrared Scope" else "useful", game_id(w))
 for f in FILLER:
     add_item(f, "filler", game_id(f))
 for v in item_counts:

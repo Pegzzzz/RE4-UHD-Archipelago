@@ -54,6 +54,7 @@ namespace sim
 	// Ems
 	void setEm(int idx, uint8_t id, int16_t hp, uint32_t guid, bool valid);
 	void setEmMaxHp(int idx, int16_t maxHp);
+	void setEmRoutine(int idx, uint8_t r0);  // cEm::Routine0 (3 = Die)
 	void setRoomItemFlagIn(uint16_t room, int bit); // flag in another room's save data (the room just left)
 
 	// Snapshots (GLOBAL_WK + item array + item manager + sub screen)

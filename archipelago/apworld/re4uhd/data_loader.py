@@ -34,7 +34,7 @@ CHAPTER_GATES: Dict[str, List[str]] = {
     "2-2": ["Round Insignia"],
     "3-1": ["Camp Key|Old Key", "False Eye"],
     "3-2": ["Platinum Sword", "Golden Sword", "Castle Gate Key", "Prison Key"],
-    "3-3": ["Moonstone (Left half)", "Moonstone (Right half)"],
+    "3-3": ["Gallery Key", "Goat Ornament", "Moonstone (Left half)", "Moonstone (Right half)"],
     "4-2": ["Lion Ornament", "Goat Ornament", "King's Grail", "Queen's Grail"],
     "4-3": ["Dynamite"],
     "4-4": ["Key to the Mine", "Stone of Sacrifice"],

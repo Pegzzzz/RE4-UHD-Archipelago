@@ -113,6 +113,9 @@ class RE4CommandProcessor(ClientCommandProcessor):
     def _cmd_bindsave(self) -> bool:
         """Bind the currently loaded game save to this seed (use only if you are sure it is the right save)."""
         if isinstance(self.ctx, RE4Context):
+            if not self.ctx.slot or not self.ctx.slot_data:
+                logger.info("Connect to your room first: /bindsave links the loaded save to the room you're in.")
+                return False
             self.ctx.send_game({"cmd": "bind_save"})
             logger.info("Asked the game to bind the loaded save to this seed.")
         return True
@@ -156,7 +159,7 @@ class RE4Context(CommonContext):
         self.game_task: Optional[asyncio.Task] = None
         self.goal_sent = False
         self.goal_pending = False
-        self.unsent_checks: set = set()  # checks from the game while the server was unreachable
+        self.unsent_checks: Dict[int, Optional[int]] = {}  # location -> seed tag, from while the room was unreachable
         self.known_game_folder: Optional[str] = None
 
     # ---- local setup -------------------------------------------------------------
@@ -299,7 +302,9 @@ class RE4Context(CommonContext):
             self.send_items()
             self.send_checked()
             if self.unsent_checks:
-                pending = [l for l in self.unsent_checks if l in self.missing_locations]
+                tag = self.expected_tag()
+                pending = [l for l, t in self.unsent_checks.items()
+                           if l in self.missing_locations and (t is None or t == tag)]
                 self.unsent_checks.clear()
                 if pending:
                     Utils.async_start(self.check_locations(pending))
@@ -336,6 +341,12 @@ class RE4Context(CommonContext):
             "slot_data": self.slot_data,
         }
 
+    def expected_tag(self) -> Optional[int]:
+        """The seed tag of the room we're connected to (None before connecting: then nothing can match)."""
+        if not self.slot or not self.seed_name:
+            return None
+        return save_tag(self.seed_name, self.slot, self.team or 0)
+
     def send_config(self) -> None:
         if self.slot_data:
             self.send_game(self.config_dict())
@@ -344,11 +355,10 @@ class RE4Context(CommonContext):
         if not self.slot_data:
             return
         items: List[Dict[str, Any]] = []
-        # items from locations that hold their own vanilla item stay in the game: don't deliver a second copy
-        keep = set(self.slot_data.get("keep_locations", []))
-        received = [i for i in self.items_received if not (i.player == self.slot and i.location in keep)]
-        for index, item in enumerate(received):
-            items.append({"i": index, "id": item.item,
+        # the full list, with where each item was found: the game skips copies of items Leon kept at their own
+        # location, so its saved index always counts the same list
+        for index, item in enumerate(self.items_received):
+            items.append({"i": index, "id": item.item, "loc": item.location, "own": item.player == self.slot,
                           "name": self.item_names.lookup_in_slot(item.item, self.slot),
                           "from": "" if item.player == self.slot else self.player_names.get(item.player, "Archipelago")})
         self.send_game({"cmd": "items", "items": items})
@@ -377,9 +387,14 @@ class RE4Context(CommonContext):
             self.send_items()
             self.send_checked()
         elif cmd == "check":
+            tag = msg.get("tag")
             if not (self.server and self.server.socket and self.slot):
-                # not connected to the room right now: send these as soon as it is
-                self.unsent_checks.update(msg.get("locations", []))
+                # not connected to the room right now: send these as soon as it is (if they're for that seed)
+                for l in msg.get("locations", []):
+                    self.unsent_checks[l] = tag
+                return
+            if tag is not None and tag != self.expected_tag():
+                logger.warning("The game sent checks from a save of a different seed; ignored.")
                 return
             locations = [l for l in msg.get("locations", []) if l in self.missing_locations]
             if locations:
@@ -387,6 +402,9 @@ class RE4Context(CommonContext):
                 for l in locations:
                     self.announce_location(l)
         elif cmd == "goal":
+            if msg.get("tag") is not None and self.slot and msg["tag"] != self.expected_tag():
+                return
+            self.goal_tag = msg.get("tag")
             self.goal_pending = True
             await self.send_goal()
         elif cmd == "death":
@@ -398,6 +416,8 @@ class RE4Context(CommonContext):
             logger.info(f"[game] {msg.get('text', '')}")
 
     async def send_goal(self) -> None:
+        if self.goal_pending and getattr(self, "goal_tag", None) not in (None, self.expected_tag()):
+            self.goal_pending = False  # came from a save of another seed
         if self.goal_pending and not self.goal_sent and self.slot is not None and self.server and self.server.socket:
             self.goal_sent = True
             await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])

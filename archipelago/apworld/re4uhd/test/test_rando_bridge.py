@@ -278,10 +278,10 @@ class TestManualCheck(unittest.TestCase):
 
 
 class TestClientRobustness(unittest.TestCase):
-    """Client: own vanilla items at kept locations aren't delivered twice; checks made while the room is
-    unreachable are sent once it's back; a bad message from the game doesn't break the link."""
+    """Client: the full received list goes to the game with where each item was found (the game skips kept
+    copies); checks from a save of another seed are dropped; checks made while the room is unreachable wait."""
 
-    def test_keep_and_buffer(self) -> None:
+    def test_items_tags_buffer(self) -> None:
         import asyncio
         from NetUtils import NetworkItem
         from .. import client as C
@@ -291,16 +291,36 @@ class TestClientRobustness(unittest.TestCase):
             sent = []
             ctx.send_game = lambda m: sent.append(m)
             ctx.slot = 1
+            ctx.team = 0
+            ctx.seed_name = "S1"
             ctx.slot_data = {"keep_locations": [7741500]}
             ctx.item_names = type("N", (), {"lookup_in_slot": lambda self, i, s=None: str(i)})()
-            ctx.items_received = [NetworkItem(7740059, 7741500, 1, 0), NetworkItem(7740062, 7741001, 1, 0),
-                                  NetworkItem(7740059, 7741500, 2, 0)]
+            ctx.items_received = [NetworkItem(7740059, 7741500, 1, 0), NetworkItem(7740062, 7741001, 2, 0)]
             ctx.send_items()
-            ids = [(i["id"]) for i in sent[-1]["items"]]
-            self.assertEqual(ids, [7740062, 7740059], "own kept item filtered, other players' copy delivered")
-            # not connected to the room: the check waits
-            await ctx.handle_game_message({"cmd": "check", "locations": [7741002]})
-            self.assertEqual(ctx.unsent_checks, {7741002})
+            items = sent[-1]["items"]
+            self.assertEqual([(i["id"], i["loc"], i["own"]) for i in items],
+                             [(7740059, 7741500, True), (7740062, 7741001, False)])
+            # not connected to the room: checks wait, remembering their seed tag
+            await ctx.handle_game_message({"cmd": "check", "locations": [7741002], "tag": 123})
+            self.assertEqual(ctx.unsent_checks, {7741002: 123})
+            # /bindsave refused before connecting
+            ctx.slot = None
+            proc = C.RE4CommandProcessor(ctx)
+            self.assertFalse(proc._cmd_bindsave())
+            self.assertFalse(any(m.get("cmd") == "bind_save" for m in sent))
+            await ctx.shutdown()
+
+        asyncio.run(run())
+
+    def test_expected_tag(self) -> None:
+        import asyncio
+        from .. import client as C
+
+        async def run():
+            ctx = C.RE4Context(None, None)
+            self.assertIsNone(ctx.expected_tag())
+            ctx.slot, ctx.team, ctx.seed_name = 2, 0, "ABC"
+            self.assertEqual(ctx.expected_tag(), C.save_tag("ABC", 2, 0))
             await ctx.shutdown()
 
         asyncio.run(run())
