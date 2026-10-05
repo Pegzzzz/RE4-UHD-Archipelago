@@ -36,6 +36,7 @@ namespace sim
 	void setGetItem(uint16_t id, uint16_t num);
 	void setRoomItemFlag(int bit);        // the game marks a placed item in the current room as taken
 	int nextRoomItemBit();                // first item flag bit not yet set in the current room
+	void setRoomFindFlag(int bit);        // a hidden item (barrel/crate, knocked down) appeared in the current room
 
 	// Inventory
 	void gameAdd(uint16_t id, int num, int chr = 0);   // game-side add (stacks like cItemMgr::get)

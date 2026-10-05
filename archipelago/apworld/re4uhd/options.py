@@ -44,11 +44,23 @@ class BonusTreasureChecks(Range):
     default = 5
 
 
-class PesetasChecks(DefaultOnToggle):
-    """Pesetas placed in the world (cabinets, tables, crates, bird nests...) are checks: 12 in the village,
-    37 in the castle, 11 on the island. Each placed pesetas pickup takes its area's next check and you keep the
-    money. Enemy and boss drops don't count. Filler-only: these checks give minor items."""
+class PesetasChecks(Range):
+    """How many placed pesetas pickups per stage (village, castle, island) are checks, 0-50.
+    Each placed pesetas pickup (cabinets, tables, crates, bird nests...) takes its stage's next check and you keep
+    the money. Enemy and boss drops don't count. Filler-only: these checks give minor items.
+    Every stage has well over 25 placed pesetas; the island may have fewer than 50."""
     display_name = "Pesetas Checks"
+    range_start = 0
+    range_end = 50
+    default = 25
+
+    @classmethod
+    def from_any(cls, data):
+        if isinstance(data, bool):  # 0.5.0 YAMLs: pesetas_checks: true/false
+            return cls(cls.default if data else 0)
+        if isinstance(data, str) and data.lower() in ("true", "false", "on", "off"):
+            return cls(cls.default if data.lower() in ("true", "on") else 0)
+        return super().from_any(data)
 
 
 class BossChecks(DefaultOnToggle):

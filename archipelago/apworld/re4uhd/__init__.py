@@ -23,6 +23,11 @@ components.append(Component("Resident Evil 4 UHD Client", func=launch_client,
                             supports_uri=True))
 
 
+# Merchant items the game mod can't take back after a check-only purchase (the vest changes Leon's costume, stocks
+# attach to the gun right away): the buyer keeps them, so they don't go into the item pool too.
+MERCHANT_KEPT = {"Tactical Vest", "Stock (TMP)", "Stock (Red9)"}
+
+
 class RE4Settings(settings.Group):
     class GameFolder(settings.OptionalUserFolderPath):
         """Resident Evil 4 game folder (the one that contains Bin32). Steam installs are found automatically;
@@ -129,7 +134,7 @@ class RE4World(World):
         if kind == "bonus":
             return loc["index"] <= self.options.bonus_treasure_checks.value
         if kind == "pesetas":
-            return bool(self.options.pesetas_checks)
+            return loc["index"] <= self.options.pesetas_checks.value
         if kind == "boss":
             return bool(self.options.boss_checks)
         if kind == "merchant":
@@ -197,7 +202,8 @@ class RE4World(World):
         for loc in self.enabled_locations:
             # merchant stock joins the pool when buying only sends the check
             if loc["kind"] == "merchant" and self.merchant_check_only:
-                pool.append(self.create_item(loc["vanilla"]))
+                if loc["vanilla"] not in MERCHANT_KEPT:
+                    pool.append(self.create_item(loc["vanilla"]))
                 continue
             if loc["kind"] != "pickup":
                 continue
@@ -216,7 +222,8 @@ class RE4World(World):
         extra = unfilled - len(pool)
         have = [i.name for i in pool]
         extras: List[str] = ["Progressive Attache Case"] * max(0, 3 - have.count("Progressive Attache Case"))
-        extras += [n for n in EXTRA_USEFUL if n not in have or n == "Yellow Herb"]
+        extras += [n for n in EXTRA_USEFUL if (n not in have or n == "Yellow Herb")
+                   and not (self.merchant_check_only and n in MERCHANT_KEPT)]
         for name in extras:
             if extra <= 0:
                 break

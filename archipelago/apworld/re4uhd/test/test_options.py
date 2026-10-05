@@ -104,7 +104,7 @@ class TestMerchantCheckOnly(RE4TestBase):
         self.assertTrue(self.world.fill_slot_data()["merchant_check_only"])
         pool = Counter(i.name for i in self.multiworld.itempool if i.player == self.player)
         for name in ("Rifle", "Handgun", "Treasure Map (Village)", "Treasure Map (Castle)", "Treasure Map (Island)",
-                     "Striker", "Killer7", "Tactical Vest", "Scope (semi-auto rifle)"):
+                     "Striker", "Killer7", "Scope (semi-auto rifle)"):
             self.assertGreaterEqual(pool[name], 1, name)
         self.assertEqual(pool["Progressive Attache Case"], 3)
 
@@ -170,13 +170,13 @@ class TestPesetas(RE4TestBase):
         call_all(self.multiworld, "pre_fill")
         distribute_items_restrictive(self.multiworld)
         pesetas = [l for l in self.multiworld.get_locations(self.player) if "Pesetas " in l.name]
-        self.assertEqual(len(pesetas), 60)
+        self.assertEqual(len(pesetas), 75)
         for loc in pesetas:
             self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)
             self.assertFalse(loc.item.advancement, f"{loc.name} holds progression")
         slot = [l for l in self.world.fill_slot_data()["locations"] if l["k"] == "pesetas"]
         counts = Counter(l["stage"] for l in slot)
-        self.assertEqual(counts, {1: 12, 2: 37, 3: 11})
+        self.assertEqual(counts, {1: 25, 2: 25, 3: 25})
 
     def test_chapters_follow_stage(self) -> None:
         for loc in LOCATIONS:
@@ -186,7 +186,7 @@ class TestPesetas(RE4TestBase):
 
 
 class TestNoPesetas(RE4TestBase):
-    options = {"pesetas_checks": False}
+    options = {"pesetas_checks": 0}
 
     def test_none(self) -> None:
         self.assertFalse(any("Pesetas " in l.name for l in self.multiworld.get_locations(self.player)))
@@ -225,3 +225,26 @@ class TestRandomEnemyHealth(RE4TestBase):
 class TestEnemyHealthOff(RE4TestBase):
     def test_off(self) -> None:
         self.assertIsNone(self.world.fill_slot_data()["enemy_health"])
+
+
+class TestPesetasOldYaml(RE4TestBase):
+    options = {"pesetas_checks": True}  # 0.5.0 YAMLs used a toggle
+
+    def test_true_means_default(self) -> None:
+        self.assertEqual(self.world.options.pesetas_checks.value, 25)
+
+
+class TestMaxPesetas(RE4TestBase):
+    options = {"pesetas_checks": 50}
+
+    def test_fifty_each(self) -> None:
+        slot = [l for l in self.world.fill_slot_data()["locations"] if l["k"] == "pesetas"]
+        self.assertEqual(Counter(l["stage"] for l in slot), {1: 50, 2: 50, 3: 50})
+
+
+class TestMerchantKeptNotInPool(RE4TestBase):
+    def test_vest_and_stocks_not_duplicated(self) -> None:
+        pool = Counter(i.name for i in self.multiworld.itempool if i.player == self.player)
+        for name in ("Tactical Vest", "Stock (TMP)", "Stock (Red9)"):
+            self.assertEqual(pool[name], 0, name)
+        self.assertGreaterEqual(pool["Red9"], 1)

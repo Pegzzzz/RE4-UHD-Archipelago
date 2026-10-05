@@ -254,6 +254,11 @@ namespace sim
 		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];
 		rs.item_flg_8[bit / 32] |= 0x80000000u >> (bit % 32);
 	}
+	void setRoomFindFlag(int bit)
+	{
+		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];
+		rs.item_find_flg_18[bit / 32] |= 0x80000000u >> (bit % 32);
+	}
 	int nextRoomItemBit()
 	{
 		auto& rs = gRoomSaves[GlobalPtr()->curRoomId_4FAC];

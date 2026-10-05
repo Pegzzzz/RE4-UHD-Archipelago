@@ -49,6 +49,8 @@ want = {
     "L_CASTLE_BONUS1": "Castle Bonus Treasure 1", "L_CASTLE_BONUS5": "Castle Bonus Treasure 5",
     "L_VILLAGE_PESETAS1": "Village Pesetas 1", "L_VILLAGE_PESETAS2": "Village Pesetas 2",
     "L_ISLAND_PESETAS1": "Island Pesetas 1", "L_ISLAND_PESETAS11": "Island Pesetas 11",
+    "L_OLDHOUSE_SPINEL1": "1-1 Old House Road: Spinel #1", "L_OLDHOUSE_SPINEL2": "1-1 Old House Road: Spinel #2",
+    "L_INSIGNIA_KEY": "1-2 Chief's House: Insignia Key", "L_BUY_STOCK_TMP": "Merchant: Buy Stock (TMP)",
 }
 from worlds.re4uhd.data_loader import LOCATION_BASE_ID
 with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") as f:

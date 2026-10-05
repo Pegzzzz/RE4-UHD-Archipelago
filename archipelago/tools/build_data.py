@@ -310,6 +310,19 @@ for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
             locations.append({"name": f"{stage_name} Pesetas {i}", "kind": "pesetas", "stage": stage,
                               "index": i, "chapter": ch, "requires": [], "excluded": True})
 
+# 0.5.1: the first real session found far more placed pesetas than the Manual lists (24 in chapter 1-1 alone), so
+# each stage's pool goes up to 50 (the pesetas_checks option picks how many are used). Appended after everything
+# above, so earlier ids stay the same; spread over the stage's chapters for the logic.
+PESETAS_MAX = 50
+for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
+    have = sum(1 for l in locations if l["kind"] == "pesetas" and l["stage"] == stage)
+    chapters = [c for c in CHAPTERS
+                if (c == "Final" and stage == 3) or (c != "Final" and {"1": 1, "2": 1, "3": 2, "4": 2, "5": 3}[c[0]] == stage)]
+    for i in range(have + 1, PESETAS_MAX + 1):
+        ch = chapters[min(len(chapters) - 1, (i - 1) * len(chapters) // PESETAS_MAX)]
+        locations.append({"name": f"{stage_name} Pesetas {i}", "kind": "pesetas", "stage": stage,
+                          "index": i, "chapter": ch, "requires": [], "excluded": True})
+
 # ---- ids ---------------------------------------------------------------------------
 for i, l in enumerate(locations):
     l["offset"] = i

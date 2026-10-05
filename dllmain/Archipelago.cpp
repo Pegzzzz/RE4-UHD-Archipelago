@@ -31,6 +31,7 @@
 #include <chrono>
 #include <deque>
 #include <fstream>
+#include <map>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
@@ -176,7 +177,13 @@ namespace ap
 	// (a room item flag flipped) or enemy/random drops (no flag), which never count.
 	enum class FlagMode { Unknown, Flags, Legacy };
 	FlagMode flagMode = FlagMode::Unknown;
-	std::deque<uint64_t> unclaimedFlips; // frames of item flag flips not yet matched to a pickup
+	struct Flip { uint64_t frame; uint16_t room; int bit; };
+	std::deque<Flip> unclaimedFlips; // item flag flips not yet matched to a pickup
+	// Hidden items (in a barrel/crate, or knocked down like an embedded Spinel) set their "found" flag when they
+	// appear; the pickup itself may come much later with no flag of its own. Each one is a credit for its room
+	// that one later unflagged pickup there can use.
+	std::map<uint16_t, std::map<int, uint64_t>> revealed; // room -> bit -> frame it appeared
+	uint64_t lastCombineFrame = 0; // a treasure/key item went away (combined in the inventory screen)
 	struct SupplyPickup
 	{
 		bool gold = false;
@@ -815,7 +822,7 @@ namespace ap
 		// 1. give each flag flip (once it has settled a little) to the nearest pickup in time
 		for (auto f = unclaimedFlips.begin(); f != unclaimedFlips.end();)
 		{
-			if (frame - *f < 15)
+			if (frame - f->frame < 15)
 			{
 				++f;
 				continue;
@@ -824,10 +831,11 @@ namespace ap
 			uint64_t bestDist = UINT64_MAX;
 			for (auto& p : pendingSupplies)
 			{
-				if (p.matched)
+				if (p.matched || p.room != f->room)
 					continue;
-				bool inWindow = *f >= p.frame ? (*f - p.frame <= kFlagAfterFrames) : (p.frame - *f <= kFlagBeforeFrames);
-				uint64_t dist = *f >= p.frame ? *f - p.frame : p.frame - *f;
+				uint64_t ff = f->frame;
+				bool inWindow = ff >= p.frame ? (ff - p.frame <= kFlagAfterFrames) : (p.frame - ff <= kFlagBeforeFrames);
+				uint64_t dist = ff >= p.frame ? ff - p.frame : p.frame - ff;
 				if (inWindow && dist < bestDist)
 				{
 					best = &p;
@@ -837,9 +845,10 @@ namespace ap
 			if (best)
 			{
 				best->matched = true;
+				revealed[f->room].erase(f->bit); // a hidden item picked up right away: its credit is used
 				f = unclaimedFlips.erase(f);
 			}
-			else if (frame - *f > kFlagBeforeFrames + kFlagAfterFrames)
+			else if (frame - f->frame > kFlagBeforeFrames + kFlagAfterFrames)
 				f = unclaimedFlips.erase(f); // nobody picked anything up near it (Ashley, a cutscene item, ...)
 			else
 				++f;
@@ -876,7 +885,18 @@ namespace ap
 				++it;
 				continue;
 			}
-			// no flag: an enemy drop or a random container drop
+			// no flag of its own: an item that appeared earlier from a barrel/crate (uses that credit) ...
+			auto& credits = revealed[p.room];
+			if (!credits.empty())
+			{
+				auto oldest = std::min_element(credits.begin(), credits.end(),
+					[](const auto& a, const auto& b) { return a.second < b.second; });
+				Log("[pickup] " + SupplyName(p) + " in r" + Hex(p.room) + " matches hidden item " + std::to_string(oldest->first));
+				credits.erase(oldest);
+				p.matched = true;
+				continue; // decided as placed on the next pass
+			}
+			// ... or an enemy drop / random container drop
 			switch (flagMode)
 			{
 			case FlagMode::Flags:
@@ -926,12 +946,20 @@ namespace ap
 				for (int b = 0; b < 32 && added; b++)
 					if (added & (0x80000000u >> b))
 					{
-						Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " " + what + " bit " + std::to_string(w * 32 + b));
+						int bit = w * 32 + b;
+						Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " " + what + " bit " + std::to_string(bit));
 						if (strcmp(what, "item_flg") == 0)
 						{
 							lastItemFlagFrame = frame;
-							unclaimedFlips.push_back(frame);
+							unclaimedFlips.push_back({ frame, roomFlags.room, bit });
+							// taken flag well after the found flag: that hidden item is being picked up now
+							auto& credits = revealed[roomFlags.room];
+							auto c = credits.find(bit);
+							if (c != credits.end() && frame - c->second > 30)
+								credits.erase(c);
 						}
+						else
+							revealed[roomFlags.room][bit] = frame;
 					}
 				before[w] = now[w];
 			}
@@ -1002,8 +1030,11 @@ namespace ap
 					}
 			}
 			// check-only mode: the item itself is shuffled into the multiworld, so take this copy back once the
-			// shop closes (the tactical vest changes Leon's costume on purchase, so it stays)
-			if (checked && merchantCheckOnly && id != uint16_t(EItemId::Assault_Jacket))
+			// shop closes. Kept: the tactical vest (changes Leon's costume on purchase) and the stocks (attach to
+			// the gun right away, so there's no item left to take).
+			bool keeps = id == uint16_t(EItemId::Assault_Jacket) || id == uint16_t(EItemId::Stock_Mauser) ||
+				id == uint16_t(EItemId::Stock_Styer);
+			if (checked && merchantCheckOnly && !keeps)
 			{
 				pendingRemovals.push_back({ id, 1, fresh });
 				AddToast(std::string("Merchant check: ") + ItemName(id) + " goes to the multiworld");
@@ -1029,8 +1060,11 @@ namespace ap
 			return;
 		}
 
-		// 5. world pickups (or cutscene/puzzle rewards)
-		if (pickup)
+		// 5. world pickups (or cutscene/puzzle rewards). Treasures and key items usually reach the case before
+		//    their pickup screen opens, so the screen isn't required; a treasure or key item that just went away
+		//    means this one was combined from others in the inventory screen.
+		bool combined = lastCombineFrame && (frame - lastCombineFrame) <= 5;
+		if (!combined)
 		{
 			SupplyPickup other; // lets this pickup claim its own room flag, so a drop picked up next to it can't
 			other.other = true;
@@ -1041,7 +1075,7 @@ namespace ap
 		}
 		uint32_t removeCount = 0;
 		for (uint32_t i = 0; i < count; i++)
-			if (HandlePickup(id, room, !pickup))
+			if (HandlePickup(id, room, combined))
 				removeCount++;
 		if (removeCount)
 			pendingRemovals.push_back({ id, removeCount, fresh });
@@ -1064,6 +1098,13 @@ namespace ap
 			prevCaseSize = caseSize;
 			resetSnapshot = false;
 			return;
+		}
+
+		for (auto& [id, num] : prevInv)
+		{
+			auto c = cur.find(id);
+			if ((c == cur.end() || c->second < num) && IsInterestingType(id))
+				lastCombineFrame = frame;
 		}
 
 		int goldDelta = gold - prevGold;
@@ -1366,6 +1407,7 @@ namespace ap
 		pendingGrant = {};
 		pendingSupplies.clear();
 		undecidedSupplies.clear();
+		revealed.clear();
 		goalReported = false;
 		saveState = 0;
 		resetSnapshot = true;
@@ -1562,6 +1604,7 @@ namespace ap
 			{
 				pendingRemovals.clear();
 				pendingGrant = {};
+				revealed.clear();
 				saveState = 0;
 			}
 			return;

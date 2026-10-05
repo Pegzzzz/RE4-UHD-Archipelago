@@ -992,8 +992,9 @@ void H3()
 {
 	Begin("H3. Combining a treasure in the inventory screen is not a pickup");
 	Setup(0x101);
-	sim::gameAdd(198, 1); // Elegant Mask
+	sim::gameAdd(198, 1); // Elegant Mask (already in the case, not a pickup now)
 	sim::gameAdd(199, 1); // Green Gem
+	ap::Resnapshot();
 	Tick(5);
 	size_t m = cl.got.size(), c0 = sim::conLines().size();
 	sim::setOpenFlag(sim::SS_NORMAL);
@@ -1326,19 +1327,19 @@ void P5()
 
 void P6()
 {
-	Begin("P6. Island pesetas use the extended save bitset (offsets past 768)");
+	Begin("P6. Island pesetas use the extended save bitset (offsets past 768); the pool runs out at 25");
 	Setup(0x301);
 	size_t m = cl.got.size();
-	for (int i = 0; i < 11; i++)
+	for (int i = 0; i < 25; i++)
 		PickupGold(100);
 	Settle();
 	auto c = ChecksSince(m);
-	Expect(c.size() == 11 && Has(c, L_ISLAND_PESETAS1) && Has(c, L_ISLAND_PESETAS11), "11 island pesetas checks");
+	Expect(c.size() == 25 && Has(c, L_ISLAND_PESETAS1) && Has(c, L_ISLAND_PESETAS11), "25 island pesetas checks");
 	Expect((sim::saveWork(28 + OFF_ISLAND_PESETAS11 / 32) >> (OFF_ISLAND_PESETAS11 % 32)) & 1,
 		"bit stored in save_free_work[" + std::to_string(28 + OFF_ISLAND_PESETAS11 / 32) + "]");
 	PickupGold(100);
 	Settle();
-	Expect(ChecksSince(m).size() == 11, "12th island pesetas: none left");
+	Expect(ChecksSince(m).size() == 25, "26th island pesetas: none left");
 	End();
 }
 
@@ -1360,6 +1361,88 @@ void P7()
 	Deliver({ cl.config });
 	Tick(2);
 	Expect(!Archipelago_EnemyHP(&lo, &hi), "off again with a config without it");
+	End();
+}
+
+// =================================================================== 0.5.1: what the first real session showed
+void Q1()
+{
+	Begin("Q1. Treasures and key items reach the case before their pickup screen: they still count");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	sim::gameAdd(87, 1); // Spinel shot down from the tunnel roof, no pickup screen seen yet
+	Tick(60);
+	sim::setRoomItemFlag(11);
+	Tick(30);
+	auto c = ChecksSince(m);
+	Expect(c.size() == 1 && c[0] == L_OLDHOUSE_SPINEL1, "Old House Road Spinel #1 checked (got " + json(c).dump() + ")");
+	Expect(sim::count(87) == 0, "Spinel removed");
+	sim::gameAdd(87, 1);
+	Tick(30);
+	Expect(Has(ChecksSince(m), L_OLDHOUSE_SPINEL2), "Spinel #2 checked");
+	Setup(0x105);
+	size_t m2 = cl.got.size();
+	sim::gameAdd(59, 1); // Insignia Key
+	Tick(30);
+	Expect(Has(ChecksSince(m2), L_INSIGNIA_KEY), "Insignia Key checked");
+	Expect(sim::count(59) == 0, "Insignia Key removed (it comes from the multiworld)");
+	End();
+}
+
+void Q2()
+{
+	Begin("Q2. Hidden items: a barrel's contents count when picked up later; a drop afterwards doesn't");
+	Setup(0x106);
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	sim::setRoomItemFlag(20); // barrel broken: item appears, both flags set together
+	sim::setRoomFindFlag(20);
+	Tick(300);                // walk over a few seconds later
+	Drop(4, 10);              // the pickup itself sets no flag
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "barrel ammo -> check");
+	Expect(ConContains(c0, "matches hidden item 20"), "logged as the hidden item");
+	Drop(4, 10);
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "an enemy drop afterwards: no check");
+	sim::setRoomItemFlag(21);  // crate with pesetas
+	sim::setRoomFindFlag(21);
+	Tick(200);
+	PickupGold(800, false);
+	Settle();
+	Expect(ChecksSince(m).size() == 2, "crate pesetas -> pesetas check");
+	End();
+}
+
+void Q3()
+{
+	Begin("Q3. A knocked-down treasure uses up its own hidden-item credit");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	sim::setRoomFindFlag(13); // Spinel shot loose
+	Tick(120);
+	sim::gameAdd(87, 1);      // picked up
+	Tick(60);
+	sim::setRoomItemFlag(13); // taken flag a second later
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "Spinel checked");
+	Drop(6, 1);
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "a drop afterwards doesn't use the Spinel's credit");
+	End();
+}
+
+void Q4()
+{
+	Begin("Q4. Stocks attach to the gun when bought: check sent, nothing taken back");
+	Setup(0x104);
+	sim::setGold(100000);
+	Tick(2);
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	Buy(67, 10000); // Stock (TMP)
+	CloseShop();
+	Expect(Has(ChecksSince(m), L_BUY_STOCK_TMP), "Merchant: Buy Stock (TMP) checked");
+	Expect(sim::count(67) == 1, "stock kept");
+	Expect(!ConContains(c0, "Could not remove"), "no failed removal");
 	End();
 }
 
@@ -1391,6 +1474,7 @@ int main()
 	E1(); E2(); E3(); E4(); E5(); E6(); E7(); E8(); E9(); E10(); E11(); E13();
 	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10(); H11();
 	P1(); P2(); P3(); P4(); P5(); P6(); P7();
+	Q1(); Q2(); Q3(); Q4();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

@@ -118,6 +118,31 @@ class RE4CommandProcessor(ClientCommandProcessor):
         return True
 
 
+    def _cmd_check(self, *location: str) -> bool:
+        """Send one of your own locations by hand, for a check the game mod missed.
+        Example: /check 1-1 Old House Road: Spinel #1"""
+        if not isinstance(self.ctx, RE4Context):
+            return False
+        query = " ".join(location).strip()
+        if not self.ctx.slot:
+            logger.info("Connect to the room first.")
+            return False
+        if not query:
+            logger.info("Usage: /check <location name>. Your missing locations are listed by /missing.")
+            return False
+        found = self.ctx.find_missing_location(query)
+        if isinstance(found, list):
+            if found:
+                logger.info("Not sure which one you mean: " + "; ".join(found))
+            else:
+                logger.info(f"No location of yours that hasn't been checked matches \"{query}\".")
+            return False
+        Utils.async_start(self.ctx.check_locations([found]))
+        self.ctx.announce_location(found)
+        logger.info(f"Sent {self.ctx.location_names.lookup_in_game(found, GAME_NAME)}.")
+        return True
+
+
 class RE4Context(CommonContext):
     command_processor = RE4CommandProcessor
     game = GAME_NAME
@@ -360,6 +385,25 @@ class RE4Context(CommonContext):
             self.goal_sent = True
             await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
             logger.info("Goal complete!")
+
+    def find_missing_location(self, query: str):
+        """The id of the unchecked location this slot's player means, or a list of candidates (maybe empty)."""
+        names = {self.location_names.lookup_in_game(l, GAME_NAME): l for l in self.missing_locations}
+        for name, loc in names.items():
+            if name.lower() == query.lower():
+                return loc
+        contains = [n for n in names if query.lower() in n.lower()]
+        if len(contains) == 1:
+            return names[contains[0]]
+        if contains:
+            return sorted(contains)[:8]
+        try:
+            fuzzy = Utils.get_fuzzy_results(query, list(names), limit=5)
+        except ImportError:
+            return []
+        if fuzzy and fuzzy[0][1] >= 90 and (len(fuzzy) == 1 or fuzzy[1][1] < fuzzy[0][1]):
+            return names[fuzzy[0][0]]
+        return [n for n, _ in fuzzy]
 
     def announce_location(self, location_id: int) -> None:
         info = self.locations_info.get(location_id)

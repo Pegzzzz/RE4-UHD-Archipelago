@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.5).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5.1).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -109,7 +109,7 @@ The YAML file holds your name and your choices for the randomizer.
 |---|---|---|
 | `shuffle_key_items` | Key items (Insignia Key, False Eye, Card Keys…) can be anywhere in the multiworld. `false` keeps them in their normal spots. | `true` |
 | `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). Enemy drops don't count. | `true` |
-| `pesetas_checks` | Pesetas placed in the world (cabinets, crates, bird nests…) are checks: 12 village, 37 castle, 11 island. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `true` |
+| `pesetas_checks` | How many placed pesetas pickups (cabinets, crates, bird nests…) per stage are checks, 0–50. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `25` |
 | `merchant_checks` | The first time you buy each Merchant item, you send a check. | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
 | `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
@@ -221,6 +221,7 @@ Type these in the Resident Evil 4 UHD Client:
 | `/rando` | Writes the Archipelago profile for re_duke's randomizer and opens it |
 | `/game` | Shows whether the game mod is connected |
 | `/bindsave` | Links the save you have loaded to this multiworld (see below) |
+| `/check <location>` | Sends one of your own locations by hand, if the mod missed a check (part of the name is enough, e.g. `/check Old House Road: Spinel #1`). `/missing` lists what's left |
 | `!hint <item>` | Asks where an item is |
 | `/received` | Lists the items you've received |
 
@@ -250,6 +251,10 @@ Make sure you're on the Steam UHD version and that you extracted into **Bin32**.
 First check the randomizer's own setup guide and FAQ (most crashes come from its enemy settings, overlays like
 Discord, or missing `X3DAudio1_7.dll`). To tell whose problem it is, try once without our mod: rename `dinput8.dll` to
 `dinput8.dll.off` and put `dinput8.dll.pre-archipelago` back as `dinput8.dll`.
+
+**I picked up a treasure or key item and no check was sent**
+Update to v0.5.1 or later (earlier versions missed most treasures picked up without a visible pickup screen).
+For checks already missed, type `/check <location name>` in the client.
 
 **I picked up ammo/pesetas and no check was sent**
 Enemy drops never count, only items placed in the world (before v0.5, drops used up a room's checks, so placed

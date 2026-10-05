@@ -247,3 +247,31 @@ class TestUnsafeRandoWithoutReDukeYaml(unittest.TestCase):
                     self.assertEqual(v["randomizeEnemiesCheckBox"], "1")
 
             asyncio.run(run())
+
+
+class TestManualCheck(unittest.TestCase):
+    """/check finds one of the player's own unchecked locations by (part of) its name."""
+
+    def test_find(self) -> None:
+        import asyncio
+        from .. import client as C
+        from ..data_loader import LOCATION_NAME_TO_ID
+
+        class Names:
+            def lookup_in_game(self, code, game=None):
+                return {v: k for k, v in LOCATION_NAME_TO_ID.items()}[code]
+
+        async def run():
+            ctx = C.RE4Context(None, None)
+            ctx.location_names = Names()
+            ids = [LOCATION_NAME_TO_ID[n] for n in ("1-1 Old House Road: Spinel #1", "1-1 Old House Road: Spinel #2",
+                                                     "1-2 Chief's House: Insignia Key")]
+            ctx.missing_locations = set(ids)
+            self.assertEqual(ctx.find_missing_location("1-1 old house road: spinel #1"), ids[0])
+            self.assertEqual(ctx.find_missing_location("Insignia"), ids[2])
+            self.assertEqual(sorted(ctx.find_missing_location("Old House Road")),
+                             ["1-1 Old House Road: Spinel #1", "1-1 Old House Road: Spinel #2"])
+            self.assertIsInstance(ctx.find_missing_location("Saddler"), list)
+            await ctx.shutdown()
+
+        asyncio.run(run())

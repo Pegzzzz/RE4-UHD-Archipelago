@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.1
+Fixes from the first real session's log:
+- Treasures and key items picked up without the mod seeing a pickup screen (most of them: they reach the case
+  before the screen opens) now count. Before, only some did, so e.g. the Old House Road Spinels sent nothing.
+  A treasure that appears because two others were combined in the inventory still doesn't count.
+- Items hidden in barrels and crates (and knocked-down ones) count when you pick them up later: the game flags
+  them when they appear, not when they're taken, so they used to be mistaken for enemy drops.
+- `pesetas_checks` is now a number per stage (0-50, default 25): the game has far more placed pesetas than the
+  Manual's list (24 in chapter 1-1 alone). `true`/`false` from 0.5.0 YAMLs still work.
+- Merchant check-only: stocks are no longer "taken back" (they attach to the gun, so it failed) and, like the
+  tactical vest, aren't added to the item pool.
+- New client command `/check <location>` sends one of your own locations by hand, for checks the mod missed.
+
 ## 0.5.0
 - Enemy drops no longer use up a room's ammo/herb checks. The game marks placed items as taken in the room's
   save data; a pickup only counts when that flag flips with it. If a game never shows those flags, the mod falls
