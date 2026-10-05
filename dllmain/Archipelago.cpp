@@ -47,7 +47,7 @@ namespace ap
 {
 	constexpr uint16_t kPort = 46400;
 	constexpr int kProtocolVersion = 2; // 2: checks/goal carry the seed tag, received items carry their location
-	constexpr const char* kModVersion = "0.5.4"; // the APWorld release this build belongs to (checked by the client)
+	constexpr const char* kModVersion = "0.5.5"; // the APWorld release this build belongs to (checked by the client)
 
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
 	constexpr int kSlotBits = 28;   // 32 slots (28..59) = 1024 location bits
@@ -76,7 +76,7 @@ namespace ap
 	constexpr uint16_t kRoomSaddler = 0x332;
 	constexpr uint16_t kRoomJetski = 0x333;
 
-	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Bonus, Pesetas, Unknown };
+	enum class Kind { Pickup, Boss, Merchant, MedallionReward, BottleCap, Bonus, Pesetas, Drop, Unknown };
 
 	struct LocationDef
 	{
@@ -89,7 +89,7 @@ namespace ap
 		bool loose = false; // room id not verified: allow a match anywhere in the same stage
 		bool cut = false;   // given by a cutscene/puzzle rather than the pickup screen
 		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
-		int stage = 0;           // bonus treasure / pesetas: 1 village, 2 castle, 3 island
+		int stage = 0;           // bonus treasure / pesetas / enemy drops: 1 village, 2 castle, 3 island
 		bool keep = false;       // holds its own vanilla item for this player: send the check, leave the item
 		bool excluded = false;   // filler-only / may not exist: left out of the "checks here" counter
 	};
@@ -214,6 +214,8 @@ namespace ap
 	uint64_t refusedFrame = 0;
 	int refusedTries = 0;
 	bool warnedEquipped = false;
+	std::chrono::steady_clock::time_point deliveryWaitSince{}; // items waiting and not deliverable since then
+	bool deliveryWaitLogged = false;
 	struct SupplyPickup
 	{
 		bool gold = false;
@@ -942,12 +944,29 @@ namespace ap
 		return false;
 	}
 
-	void ClaimSupply(const SupplyPickup& p, bool removeItem)
+	// Returns false if no check was left for it
+	bool ClaimSupply(const SupplyPickup& p, bool removeItem)
 	{
 		if (p.gold)
-			HandleGoldPickup(p.count, p.room);
-		else if (HandleConsumablePickup(p.id, p.room) && removeItem)
+			return HandleGoldPickup(p.count, p.room);
+		if (!HandleConsumablePickup(p.id, p.room))
+			return false;
+		if (removeItem)
 			pendingRemovals.push_back({ p.id, p.count, p.fresh });
+		return true;
+	}
+
+	// Enemy drop checks (enemy_drop_checks): every drop takes its stage's next drop check; Leon keeps the drop
+	bool HandleDropPickup(const SupplyPickup& p)
+	{
+		for (auto& loc : locations)
+		{
+			if (loc.kind != Kind::Drop || loc.stage != (p.room >> 8) || SaveBit(loc.offset))
+				continue;
+			SendCheck(loc, "enemy drop: " + (p.gold ? std::to_string(p.count) + " pesetas" : std::string(ItemName(p.id))));
+			return true;
+		}
+		return false;
 	}
 
 	std::string SupplyName(const SupplyPickup& p)
@@ -1066,9 +1085,11 @@ namespace ap
 			{
 				if (flagMode != FlagMode::Flags)
 				{
-					Log("Placed items are recognized by their room flags: enemy drops won't count as checks");
+					Log("Placed items are recognized by their room flags: enemy drops won't take placed-item checks");
 					flagMode = FlagMode::Flags;
-					undecidedSupplies.clear(); // those were drops
+					for (auto& u : undecidedSupplies) // those were drops
+						HandleDropPickup(u);
+					undecidedSupplies.clear();
 					SaveLearnedState();
 				}
 				Log("[pickup] placed " + SupplyName(p) + " in r" + Hex(p.room));
@@ -1093,10 +1114,12 @@ namespace ap
 			switch (flagMode)
 			{
 			case FlagMode::Flags:
-				Log("[pickup] drop " + SupplyName(p) + " in r" + Hex(p.room) + " (not a check)");
+				if (!HandleDropPickup(p))
+					Log("[pickup] drop " + SupplyName(p) + " in r" + Hex(p.room) + " (not a check)");
 				break;
 			case FlagMode::Legacy:
-				ClaimSupply(p, true);
+				if (!ClaimSupply(p, true))
+					HandleDropPickup(p);
 				break;
 			case FlagMode::Unknown:
 				undecidedSupplies.push_back(p);
@@ -1107,7 +1130,8 @@ namespace ap
 						" pickups: counting every ammo/herb/pesetas pickup instead");
 					flagMode = FlagMode::Legacy;
 					for (auto& u : undecidedSupplies)
-						ClaimSupply(u, false); // already in the inventory for a while: the player keeps these
+						if (!ClaimSupply(u, false)) // already in the inventory for a while: the player keeps these
+							HandleDropPickup(u);
 					undecidedSupplies.clear();
 				}
 				break;
@@ -1711,7 +1735,46 @@ namespace ap
 		prevCaseSize = SubScreenWk->board_size_2AA;
 		Resnapshot();
 		AddToast(toast);
+		Log("[received] #" + std::to_string(index) + " " + label + (done ? "" : " (organize screen)"));
 		return done;
+	}
+
+	// Items are waiting but the game isn't in a state where the inventory can be touched: after 15 s of that,
+	// write down why once (to find any game state that blocks delivery for too long)
+	void LogDeliveryBlocked()
+	{
+		if (AppliedIndex() >= received.size())
+		{
+			deliveryWaitSince = {};
+			return;
+		}
+		auto now = std::chrono::steady_clock::now();
+		if (deliveryWaitSince == std::chrono::steady_clock::time_point{})
+			deliveryWaitSince = now;
+		if (deliveryWaitLogged || now - deliveryWaitSince < std::chrono::seconds(15))
+			return;
+		deliveryWaitLogged = true;
+		GLOBAL_WK* g = GlobalPtr();
+		std::string why;
+		auto add = [&](bool on, const char* name) { if (on) why += std::string(" ") + name; };
+		add(!InMainLoop(), "not-main-loop");
+		add(!IsLeon(), "not-leon");
+		add(OptionOpenFlag(), "options");
+		add(SubScreenWk && SubScreenWk->open_flag_2C != SS_OPEN_NULL, ("screen=" + Hex(SubScreenWk ? int(SubScreenWk->open_flag_2C) : 0)).c_str());
+		add(SubScreenWk && SubScreenWk->item_get_flag_40, "item-get");
+		add(g && g->playerHpCur_4FB4 <= 0, "dead");
+		add(Status(Flags_STATUS::STA_ITEM_GET), "STA_ITEM_GET");
+		add(Status(Flags_STATUS::STA_SUB_SCRN), "STA_SUB_SCRN");
+		add(Status(Flags_STATUS::STA_SSCRN_REQUEST), "STA_SSCRN_REQUEST");
+		add(Status(Flags_STATUS::STA_EVENT), "STA_EVENT");
+		add(Status(Flags_STATUS::STA_MOVIE_ON), "STA_MOVIE_ON");
+		add(Status(Flags_STATUS::STA_MOVIE2_ON), "STA_MOVIE2_ON");
+		add(Status(Flags_STATUS::STA_DIEDEMO), "STA_DIEDEMO");
+		add(Status(Flags_STATUS::STA_NOW_LOADING), "STA_NOW_LOADING");
+		add(Status(Flags_STATUS::STA_SHOOTING), "STA_SHOOTING");
+		cPlayer* pl = PlayerPtr();
+		add(pl && !pl->subScrCheck(), "player-busy");
+		Log("[delivery] items waiting for 15 s in r" + Hex(g ? g->curRoomId_4FAC : 0) + ", blocked by:" + (why.empty() ? " ?" : why));
 	}
 
 	void ApplyReceivedItems()
@@ -1736,7 +1799,14 @@ namespace ap
 			return;
 		}
 
-		if (!SafeForInventory() || frame - lastGrantFrame < kGrantCooldownFrames)
+		if (!SafeForInventory())
+		{
+			LogDeliveryBlocked();
+			return;
+		}
+		deliveryWaitSince = {};
+		deliveryWaitLogged = false;
+		if (frame - lastGrantFrame < kGrantCooldownFrames)
 			return;
 		uint32_t index = AppliedIndex();
 		if (index >= received.size())
@@ -1806,6 +1876,7 @@ namespace ap
 		if (k == "bottle_cap") return Kind::BottleCap;
 		if (k == "bonus") return Kind::Bonus;
 		if (k == "pesetas") return Kind::Pesetas;
+		if (k == "drop") return Kind::Drop;
 		return Kind::Unknown;
 	}
 
@@ -2001,7 +2072,9 @@ namespace ap
 	{
 		int left = 0;
 		for (auto& loc : locations)
-			if (loc.kind == Kind::Pickup && !loc.consumable && loc.room >= 0 && (loc.room >> 8) == stage && !EventDone(loc))
+			if (!loc.excluded && !EventDone(loc) &&
+				((loc.kind == Kind::Pickup && !loc.consumable && loc.room >= 0 && (loc.room >> 8) == stage) ||
+				 (loc.kind == Kind::Drop && loc.stage == stage)))
 				left++;
 		if (!left)
 			return;

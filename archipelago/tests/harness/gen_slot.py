@@ -53,6 +53,7 @@ want = {
     "L_INSIGNIA_KEY": "1-2 Chief's House: Insignia Key", "L_BUY_STOCK_TMP": "Merchant: Buy Stock (TMP)",
     "L_EMBLEM_LEFT": "1-2 Valley: Emblem (Left half)", "L_VERDUGO": "Defeat Verdugo",
     "L_BUY_CASE_L": "Merchant: Buy Attache Case L",
+    "L_VILLAGE_DROP1": "Village Enemy Drop 1", "L_VILLAGE_DROP2": "Village Enemy Drop 2",
 }
 from worlds.re4uhd.data_loader import LOCATION_BASE_ID
 with open(os.path.join(os.path.dirname(os.path.abspath(out)), "ids.inc"), "w") as f:

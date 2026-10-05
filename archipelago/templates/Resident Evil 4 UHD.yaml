@@ -17,6 +17,10 @@ Resident Evil 4 UHD:
   # Enemy drops don't count. Filler-only.
   pesetas_checks: 25
 
+  # Enemies can drop important items: what enemies drop becomes checks, 0-30 per area (village, castle, island).
+  # Each drop you pick up sends the area's next drop check (you keep the drop). Can hold key items. 0 = off.
+  enemy_drop_checks: 0
+
   # First purchase of each Merchant item is a check.
   merchant_checks: true
 

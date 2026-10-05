@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.5.4).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5.5).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -111,6 +111,7 @@ The YAML file holds your name and your choices for the randomizer.
 | `consumable_checks` | Every ammo box, herb, grenade and spray placed in the world is a check (~450 extra checks). Enemy drops don't count. | `true` |
 | `consumable_progression` | Let those ammo/herb checks hold key items too. Off: they can still hold weapons and other useful things, never something you need to finish (the number of ammo/herb spots per room comes from guides and may be one too high). | `false` |
 | `pesetas_checks` | How many placed pesetas pickups (cabinets, crates, bird nests…) per stage are checks, 0–50. You keep the money. Enemy and boss drops don't count. They only hold minor items. | `25` |
+| `enemy_drop_checks` | Enemies can drop important items: 0–30 checks per area (village, castle, island) for things enemies drop. Each drop you pick up sends the area's next drop check and you keep the drop. These can hold key items. `0` turns it off. | `0` |
 | `merchant_checks` | The first time you buy each Merchant item, you send a check. They only hold minor items (the Merchant only sells the next attache case, and may not sell a gun you already have). | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
 | `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
@@ -179,8 +180,10 @@ That's it — play the game. The top-left corner also shows how many checks are 
 
 ## 7. What happens in-game
 
-- **Picking up a shuffled item:** you see the normal pickup screen, then the item disappears and a message says
-  what you found and for whom. The real item (yours or someone else's) is sent through Archipelago.
+- **Picking up a shuffled item:** you see the normal pickup screen, then the item disappears from your case as soon
+  as the screen closes (the Shotgun in the village house, for example), and a message says what you found and for
+  whom. The real item (yours or someone else's) is sent through Archipelago. Merchant purchases with
+  `merchant_purchases: check_only` disappear the same way when you leave the shop.
 - **Receiving items:** they appear in your case with a message like *"Received Insignia Key from Alex"*.
   Items are only delivered during normal gameplay, not during menus, cutscenes or while shopping.
   If your attache case is full, the normal "organize" screen opens.
@@ -190,6 +193,8 @@ That's it — play the game. The top-left corner also shows how many checks are 
   game's own "already taken" flags), so they're always yours.
 - **Pesetas:** each placed pesetas pickup (not enemy drops) sends the next pesetas check for that area. You keep
   the money.
+- **Enemy drops:** always yours. With `enemy_drop_checks`, each drop you pick up also sends that area's next drop
+  check (which can be a key item, for you or someone else).
 - **Merchant:** the first purchase of each item sends a check. With `merchant_purchases: check_only` (the default)
   the item is taken back when you leave the shop: you've paid for the check, and the item itself is somewhere in
   the multiworld. Buying it again later works normally. Attache cases and the tactical vest always take effect.

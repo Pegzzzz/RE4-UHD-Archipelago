@@ -333,3 +333,26 @@ class TestConsumableProgressionOn(RE4TestBase):
         loc = next(l for l in self.multiworld.get_locations(self.player) if l.name in consumable)
         key = self.world.create_item("Insignia Key")
         self.assertTrue(loc.item_rule(key))
+
+
+class TestEnemyDropChecks(RE4TestBase):
+    options = {"enemy_drop_checks": 10}
+
+    def test_drops(self) -> None:
+        from BaseClasses import LocationProgressType
+        drops = [l for l in self.multiworld.get_locations(self.player) if "Enemy Drop" in l.name]
+        self.assertEqual(len(drops), 30)
+        for loc in drops:
+            self.assertNotEqual(loc.progress_type, LocationProgressType.EXCLUDED, "drop checks can hold key items")
+        slot = [l for l in self.world.fill_slot_data()["locations"] if l["k"] == "drop"]
+        self.assertEqual(Counter(l["stage"] for l in slot), {1: 10, 2: 10, 3: 10})
+        # the n-th drop of an area sits in that area's chapters, early ones first
+        by_name = {l["name"]: l for l in LOCATIONS}
+        self.assertEqual(by_name["Village Enemy Drop 1"]["chapter"], "1-1")
+        self.assertTrue(by_name["Castle Enemy Drop 1"]["chapter"].startswith("3-"))
+        self.assertTrue(by_name["Island Enemy Drop 1"]["chapter"].startswith("5-"))
+
+
+class TestNoEnemyDrops(RE4TestBase):
+    def test_off_by_default(self) -> None:
+        self.assertFalse(any("Enemy Drop" in l.name for l in self.multiworld.get_locations(self.player)))

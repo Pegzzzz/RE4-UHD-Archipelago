@@ -71,6 +71,17 @@ class PesetasChecks(Range):
         return super().from_any(data)
 
 
+class EnemyDropChecks(Range):
+    """Enemies can drop important items: the items enemies drop (ammo, herbs, grenades, pesetas, also random
+    barrel/crate contents) become checks, 0-30 per area (village, castle, island). Each drop you pick up sends the
+    area's next drop check, and you keep the drop. These checks can hold anything, including key items.
+    0 turns them off."""
+    display_name = "Enemy Drop Checks"
+    range_start = 0
+    range_end = 30
+    default = 0
+
+
 class BossChecks(DefaultOnToggle):
     """Defeating a boss (Del Lago, El Gigantes, Mendez, Verdugo, Salazar, U-3, Krauser) is a check."""
     display_name = "Boss Checks"
@@ -185,6 +196,7 @@ class RE4Options(PerGameCommonOptions):
     merchant_purchases: MerchantPurchases
     bonus_treasure_checks: BonusTreasureChecks
     pesetas_checks: PesetasChecks
+    enemy_drop_checks: EnemyDropChecks
     boss_checks: BossChecks
     shooting_gallery_checks: ShootingGalleryChecks
     starting_weapon: StartingWeapon
@@ -202,7 +214,7 @@ class RE4Options(PerGameCommonOptions):
 
 
 OPTION_GROUPS = [
-    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, ConsumableProgression, PesetasChecks, MerchantChecks, MerchantPurchases,
+    OptionGroup("Checks", [ShuffleKeyItems, ConsumableChecks, ConsumableProgression, PesetasChecks, EnemyDropChecks, MerchantChecks, MerchantPurchases,
                            BonusTreasureChecks, BossChecks, ShootingGalleryChecks]),
     OptionGroup("Starting Inventory", [StartingWeapon, StartingSupplies, StartingPesetas]),
     OptionGroup("Enemies", [RandomEnemyHealth]),

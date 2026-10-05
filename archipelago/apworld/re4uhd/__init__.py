@@ -136,6 +136,7 @@ class RE4World(World):
         "Shooting Gallery": {l["name"] for l in LOCATIONS if l["kind"] == "bottle_cap"},
         "Blue Medallions": {l["name"] for l in LOCATIONS if l["kind"] == "medallion_reward"},
         "Pesetas Pickups": {l["name"] for l in LOCATIONS if l["kind"] == "pesetas"},
+        "Enemy Drops": {l["name"] for l in LOCATIONS if l["kind"] == "drop"},
     }
 
     def _location_enabled(self, loc: Dict[str, Any]) -> bool:
@@ -150,6 +151,8 @@ class RE4World(World):
             return loc["index"] <= self.options.bonus_treasure_checks.value
         if kind == "pesetas":
             return loc["index"] <= self.options.pesetas_checks.value
+        if kind == "drop":
+            return loc["index"] <= self.options.enemy_drop_checks.value
         if kind == "boss":
             return bool(self.options.boss_checks)
         if kind == "merchant":
@@ -289,7 +292,7 @@ class RE4World(World):
                 entry["loose"] = 1
             if l.get("cut"):
                 entry["cut"] = 1
-            if l["kind"] in ("bonus", "pesetas"):
+            if l["kind"] in ("bonus", "pesetas", "drop"):
                 entry["stage"] = l["stage"]
             if self.multiworld.get_location(l["name"], self.player).progress_type == LocationProgressType.EXCLUDED:
                 entry["x"] = 1  # filler-only / may not exist: the in-game "checks here" counter leaves it out

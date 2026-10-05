@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.5
+- New `enemy_drop_checks` (0-30 per area, default 0): enemies can drop important items. Every drop picked up (ammo,
+  herbs, grenades, pesetas, random barrel contents) sends the area's next drop check; the drop is kept. These
+  checks can hold key items; they're spread over each area's chapters for the logic.
+- Received items are logged, and if items wait more than 15 s because the game is in a state where the inventory
+  can't be touched, the log says which state (the old "items only arrive after changing rooms" came from the
+  Merchant flag, fixed in 0.5.2; this catches anything similar).
+
 ## 0.5.4
 Third audit (code read-through, a fresh review, game-mechanics research, and a new end-to-end test):
 - **Save tags fixed for Archipelago 0.6.7/0.6.8:** the client built the save's seed tag from a seed name those

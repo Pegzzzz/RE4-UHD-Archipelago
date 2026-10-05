@@ -2003,6 +2003,50 @@ void V3()
 	End();
 }
 
+void W1()
+{
+	Begin("W1. Enemy drop checks: drops take the area's drop checks and are kept; placed items still take their spots");
+	json sd = slotData;
+	sd["locations"].push_back({ {"id", L_VILLAGE_DROP1}, {"k", "drop"}, {"stage", 1} });
+	sd["locations"].push_back({ {"id", L_VILLAGE_DROP2}, {"k", "drop"}, {"stage", 1} });
+	json saved = slotData;
+	slotData = sd;
+	Setup(0x106);
+	slotData = saved;
+	size_t m = cl.got.size();
+	int ammo = sim::count(4);
+	Drop(4, 10);
+	PickupGold(300, false);
+	Settle();
+	auto c = ChecksSince(m);
+	Expect(Has(c, L_VILLAGE_DROP1) && Has(c, L_VILLAGE_DROP2), "two drops -> Village Enemy Drop 1 and 2 (got " + json(c).dump() + ")");
+	Expect(sim::count(4) == ammo + 10 && sim::gold() == 300, "drops kept");
+	size_t m2 = cl.got.size();
+	Pickup(24, 6);
+	Settle();
+	auto c2 = ChecksSince(m2);
+	Expect(c2.size() == 1 && c2[0] != L_VILLAGE_DROP1 && c2[0] != L_VILLAGE_DROP2, "placed shells -> a room spot, not a drop check");
+	End();
+}
+
+void W2()
+{
+	Begin("W2. Received items are logged; a delivery blocked for 15 s logs why");
+	Setup(0x101);
+	size_t c0 = sim::conLines().size();
+	SetItems({ I_SHOTGUN });
+	Tick(60);
+	Expect(ConContains(c0, "[received] #0"), "grant logged");
+	sim::setStatus(sim::STA_EVENT, true); // e.g. a status that never clears
+	SetItems({ I_SHOTGUN, I_RIFLE });
+	for (int i = 0; i < 40; i++) { Tick(1); Sleep(450); }
+	Expect(ConContains(c0, "[delivery] items waiting for 15 s") && ConContains(c0, "STA_EVENT"), "blocker logged");
+	sim::setStatus(sim::STA_EVENT, false);
+	Tick(60);
+	Expect(sim::count(46) == 1, "delivered once it clears");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -2036,6 +2080,7 @@ int main()
 	T1(); T2(); T3(); T4(); T5(); T6();
 	U1(); U2(); U3(); U4(); U5(); U6();
 	V1(); V2(); V3();
+	W1(); W2();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

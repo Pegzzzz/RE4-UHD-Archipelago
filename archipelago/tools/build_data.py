@@ -323,6 +323,18 @@ for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
         locations.append({"name": f"{stage_name} Pesetas {i}", "kind": "pesetas", "stage": stage,
                           "index": i, "chapter": ch, "requires": [], "excluded": True})
 
+# 0.5.5: enemy drop checks. Every item an enemy (or a breakable with random contents) drops takes its stage's next
+# drop check; the player keeps the drop. Spread over the stage's chapters (the n-th drop is reached long before the
+# chapter it's placed in ends: each stage has well over a hundred enemies). Can hold anything, key items included.
+DROPS_MAX = 30
+for stage, stage_name in ((1, "Village"), (2, "Castle"), (3, "Island")):
+    chapters = [c for c in CHAPTERS
+                if (c == "Final" and stage == 3) or (c != "Final" and {"1": 1, "2": 1, "3": 2, "4": 2, "5": 3}[c[0]] == stage)]
+    for i in range(1, DROPS_MAX + 1):
+        ch = chapters[min(len(chapters) - 1, (i - 1) * len(chapters) // DROPS_MAX)]
+        locations.append({"name": f"{stage_name} Enemy Drop {i}", "kind": "drop", "stage": stage,
+                          "index": i, "chapter": ch, "requires": []})
+
 # ---- 0.5.3 logic audit (checked against the community Manual, Evil Resource and StrategyWiki) -------------
 # Requirements missing from the research: these rooms sit behind doors the logic didn't know about.
 GRAILS = ["Goat Ornament", "Lion Ornament", "King's Grail", "Queen's Grail"]
