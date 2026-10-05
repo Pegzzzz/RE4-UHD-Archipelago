@@ -275,3 +275,32 @@ class TestManualCheck(unittest.TestCase):
             await ctx.shutdown()
 
         asyncio.run(run())
+
+
+class TestClientRobustness(unittest.TestCase):
+    """Client: own vanilla items at kept locations aren't delivered twice; checks made while the room is
+    unreachable are sent once it's back; a bad message from the game doesn't break the link."""
+
+    def test_keep_and_buffer(self) -> None:
+        import asyncio
+        from NetUtils import NetworkItem
+        from .. import client as C
+
+        async def run():
+            ctx = C.RE4Context(None, None)
+            sent = []
+            ctx.send_game = lambda m: sent.append(m)
+            ctx.slot = 1
+            ctx.slot_data = {"keep_locations": [7741500]}
+            ctx.item_names = type("N", (), {"lookup_in_slot": lambda self, i, s=None: str(i)})()
+            ctx.items_received = [NetworkItem(7740059, 7741500, 1, 0), NetworkItem(7740062, 7741001, 1, 0),
+                                  NetworkItem(7740059, 7741500, 2, 0)]
+            ctx.send_items()
+            ids = [(i["id"]) for i in sent[-1]["items"]]
+            self.assertEqual(ids, [7740062, 7740059], "own kept item filtered, other players' copy delivered")
+            # not connected to the room: the check waits
+            await ctx.handle_game_message({"cmd": "check", "locations": [7741002]})
+            self.assertEqual(ctx.unsent_checks, {7741002})
+            await ctx.shutdown()
+
+        asyncio.run(run())

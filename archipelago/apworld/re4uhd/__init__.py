@@ -23,6 +23,20 @@ components.append(Component("Resident Evil 4 UHD Client", func=launch_client,
                             supports_uri=True))
 
 
+# Checks that may not be obtainable in every playthrough, or whose detection hasn't been confirmed in the real
+# game yet: they only ever hold filler.
+#  - bosses: some can be escaped (Verdugo) or die in a cutscene; detection is HP-based and unconfirmed
+#  - Buy Handgun: Leon starts with one, and the Merchant may not sell a weapon you already own
+#  - special bottle caps (Ada, Bella Sisters, Don Pedro, J.J.) need near-perfect shooting gallery scores
+FILLER_ONLY_KINDS = {"boss"}
+FILLER_ONLY_NAMES = {"Merchant: Buy Handgun"}
+FILLER_ONLY_GAME_ITEMS = {240, 241, 242, 243}
+
+# Key items that always stay where they are: the Holy Beast pieces are inside Krauser's arena, which only opens
+# with all three, so a shuffled piece could trap the player in there with him.
+LOCKED_VANILLA = {"Piece of the Holy Beast, Panther", "Piece of the Holy Beast, Eagle",
+                  "Piece of the Holy Beast, Serpent"}
+
 # Merchant items the game mod can't take back after a check-only purchase (the vest changes Leon's costume, stocks
 # attach to the gun right away): the buyer keeps them, so they don't go into the item pool too.
 MERCHANT_KEPT = {"Tactical Vest", "Stock (TMP)", "Stock (Red9)"}
@@ -187,7 +201,8 @@ class RE4World(World):
             reqs = [_requirement(r, self.player) for r in loc.get("requires", [])]
             if reqs:
                 location.access_rule = lambda state, rs=reqs: all(r(state) for r in rs)
-            if loc.get("excluded"):
+            if loc.get("excluded") or loc["kind"] in FILLER_ONLY_KINDS or loc["name"] in FILLER_ONLY_NAMES or \
+                    set(loc.get("game_items", [])) & FILLER_ONLY_GAME_ITEMS:
                 location.progress_type = LocationProgressType.EXCLUDED  # may not be obtainable: filler only
             region.locations.append(location)
 
@@ -208,15 +223,14 @@ class RE4World(World):
             if loc["kind"] != "pickup":
                 continue
             name = loc["vanilla"]
-            if not self.options.shuffle_key_items and name in key_items:
+            if self._stays_vanilla(name):
                 continue  # placed on its vanilla location below
             pool.append(self.create_item(name))
 
-        if not self.options.shuffle_key_items:
-            for loc in self.enabled_locations:
-                if loc["kind"] == "pickup" and loc["vanilla"] in key_items:
-                    location = self.multiworld.get_location(loc["name"], self.player)
-                    location.place_locked_item(self.create_item(loc["vanilla"]))
+        for loc in self.enabled_locations:
+            if loc["kind"] == "pickup" and self._stays_vanilla(loc["vanilla"]):
+                location = self.multiworld.get_location(loc["name"], self.player)
+                location.place_locked_item(self.create_item(loc["vanilla"]))
 
         unfilled = len(self.multiworld.get_unfilled_locations(self.player))
         extra = unfilled - len(pool)
@@ -234,6 +248,9 @@ class RE4World(World):
             extra -= 1
         self.multiworld.itempool += pool
         self._push_starting_inventory()
+
+    def _stays_vanilla(self, name: str) -> bool:
+        return name in LOCKED_VANILLA or (not self.options.shuffle_key_items and name in self.item_name_groups["Key Items"])
 
     def _push_starting_inventory(self) -> None:
         start: List[str] = []
@@ -256,6 +273,7 @@ class RE4World(World):
 
     def fill_slot_data(self) -> Dict[str, Any]:
         locs = []
+        keep: List[int] = []
         for l in self.enabled_locations:
             entry = {"id": LOCATION_NAME_TO_ID[l["name"]], "k": l["kind"]}
             for key in ("room", "em_id"):
@@ -271,6 +289,13 @@ class RE4World(World):
                 entry["stage"] = l["stage"]
             if l.get("consumable"):
                 entry["c"] = 1
+            elif l["kind"] == "pickup":
+                # holds its own vanilla item for this player: the game mod leaves it in Leon's hands and the client
+                # doesn't deliver the copy from the server (no waiting on the server for a key item, no duplicate)
+                item = self.multiworld.get_location(l["name"], self.player).item
+                if item is not None and item.player == self.player and item.name == l["vanilla"]:
+                    entry["keep"] = 1
+                    keep.append(entry["id"])
             locs.append(entry)
         items = []
         for i in ITEMS:
@@ -298,5 +323,6 @@ class RE4World(World):
                 1 + zlib.crc32(f"{self.multiworld.seed_name}:{self.player}".encode()) % 99,
             ) if self.re_duke else None,
             "locations": locs,
+            "keep_locations": keep,
             "items": items,
         }

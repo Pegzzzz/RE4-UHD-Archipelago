@@ -3,7 +3,7 @@
 This guide takes you from nothing to playing RE4 in an Archipelago multiworld.
 It takes about 15 minutes the first time.
 
-> **Status: early release (v0.5.1).** Everything is tested against a simulated game, but this is the first public
+> **Status: early release (v0.5.2).** Everything is tested against a simulated game, but this is the first public
 > build, so expect rough edges. Please report problems (see [Reporting problems](#reporting-problems)).
 
 ---
@@ -113,7 +113,7 @@ The YAML file holds your name and your choices for the randomizer.
 | `merchant_checks` | The first time you buy each Merchant item, you send a check. | `true` |
 | `merchant_purchases` | `check_only`: that first purchase only sends the check; the item is taken back when you leave the shop and comes from the multiworld instead. `keep_item`: you also keep it. Later purchases are always normal. | `check_only` |
 | `bonus_treasure_checks` | 0–15 extra checks per stage (village, castle, island) for treasures nothing else counts, like random enemy drops. They only hold minor items. | `5` |
-| `boss_checks` | Beating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks. | `true` |
+| `boss_checks` | Beating Del Lago, the El Gigantes, Mendez, Verdugo, Salazar, U-3 and Krauser are checks. They only hold minor items (Verdugo can be escaped, and boss detection hasn't been confirmed in a full playthrough yet). | `true` |
 | `shooting_gallery_checks` | Each of the 24 bottle caps from the shooting gallery is a check. | `true` |
 | `starting_weapon` | An extra weapon at the start, with 2 boxes of its ammo: `vanilla` (none), `random_handgun` (Red9, Blacktail or Punisher) or `random_weapon` (any). | `vanilla` |
 | `starting_supplies` | 0–10 random supplies (ammo, herbs, grenades, sprays) at the start. | `0` |
@@ -202,12 +202,24 @@ client's `!hint` command to see where your items are.
 
 ### Missed something before a point of no return?
 
-The village, castle and island lock behind you. If something you need is stuck in an area you can't reach anymore:
+The village, castle and island lock behind you. When you leave the village or the castle with item checks still
+there, a message tells you how many (`/missing` in the client lists them). If something you need is stuck in an
+area you can't reach anymore:
 
 1. Press **F1** in game to open the re4_tweaks menu.
 2. Go to the **Trainer** tab → **Area Jump**, and jump back to the area.
 
-You can also ask the host to use `!release` / `!collect`.
+If the mod missed a check you did collect, `/check <location>` in the client sends it by hand. You can also ask the
+host to use `!release` / `!collect`.
+
+### Things that are handled for you
+
+- **Merchant:** picking things up next to the Merchant counts normally; only real purchases count as Merchant
+  checks. Attache cases and the tactical vest always take effect. If you equip a check-only purchase right away,
+  it's taken when you switch weapons.
+- **Holy Beast pieces (5-3/5-4):** always in their normal spots, so Krauser's arena can always be opened.
+- **A key item you already have:** picking up the normal copy still sends its check.
+- **Dying / continuing:** checks and items roll back with your save and are counted again when you redo them.
 
 ---
 

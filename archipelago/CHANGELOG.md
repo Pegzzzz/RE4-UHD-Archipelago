@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.5.2
+A full audit of ways a check, an item or a run could be lost (from the real session log plus a code review):
+- **Merchant rooms:** the game keeps its "near the Merchant" flag on the whole time Leon is in a Merchant's area,
+  so every pickup there counted as a purchase (the 1-2 Emblem halves sent nothing, removals and received items
+  waited). Purchases are now told apart by the shop menu or by pesetas being paid; the free Punisher next to the
+  Merchant is the medallion reward; sales don't count as pesetas pickups.
+- Merchant check-only: attache cases are never taken back (the Merchant sold them again); a gun equipped right in
+  the shop is taken once you switch weapons (toast) instead of being left with you; buying again after a death
+  takes the item again, like pickups.
+- A new game is only linked to a seed by the live client, never by the last session's config read at startup.
+- Bosses: a boss removed by its death cutscene at low HP, or last seen dead when the room/cutscene changes, counts.
+  Escaping (Verdugo's elevator) or dying doesn't.
+- A key item Leon already holds (his copy came from the multiworld): picking up the vanilla one still sends the
+  check, from the room's flag, even if the game doesn't add a second copy.
+- Room flags are watched for 5 s after leaving a room (a pickup's flag lands a moment after it), and hidden-item
+  credits survive leaving and coming back.
+- A received key item the game refuses is retried instead of lost.
+- A warning when leaving the village or castle with item checks behind (Area Jump can take you back).
+- Pending ammo/pesetas decisions are dropped on death, so a rolled-back inventory is never touched.
+- APWorld: boss checks, Buy Handgun and the four special bottle caps are filler-only (not always obtainable /
+  detection unconfirmed). The Holy Beast pieces stay on their own spots (they're inside Krauser's arena, which
+  only opens with all three). Locations that hold their own vanilla item keep it in Leon's hands and the client
+  doesn't deliver a second copy (also makes `shuffle_key_items: false` work offline).
+- Client: checks made while the room is unreachable are sent when it's back; a bad message from the game no longer
+  stops the game link; a goal from an earlier slot doesn't carry over.
+
 ## 0.5.1
 Fixes from the first real session's log:
 - Treasures and key items picked up without the mod seeing a pickup screen (most of them: they reach the case

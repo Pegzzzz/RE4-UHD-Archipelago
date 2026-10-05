@@ -11,7 +11,7 @@
 //    location really holds through the normal received-items stream.
 //  - Per-save state lives inside the game's own save work (GLOBAL_WK::save_free_work), so dying,
 //    continuing or loading an older save keeps items and checks consistent:
-//      [28..51] bitset of locations collected in this save (by location offset, 768 bits)
+//      [28..59] bitset of locations collected in this save (by location offset, 1024 bits)
 //      [60] magic  [61] seed tag  [62] index of the next received item to apply  [63] flags (bit0 = goal)
 
 #include <winsock2.h>
@@ -57,14 +57,17 @@ namespace ap
 	constexpr uint32_t kFlagGoal = 1;
 
 	constexpr int kPickupWindowFrames = 120;
-	constexpr int kShopWindowFrames = 10;
+	constexpr int kShopWindowFrames = 30; // after the shop menu closes (organize screen, reward handed over)
 	constexpr int kGrantCooldownFrames = 20;
 	constexpr int kGrantGiveUpFrames = 90; // case-full screen closed without the item: player discarded it
 	// Placed (map) items set a bit in the room's save data when taken; enemy drops don't. A supply pickup counts
 	// as placed when such a bit flips up to kFlagBeforeFrames before or kFlagAfterFrames after it.
 	constexpr int kFlagBeforeFrames = 120;
 	constexpr int kFlagAfterFrames = 90;
-	constexpr int kLegacyAfterUnflagged = 8; // never saw a flag after this many supply pickups: count them all
+	constexpr int kLegacyAfterUnflagged = 8;
+	constexpr int kFlagSettleFrames = 15;    // a flip is only handed out once this old (lets nearby pickups register)
+	constexpr int kDecideFrames = kFlagAfterFrames + kFlagSettleFrames + 5; // a pickup without a flag by then is a drop
+	constexpr int kPrevRoomWatchFrames = 300; // keep watching the room just left (flags land ~1s after a pickup) // never saw a flag after this many supply pickups: count them all
 
 	constexpr uint16_t kRoomStart = 0x100;
 	constexpr uint16_t kRoomOpening = 0x120;
@@ -85,6 +88,7 @@ namespace ap
 		bool cut = false;   // given by a cutscene/puzzle rather than the pickup screen
 		bool consumable = false; // ammo/herb/grenade spot: matched by room, any consumable counts
 		int stage = 0;           // bonus treasure / pesetas: 1 village, 2 castle, 3 island
+		bool keep = false;       // holds its own vanilla item for this player: send the check, leave the item
 	};
 
 	struct ItemDef
@@ -127,6 +131,7 @@ namespace ap
 
 	// ---------------- main-thread state -------------------------------------------------------
 	bool configured = false;
+	bool configFromDisk = false; // last seed's config, read at startup: never auto-links a new game to it
 	bool deathLink = false;
 	bool merchantCheckOnly = false; // first purchase only sends the check; the bought item is taken back
 	float enemyHpMin = 0.0f, enemyHpMax = 0.0f; // random enemy health multiplier range (0 = off)
@@ -162,7 +167,7 @@ namespace ap
 	struct PendingGrant { bool active = false; uint16_t id = 0; uint32_t index = 0; uint64_t closedSince = 0; };
 	PendingGrant pendingGrant;
 
-	struct TrackedEm { uint32_t guid; uint8_t id; };
+	struct TrackedEm { uint32_t guid; uint8_t id; int16_t lastHp = 0; int16_t maxHp = 0; };
 	std::unordered_map<uint32_t, TrackedEm> trackedBosses; // key: index in EmMgr
 	std::unordered_map<uint32_t, TrackedEm> discoveryEms;
 	uint32_t warnedUnknownIndex = UINT32_MAX;
@@ -171,6 +176,8 @@ namespace ap
 	// each pickup tells us whether placed items and enemy drops can be told apart.
 	struct RoomFlagSnapshot { uint16_t room = 0xFFFF; uint32_t item[4] = {}; uint32_t find[4] = {}; uint16_t etc[64] = {}; };
 	RoomFlagSnapshot roomFlags;
+	RoomFlagSnapshot prevRoomFlags; // the room just left, watched for kPrevRoomWatchFrames
+	uint64_t prevRoomUntil = 0;
 	uint64_t lastItemFlagFrame = 0;
 
 	// Supply pickups (ammo/herbs/grenades and pesetas) wait here until we know whether they were placed items
@@ -184,6 +191,11 @@ namespace ap
 	// that one later unflagged pickup there can use.
 	std::map<uint16_t, std::map<int, uint64_t>> revealed; // room -> bit -> frame it appeared
 	uint64_t lastCombineFrame = 0; // a treasure/key item went away (combined in the inventory screen)
+	bool itemDecreasedNow = false;  // some item went away in this frame's diff (a sale at the Merchant)
+	uint64_t lastMerchantNearFrame = 0; // STA_INTO_SHOP: set the whole time Leon is near a Merchant, not just in the menu
+	uint32_t refusedIndex = UINT32_MAX; // received item the game refused: retried every few seconds
+	uint64_t refusedFrame = 0;
+	bool warnedEquipped = false;
 	struct SupplyPickup
 	{
 		bool gold = false;
@@ -404,9 +416,11 @@ namespace ap
 		return (SubScreenWk->open_flag_2C & SS_OPEN_PZZL) != 0 && SubScreenWk->get_item_id_2F6 != 0 && !pendingGrant.active;
 	}
 
+	// The Merchant's menu. (STA_INTO_SHOP stays set the whole time Leon is in a Merchant's area, so on its own it
+	// can't tell a purchase from a pickup next to the Merchant.)
 	bool ShopContext()
 	{
-		return (SubScreenWk->open_flag_2C & SS_OPEN_SHOP) != 0 || Status(Flags_STATUS::STA_INTO_SHOP);
+		return (SubScreenWk->open_flag_2C & SS_OPEN_SHOP) != 0;
 	}
 
 	// Safe moment to change Leon's inventory: same gate as the re4_tweaks trainer, plus no cutscenes
@@ -422,7 +436,7 @@ namespace ap
 			return false;
 		if (g->playerHpCur_4FB4 <= 0)
 			return false;
-		return !Status(Flags_STATUS::STA_ITEM_GET) && !Status(Flags_STATUS::STA_INTO_SHOP) &&
+		return !Status(Flags_STATUS::STA_ITEM_GET) &&
 			!Status(Flags_STATUS::STA_SUB_SCRN) && !Status(Flags_STATUS::STA_SSCRN_REQUEST) &&
 			!Status(Flags_STATUS::STA_EVENT) && !Status(Flags_STATUS::STA_MOVIE_ON) &&
 			!Status(Flags_STATUS::STA_MOVIE2_ON) && !Status(Flags_STATUS::STA_DIEDEMO) &&
@@ -475,7 +489,8 @@ namespace ap
 	}
 
 	// Remove `count` of an item, taking the copies that just appeared first, never the equipped weapon
-	void RemoveItem(const Removal& r)
+	// Returns how many couldn't be removed because the only copies left are the equipped weapon
+	uint32_t RemoveItem(const Removal& r)
 	{
 		uint32_t count = r.count;
 		auto stillValid = [&](cItem* p) {
@@ -501,12 +516,16 @@ namespace ap
 			return true;
 		});
 
+		bool equippedLeft = false;
 		for (cItem* item : order)
 		{
 			if (count == 0)
 				break;
 			if (item == ItemMgr->m_pWep_C)
+			{
+				equippedLeft = true;
 				continue;
+			}
 			uint16_t num = item->num_2 ? item->num_2 : 1;
 			if (num > count)
 			{
@@ -519,8 +538,11 @@ namespace ap
 				count -= num;
 			}
 		}
+		if (count > 0 && equippedLeft)
+			return count;
 		if (count > 0)
 			Log("Could not remove " + std::to_string(count) + " of item " + std::to_string(r.id));
+		return 0;
 	}
 
 	const char* ItemName(int id)
@@ -606,7 +628,7 @@ namespace ap
 		for (int i = kSlotBits; i < 64; i++)
 			dirty |= w[i] != 0;
 		if (dirty)
-			Log("Save work before binding was not empty (slots 52-63); overwriting");
+			Log("Save work before binding was not empty (slots 28-63); overwriting");
 		for (int i = kSlotBits; i < 64; i++)
 			w[i] = 0;
 		w[kSlotMagic] = kSaveMagic;
@@ -627,8 +649,9 @@ namespace ap
 		if (w[kSlotMagic] != kSaveMagic)
 		{
 			// only a brand new game is linked automatically
+			// (not with the last session's config from disk: the new game may be for a new seed)
 			bool freshGame = (g->curRoomId_4FAC == kRoomStart || g->curRoomId_4FAC == kRoomOpening);
-			if (freshGame)
+			if (freshGame && !configFromDisk)
 			{
 				BindSave();
 				state = 1;
@@ -650,7 +673,9 @@ namespace ap
 			else if (state == 3)
 			{
 				Log("Loaded save is not linked to Archipelago");
-				AddToast("This save isn't linked to Archipelago. Start a New Game, or type /bindsave in the client.");
+				AddToast(configFromDisk && (g->curRoomId_4FAC == kRoomStart || g->curRoomId_4FAC == kRoomOpening)
+					? "New game: connect the Archipelago client to link it to your multiworld."
+					: "This save isn't linked to Archipelago. Start a New Game, or type /bindsave in the client.");
 			}
 		}
 		uiStatus = !clientConnected ? 0 : (state == 1 ? 2 : (state == 2 ? 3 : 4));
@@ -727,7 +752,7 @@ namespace ap
 					SendLog("Matched " + std::string(ItemName(id)) + " in room r" + Hex(room) + " to location " +
 						std::to_string(loc.id) + " (room r" + Hex(loc.room) + " in the data) by stage");
 				SendCheck(loc, std::string("picked up ") + ItemName(id));
-				return true;
+				return !loc.keep;
 			}
 			return false;
 		};
@@ -807,6 +832,31 @@ namespace ap
 		return p.gold ? std::to_string(p.count) + " pesetas" : std::string(ItemName(p.id)) + " x" + std::to_string(p.count);
 	}
 
+	// A room item flag turned on with no item showing up in the inventory: the game merged a key item Leon already
+	// holds (his copy came from the multiworld). Counts for an unchecked key-item location in this room.
+	void SilentTake(uint16_t room)
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		if (!IsLeon() || !g || g->curRoomId_4FAC != room)
+			return;
+		for (auto& loc : locations)
+		{
+			if (loc.kind != Kind::Pickup || loc.consumable || loc.room != room || SaveBit(loc.offset))
+				continue;
+			for (int id : loc.items)
+			{
+				ITEM_INFO info;
+				bio4::itemInfo(ITEM_ID(id), &info);
+				if ((info.type_2 == ITEM_TYPE_KEY_ITEM || info.type_2 == ITEM_TYPE_IMPORTANT) && CountOf(uint16_t(id)) > 0)
+				{
+					SendLog(std::string("Room flag without a new item: counted as ") + ItemName(id) + " (already held)");
+					SendCheck(loc, std::string("took ") + ItemName(id) + " (already held)");
+					return;
+				}
+			}
+		}
+	}
+
 	void SaveLearnedState()
 	{
 		try
@@ -817,12 +867,14 @@ namespace ap
 		catch (...) {}
 	}
 
+	bool TakeRevealCredit(uint16_t room, int* bitOut);
+
 	void ResolveSupplies()
 	{
 		// 1. give each flag flip (once it has settled a little) to the nearest pickup in time
 		for (auto f = unclaimedFlips.begin(); f != unclaimedFlips.end();)
 		{
-			if (frame - f->frame < 15)
+			if (frame - f->frame < kFlagSettleFrames)
 			{
 				++f;
 				continue;
@@ -848,8 +900,14 @@ namespace ap
 				revealed[f->room].erase(f->bit); // a hidden item picked up right away: its credit is used
 				f = unclaimedFlips.erase(f);
 			}
-			else if (frame - f->frame > kFlagBeforeFrames + kFlagAfterFrames)
-				f = unclaimedFlips.erase(f); // nobody picked anything up near it (Ashley, a cutscene item, ...)
+			else if (frame - f->frame > kFlagBeforeFrames + kDecideFrames)
+			{
+				// nobody picked anything up near it (Ashley, a cutscene item, a barrel's contents appearing...),
+				// or the game took an item without the inventory growing: a key item Leon already holds
+				if (!revealed[f->room].count(f->bit))
+					SilentTake(f->room);
+				f = unclaimedFlips.erase(f);
+			}
 			else
 				++f;
 		}
@@ -860,7 +918,7 @@ namespace ap
 			SupplyPickup& p = *it;
 			if (p.other)
 			{
-				if (p.matched || frame - p.frame > kFlagAfterFrames)
+				if (p.matched || frame - p.frame > kDecideFrames)
 					it = pendingSupplies.erase(it);
 				else
 					++it;
@@ -880,19 +938,16 @@ namespace ap
 				it = pendingSupplies.erase(it);
 				continue;
 			}
-			if (frame - p.frame <= kFlagAfterFrames)
+			if (frame - p.frame <= kDecideFrames)
 			{
 				++it;
 				continue;
 			}
 			// no flag of its own: an item that appeared earlier from a barrel/crate (uses that credit) ...
-			auto& credits = revealed[p.room];
-			if (!credits.empty())
+			int hiddenBit = -1;
+			if (TakeRevealCredit(p.room, &hiddenBit))
 			{
-				auto oldest = std::min_element(credits.begin(), credits.end(),
-					[](const auto& a, const auto& b) { return a.second < b.second; });
-				Log("[pickup] " + SupplyName(p) + " in r" + Hex(p.room) + " matches hidden item " + std::to_string(oldest->first));
-				credits.erase(oldest);
+				Log("[pickup] " + SupplyName(p) + " in r" + Hex(p.room) + " matches hidden item " + std::to_string(hiddenBit));
 				p.matched = true;
 				continue; // decided as placed on the next pass
 			}
@@ -923,67 +978,116 @@ namespace ap
 		}
 	}
 
-	void WatchRoomFlags()
+	// Reports flags that turned on since the snapshot and updates it
+	void DiffRoomFlags(RoomFlagSnapshot& snap, ROOM_SAVE_DATA* rs)
 	{
-		GLOBAL_WK* g = GlobalPtr();
-		if (!RoomData)
-			return;
-		ROOM_SAVE_DATA* rs = RoomData->getRoomSavePtr(g->curRoomId_4FAC);
-		if (!rs)
-			return;
-		if (roomFlags.room != g->curRoomId_4FAC)
-		{
-			roomFlags.room = g->curRoomId_4FAC;
-			memcpy(roomFlags.item, rs->item_flg_8, sizeof(roomFlags.item));
-			memcpy(roomFlags.find, rs->item_find_flg_18, sizeof(roomFlags.find));
-			memcpy(roomFlags.etc, rs->EtcModelFlg, sizeof(roomFlags.etc));
-			return;
-		}
-		auto diff = [&](const char* what, const uint32_t* now, uint32_t* before, int words) {
-			for (int w = 0; w < words; w++)
+		auto diff = [&](bool itemFlag, const uint32_t* now, uint32_t* before) {
+			for (int w = 0; w < 4; w++)
 			{
 				uint32_t added = now[w] & ~before[w];
 				for (int b = 0; b < 32 && added; b++)
 					if (added & (0x80000000u >> b))
 					{
 						int bit = w * 32 + b;
-						Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " " + what + " bit " + std::to_string(bit));
-						if (strcmp(what, "item_flg") == 0)
+						Log(std::string("[roomflag] r") + Hex(snap.room) + (itemFlag ? " item_flg" : " item_find") +
+							" bit " + std::to_string(bit));
+						if (itemFlag)
 						{
 							lastItemFlagFrame = frame;
-							unclaimedFlips.push_back({ frame, roomFlags.room, bit });
+							unclaimedFlips.push_back({ frame, snap.room, bit });
 							// taken flag well after the found flag: that hidden item is being picked up now
-							auto& credits = revealed[roomFlags.room];
+							auto& credits = revealed[snap.room];
 							auto c = credits.find(bit);
 							if (c != credits.end() && frame - c->second > 30)
 								credits.erase(c);
 						}
 						else
-							revealed[roomFlags.room][bit] = frame;
+							revealed[snap.room][bit] = frame;
 					}
 				before[w] = now[w];
 			}
 		};
-		diff("item_flg", rs->item_flg_8, roomFlags.item, 4);
-		diff("item_find", rs->item_find_flg_18, roomFlags.find, 4);
+		diff(true, rs->item_flg_8, snap.item);
+		diff(false, rs->item_find_flg_18, snap.find);
 		for (int i = 0; i < 64; i++)
-			if (rs->EtcModelFlg[i] != roomFlags.etc[i])
+			if (rs->EtcModelFlg[i] != snap.etc[i])
 			{
-				Log(std::string("[roomflag] r") + Hex(roomFlags.room) + " etcmodel " + std::to_string(i) + " = " + Hex(rs->EtcModelFlg[i]));
-				roomFlags.etc[i] = rs->EtcModelFlg[i];
+				Log(std::string("[roomflag] r") + Hex(snap.room) + " etcmodel " + std::to_string(i) + " = " + Hex(rs->EtcModelFlg[i]));
+				snap.etc[i] = rs->EtcModelFlg[i];
 			}
+	}
+
+	void TakeRoomSnapshot(RoomFlagSnapshot& snap, uint16_t room, ROOM_SAVE_DATA* rs)
+	{
+		snap.room = room;
+		memcpy(snap.item, rs->item_flg_8, sizeof(snap.item));
+		memcpy(snap.find, rs->item_find_flg_18, sizeof(snap.find));
+		memcpy(snap.etc, rs->EtcModelFlg, sizeof(snap.etc));
+	}
+
+	void WatchRoomFlags()
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		if (!RoomData)
+			return;
+		// the room just left: a pickup's flag can land a moment after walking through the door
+		if (prevRoomFlags.room != 0xFFFF && frame <= prevRoomUntil)
+		{
+			if (ROOM_SAVE_DATA* prs = RoomData->getRoomSavePtr(prevRoomFlags.room))
+				DiffRoomFlags(prevRoomFlags, prs);
+		}
+		ROOM_SAVE_DATA* rs = RoomData->getRoomSavePtr(g->curRoomId_4FAC);
+		if (!rs)
+			return;
+		if (roomFlags.room != g->curRoomId_4FAC)
+		{
+			if (roomFlags.room != 0xFFFF)
+			{
+				prevRoomFlags = roomFlags;
+				prevRoomUntil = frame + kPrevRoomWatchFrames;
+			}
+			TakeRoomSnapshot(roomFlags, g->curRoomId_4FAC, rs);
+			return;
+		}
+		DiffRoomFlags(roomFlags, rs);
+	}
+
+	// A hidden item that appeared in `room` and hasn't been picked up yet (its found flag is still set)
+	bool TakeRevealCredit(uint16_t room, int* bitOut)
+	{
+		auto& credits = revealed[room];
+		ROOM_SAVE_DATA* rs = RoomData ? RoomData->getRoomSavePtr(room) : nullptr;
+		while (!credits.empty())
+		{
+			auto oldest = std::min_element(credits.begin(), credits.end(),
+				[](const auto& a, const auto& b) { return a.second < b.second; });
+			int bit = oldest->first;
+			credits.erase(oldest);
+			// gone after a death/reload rolled the room back: not a credit any more
+			if (rs && !(rs->item_find_flg_18[bit / 32] & (0x80000000u >> (bit % 32))))
+				continue;
+			*bitOut = bit;
+			return true;
+		}
+		return false;
 	}
 
 	void HandleNewItem(uint16_t id, uint32_t count, int goldDelta, const std::vector<cItem*>& fresh)
 	{
 		GLOBAL_WK* g = GlobalPtr();
 		uint16_t room = g->curRoomId_4FAC;
+		// Merchant: the menu was open just now, or the item cost money (only purchases take pesetas), or the free
+		// Punisher next to the Merchant (blue medallion reward). Anything else is a pickup, even right next to him.
+		bool menu = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
+		bool nearMerchant = lastMerchantNearFrame && (frame - lastMerchantNearFrame) <= kShopWindowFrames;
+		bool reward = id == 33 && goldDelta == 0 && (menu || nearMerchant);
+		bool shop = menu || goldDelta < 0 || reward;
+		bool pickup = lastPickupCtxFrame && (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
 		{
-			bool pickupCtx = lastPickupCtxFrame && (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
-			bool shopCtx = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
 			bool flagged = lastItemFlagFrame && (frame - lastItemFlagFrame) <= kPickupWindowFrames;
 			Log(std::string("[pickup] ") + ItemName(id) + " x" + std::to_string(count) + " r" + Hex(room) +
-				(shopCtx ? " shop" : pickupCtx ? " pickup-screen" : " no-screen") + (flagged ? " placed-item-flag" : ""));
+				(shop ? " shop" : pickup ? " pickup-screen" : " no-screen") + (flagged ? " placed-item-flag" : "") +
+				(goldDelta ? " gold " + std::to_string(goldDelta) : ""));
 		}
 
 		// 1. a received item that went through the "case full" screen
@@ -1004,17 +1108,15 @@ namespace ap
 			return;
 		}
 
-		bool shop = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
-		bool pickup = lastPickupCtxFrame && (frame - lastPickupCtxFrame) <= kPickupWindowFrames;
-
-		// 3. Merchant
+		// 3. Merchant. Like pickups, "first time" means first time in this save: after a death or an older save the
+		//    purchase sends the (already known) check again and the item is taken back again.
 		if (shop)
 		{
 			bool checked = false;
-			if (id == 33 && goldDelta >= 0) // Punisher handed over for free: blue medallion reward
+			if (reward)
 			{
 				for (auto& loc : locations)
-					if (loc.kind == Kind::MedallionReward && !EventDone(loc))
+					if (loc.kind == Kind::MedallionReward && !SaveBit(loc.offset))
 					{
 						SendCheck(loc, "medallion reward");
 						checked = true;
@@ -1023,17 +1125,18 @@ namespace ap
 			else
 			{
 				for (auto& loc : locations)
-					if (loc.kind == Kind::Merchant && HasItem(loc, id) && !EventDone(loc))
+					if (loc.kind == Kind::Merchant && HasItem(loc, id) && !SaveBit(loc.offset))
 					{
 						SendCheck(loc, std::string("bought ") + ItemName(id));
 						checked = true;
+						break;
 					}
 			}
 			// check-only mode: the item itself is shuffled into the multiworld, so take this copy back once the
 			// shop closes. Kept: the tactical vest (changes Leon's costume on purchase) and the stocks (attach to
 			// the gun right away, so there's no item left to take).
 			bool keeps = id == uint16_t(EItemId::Assault_Jacket) || id == uint16_t(EItemId::Stock_Mauser) ||
-				id == uint16_t(EItemId::Stock_Styer);
+				id == uint16_t(EItemId::Stock_Styer) || (id >= 124 && id <= 127); // attache cases always take effect
 			if (checked && merchantCheckOnly && !keeps)
 			{
 				pendingRemovals.push_back({ id, 1, fresh });
@@ -1100,16 +1203,23 @@ namespace ap
 			return;
 		}
 
+		itemDecreasedNow = false;
 		for (auto& [id, num] : prevInv)
 		{
 			auto c = cur.find(id);
-			if ((c == cur.end() || c->second < num) && IsInterestingType(id))
-				lastCombineFrame = frame;
+			if (c == cur.end() || c->second < num)
+			{
+				itemDecreasedNow = true;
+				if (IsInterestingType(id))
+					lastCombineFrame = frame;
+			}
 		}
 
 		int goldDelta = gold - prevGold;
-		bool shopNow = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
-		if (goldDelta > 0 && !shopNow)
+		bool menu = lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames;
+		bool nearMerchant = lastMerchantNearFrame && (frame - lastMerchantNearFrame) <= kShopWindowFrames;
+		bool sale = menu || (nearMerchant && itemDecreasedNow);
+		if (goldDelta > 0 && !sale)
 		{
 			SupplyPickup p;
 			p.gold = true;
@@ -1134,11 +1244,11 @@ namespace ap
 		}
 
 		// Attache case bought from the Merchant (case size changes instead of an item appearing)
-		if (caseSize > prevCaseSize && prevCaseSize >= 0 && lastShopCtxFrame && (frame - lastShopCtxFrame) <= kShopWindowFrames)
+		if (caseSize > prevCaseSize && prevCaseSize >= 0 && (menu || nearMerchant || goldDelta < 0))
 		{
 			int caseItem = 124 + caseSize;
 			for (auto& loc : locations)
-				if (loc.kind == Kind::Merchant && HasItem(loc, caseItem) && !EventDone(loc))
+				if (loc.kind == Kind::Merchant && HasItem(loc, caseItem) && !SaveBit(loc.offset))
 					SendCheck(loc, std::string("bought ") + ItemName(caseItem));
 		}
 
@@ -1152,9 +1262,19 @@ namespace ap
 	{
 		if (pendingRemovals.empty() || !SafeForInventory())
 			return;
+		std::vector<Removal> retry;
 		for (auto& r : pendingRemovals)
-			RemoveItem(r);
-		pendingRemovals.clear();
+			if (uint32_t left = RemoveItem(r))
+				retry.push_back({ r.id, left, {} });
+		pendingRemovals = std::move(retry);
+		if (!pendingRemovals.empty() && !warnedEquipped)
+		{
+			warnedEquipped = true;
+			AddToast(std::string("Switch away from the ") + ItemName(pendingRemovals[0].id) +
+				": it was a check and goes to the multiworld");
+		}
+		if (pendingRemovals.empty())
+			warnedEquipped = false;
 		Resnapshot();
 	}
 
@@ -1190,6 +1310,33 @@ namespace ap
 		}
 	}
 
+	// Before boss tracking is dropped (room change, cutscene/load): a boss last seen dead or nearly dead counts
+	void FinalBossScan(uint16_t room)
+	{
+		GLOBAL_WK* g = GlobalPtr();
+		cEmMgr* mgr = EmMgrPtr();
+		bool alive = g && g->playerHpCur_4FB4 > 0 && !Status(Flags_STATUS::STA_DIEDEMO);
+		if (alive && configured)
+		{
+			for (auto& [idx, t] : trackedBosses)
+			{
+				int hp = t.lastHp;
+				if (mgr && mgr->m_Array_4 && idx < mgr->m_nArray_8)
+				{
+					cEm* em = mgr->get(idx);
+					if (em->IsValid() && em->guid_F8 == t.guid)
+						hp = em->hp_324;
+				}
+				if (hp <= std::max<int>(0, t.maxHp / 20))
+				{
+					Log("Boss em " + Hex(t.id) + " at " + std::to_string(hp) + " HP when tracking stopped");
+					DefeatedBoss(t.id, room);
+				}
+			}
+		}
+		trackedBosses.clear();
+	}
+
 	void TrackBosses()
 	{
 		cEmMgr* mgr = EmMgrPtr();
@@ -1208,15 +1355,28 @@ namespace ap
 			}
 			cEm* em = mgr->get(it->first);
 			bool gone = !em->IsValid() || em->guid_F8 != it->second.guid;
+			bool alive = g->playerHpCur_4FB4 > 0 && !Status(Flags_STATUS::STA_DIEDEMO);
 			if (gone)
+			{
+				// removed by its death cutscene before HP 0 was seen: count it if it was nearly dead
+				const TrackedEm& t = it->second;
+				if (alive && t.lastHp <= std::max<int>(1, t.maxHp / 20))
+				{
+					Log("Boss em " + Hex(t.id) + " vanished at " + std::to_string(t.lastHp) + "/" + std::to_string(t.maxHp) + " HP");
+					DefeatedBoss(t.id, room);
+				}
 				it = trackedBosses.erase(it);
-			else if (em->hp_324 <= 0 && g->playerHpCur_4FB4 > 0)
+			}
+			else if (em->hp_324 <= 0 && alive)
 			{
 				DefeatedBoss(it->second.id, room);
 				it = trackedBosses.erase(it);
 			}
 			else
+			{
+				it->second.lastHp = em->hp_324;
 				++it;
+			}
 		}
 
 		for (uint32_t i = 0; i < mgr->m_nArray_8; i++)
@@ -1225,7 +1385,7 @@ namespace ap
 			if (!em->IsValid() || !bossEmIds.count(em->id_100) || em->hp_324 <= 0)
 				continue;
 			if (!trackedBosses.count(i))
-				trackedBosses[i] = { em->guid_F8, em->id_100 };
+				trackedBosses[i] = { em->guid_F8, em->id_100, em->hp_324, em->hp_max_326 };
 		}
 	}
 
@@ -1315,6 +1475,19 @@ namespace ap
 					pendingGrant = { true, gid, index, 0 };
 					done = false;
 				}
+				else if (info.type_2 == ITEM_TYPE_KEY_ITEM || info.type_2 == ITEM_TYPE_IMPORTANT)
+				{
+					// never lose a key item: try again in a few seconds
+					if (refusedIndex != index)
+					{
+						SendLog("Key item " + label + " could not be added yet; retrying");
+						AddToast("Couldn't add " + label + " yet, trying again...");
+					}
+					refusedIndex = index;
+					refusedFrame = frame;
+					Resnapshot();
+					return false;
+				}
 				else
 					SendLog("Item " + label + " could not be added (game refused it)");
 			}
@@ -1354,6 +1527,8 @@ namespace ap
 		uint32_t index = AppliedIndex();
 		if (index >= received.size())
 			return;
+		if (index == refusedIndex && frame - refusedFrame < 300)
+			return;
 		lastGrantFrame = frame;
 		if (ApplyItem(received[index], index))
 		{
@@ -1371,6 +1546,8 @@ namespace ap
 		{
 			pendingRemovals.clear(); // the game is about to roll back to the last checkpoint
 			pendingGrant = {};
+			pendingSupplies.clear();
+			undecidedSupplies.clear();
 			if (deathLink && frame - lastKillFrame > 600)
 				Send({ {"cmd", "death"} });
 		}
@@ -1439,6 +1616,7 @@ namespace ap
 			d.cut = l.value("cut", 0) != 0;
 			d.consumable = l.value("c", 0) != 0;
 			d.stage = l.value("stage", 0);
+			d.keep = l.value("keep", 0) != 0;
 			for (auto& i : l.value("items", json::array()))
 				d.items.push_back(i.get<int>());
 			if (d.offset < 0 || d.offset >= kBitSlots * 32)
@@ -1471,6 +1649,7 @@ namespace ap
 		locationBase = newBase;
 		deathLink = sd.value("death_link", false);
 		merchantCheckOnly = sd.value("merchant_check_only", false);
+		configFromDisk = fromDisk;
 		enemyHpMin = enemyHpMax = 0.0f;
 		{
 			const json& hp = sd.value("enemy_health", json());
@@ -1575,6 +1754,22 @@ namespace ap
 		}
 	}
 
+	// Village -> castle and castle -> island are one-way: say how many item checks were left behind
+	void WarnLeftBehind(int stage)
+	{
+		int left = 0;
+		for (auto& loc : locations)
+			if (loc.kind == Kind::Pickup && !loc.consumable && loc.room >= 0 && (loc.room >> 8) == stage && !EventDone(loc))
+				left++;
+		if (!left)
+			return;
+		const char* names[] = { "", "village", "castle", "island" };
+		std::string where = stage >= 1 && stage <= 3 ? names[stage] : "last area";
+		Log(std::to_string(left) + " item checks left behind in the " + where);
+		AddToast(std::to_string(left) + " item checks left behind in the " + where +
+			". /missing in the client lists them; F1 > Trainer > Area Jump goes back.");
+	}
+
 	void SendHello()
 	{
 		uint32_t* w = SaveWork();
@@ -1597,14 +1792,16 @@ namespace ap
 		if (!configured || !InMainLoop() || !IsMainGame())
 		{
 			resetSnapshot = true;
-			trackedBosses.clear();
+			if (!trackedBosses.empty())
+				FinalBossScan(prevRoom);
 			discoveryEms.clear();
 			// Title screen / new load: anything queued belongs to a game state that no longer exists
 			if (!g || g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::Init) || g->Rno0_20 == uint8_t(GLOBAL_WK::Routine0::StageInit))
 			{
 				pendingRemovals.clear();
 				pendingGrant = {};
-				revealed.clear();
+				pendingSupplies.clear();
+				unclaimedFlips.clear();
 				saveState = 0;
 			}
 			return;
@@ -1612,8 +1809,12 @@ namespace ap
 
 		if (g->curRoomId_4FAC != prevRoom)
 		{
+			if (!trackedBosses.empty())
+				FinalBossScan(prevRoom);
+			uint16_t oldRoom = prevRoom;
 			prevRoom = g->curRoomId_4FAC;
-			trackedBosses.clear();
+			if (oldRoom != 0xFFFF && (prevRoom >> 8) > (oldRoom >> 8) && saveState == 1)
+				WarnLeftBehind(oldRoom >> 8);
 		}
 
 		int oldState = saveState;
@@ -1643,6 +1844,8 @@ namespace ap
 			lastPickupCtxFrame = frame;
 		if (ShopContext())
 			lastShopCtxFrame = frame;
+		if (Status(Flags_STATUS::STA_INTO_SHOP))
+			lastMerchantNearFrame = frame;
 
 		DiffInventory();
 		ResolveSupplies();

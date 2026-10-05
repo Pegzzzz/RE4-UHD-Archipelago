@@ -156,6 +156,7 @@ class RE4Context(CommonContext):
         self.game_task: Optional[asyncio.Task] = None
         self.goal_sent = False
         self.goal_pending = False
+        self.unsent_checks: set = set()  # checks from the game while the server was unreachable
         self.known_game_folder: Optional[str] = None
 
     # ---- local setup -------------------------------------------------------------
@@ -282,6 +283,10 @@ class RE4Context(CommonContext):
 
     def on_package(self, cmd: str, args: Dict[str, Any]) -> None:
         if cmd == "Connected":
+            if getattr(self, "_last_slot", None) not in (None, (self.seed_name, self.slot)):
+                self.goal_pending = False  # a different slot: an earlier slot's goal doesn't carry over
+                self.unsent_checks.clear()
+            self._last_slot = (self.seed_name, self.slot)
             self.slot_data = args.get("slot_data", {}) or {}
             if self.slot_data.get("death_link"):
                 Utils.async_start(self.update_death_link(True))
@@ -293,6 +298,11 @@ class RE4Context(CommonContext):
             self.send_config()
             self.send_items()
             self.send_checked()
+            if self.unsent_checks:
+                pending = [l for l in self.unsent_checks if l in self.missing_locations]
+                self.unsent_checks.clear()
+                if pending:
+                    Utils.async_start(self.check_locations(pending))
             try:
                 self.check_local_setup()
             except Exception as e:  # never let a local-file problem break the connection
@@ -334,7 +344,10 @@ class RE4Context(CommonContext):
         if not self.slot_data:
             return
         items: List[Dict[str, Any]] = []
-        for index, item in enumerate(self.items_received):
+        # items from locations that hold their own vanilla item stay in the game: don't deliver a second copy
+        keep = set(self.slot_data.get("keep_locations", []))
+        received = [i for i in self.items_received if not (i.player == self.slot and i.location in keep)]
+        for index, item in enumerate(received):
             items.append({"i": index, "id": item.item,
                           "name": self.item_names.lookup_in_slot(item.item, self.slot),
                           "from": "" if item.player == self.slot else self.player_names.get(item.player, "Archipelago")})
@@ -364,6 +377,10 @@ class RE4Context(CommonContext):
             self.send_items()
             self.send_checked()
         elif cmd == "check":
+            if not (self.server and self.server.socket and self.slot):
+                # not connected to the room right now: send these as soon as it is
+                self.unsent_checks.update(msg.get("locations", []))
+                return
             locations = [l for l in msg.get("locations", []) if l in self.missing_locations]
             if locations:
                 await self.check_locations(locations)
@@ -431,9 +448,14 @@ class RE4Context(CommonContext):
                         break
                     try:
                         msg = json.loads(line)
-                    except json.JSONDecodeError:
+                    except (json.JSONDecodeError, UnicodeDecodeError):
                         continue
-                    await self.handle_game_message(msg)
+                    if not isinstance(msg, dict):
+                        continue
+                    try:
+                        await self.handle_game_message(msg)
+                    except Exception as e:  # one bad message must not stop the game link
+                        logger.warning(f"Problem handling a game message: {e}")
             except (ConnectionError, OSError):
                 pass
             finally:

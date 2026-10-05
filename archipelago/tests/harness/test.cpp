@@ -308,7 +308,7 @@ void PickupGold(int amount, bool placed = true)
 }
 
 // let pending supply pickups be decided
-void Settle() { Tick(ap::kFlagAfterFrames + 5); }
+void Settle() { Tick(ap::kDecideFrames + 5); }
 
 void Buy(uint16_t id, int price)
 {
@@ -1446,6 +1446,198 @@ void Q4()
 	End();
 }
 
+// =================================================================== 0.5.2: robustness audit
+void R1()
+{
+	Begin("R1. Next to the Merchant (STA_INTO_SHOP set, menu closed): pickups are pickups, purchases still purchases");
+	Setup(0x104);
+	sim::setGold(50000);
+	sim::setStatus(sim::STA_INTO_SHOP, true); // stays set the whole time Leon is near the Merchant
+	Tick(5);
+	size_t m = cl.got.size();
+	sim::gameAdd(165, 1); // Emblem (Left half), no pickup screen
+	Tick(30);
+	Expect(Has(ChecksSince(m), L_EMBLEM_LEFT), "Emblem (Left half) checked");
+	Expect(sim::count(165) == 0, "Emblem removed even though the Merchant is near");
+	Pickup(4, 10);
+	Settle();
+	Expect(ChecksSince(m).size() == 2, "placed ammo next to the Merchant -> check");
+	// purchase without the menu flag: the gold going down marks it
+	size_t m2 = cl.got.size();
+	sim::setGold(sim::gold() - 14000);
+	sim::gameAdd(37, 1); // Red9
+	Tick(30);
+	Expect(Has(ChecksSince(m2), L_BUY_RED9), "paid Red9 -> Merchant check");
+	Expect(sim::count(37) == 0, "Red9 taken back (check-only)");
+	// free Punisher next to the Merchant -> medallion reward
+	size_t m3 = cl.got.size();
+	sim::gameAdd(33, 1);
+	Tick(30);
+	Expect(Has(ChecksSince(m3), L_MEDALLION) && !Has(ChecksSince(m3), L_BUY_PUNISHER), "free Punisher -> medallion reward");
+	// selling a treasure next to the Merchant: gold up, item gone -> not a pesetas pickup
+	sim::gameAdd(87, 1);
+	ap::Resnapshot();
+	Tick(2);
+	size_t m4 = cl.got.size();
+	sim::gameRemoveAll(87);
+	sim::setGold(sim::gold() + 3000);
+	Settle();
+	Expect(ChecksSince(m4).empty(), "sale -> no pesetas check");
+	sim::setStatus(sim::STA_INTO_SHOP, false);
+	End();
+}
+
+void R2()
+{
+	Begin("R2. Check-only Merchant: attache case stays; equipped purchase taken back once unequipped; rebuy after death");
+	Setup(0x104);
+	sim::setGold(100000);
+	Tick(2);
+	size_t m = cl.got.size(), c0 = sim::conLines().size();
+	Buy(125, 24000); // Attache Case M shows up as an item
+	CloseShop();
+	Expect(Has(ChecksSince(m), L_BUY_CASE_M), "case check");
+	Expect(sim::count(125) == 1, "attache case kept");
+	auto checkpoint = sim::save();
+	size_t m2 = cl.got.size();
+	Buy(37, 14000);
+	sim::equip(37); // equipped right away in the shop
+	CloseShop();
+	Expect(Has(ChecksSince(m2), L_BUY_RED9), "Red9 checked");
+	Expect(sim::count(37) == 1, "equipped Red9 can't be taken yet");
+	sim::equip(35);
+	Tick(5);
+	Expect(sim::count(37) == 0, "taken once Leon switches weapons");
+	Expect(!ConContains(c0, "Could not remove"), "no failed removal logged");
+	// death: back to before the purchase; buying again sends the known check and takes the gun again
+	sim::setHp(0);
+	Tick(10);
+	sim::setRoutine(sim::R_ROOMINIT);
+	Tick(5);
+	sim::restore(checkpoint);
+	Tick(5);
+	Buy(37, 14000);
+	CloseShop();
+	Expect(sim::count(37) == 0, "re-bought Red9 taken back again");
+	End();
+}
+
+void R3()
+{
+	Begin("R3. Last session's config from disk never links a new game; the live config does");
+	// a fresh process state: new game in r100 with only the disk config
+	sim::reset(0x100);
+	json cfg = Config(++nextTag);
+	cfg["from_disk"] = true;
+	Deliver({ cfg });
+	Tick(5);
+	Expect(sim::saveWork(60) != ap::kSaveMagic, "not linked to the old seed");
+	Expect(ap::saveState == 3, "shown as not linked");
+	cl.config = Config(nextTag);
+	Deliver({ cl.config });
+	Tick(5);
+	Expect(sim::saveWork(60) == ap::kSaveMagic && sim::saveWork(61) == nextTag, "linked once the client sends the seed");
+	End();
+}
+
+void R4()
+{
+	Begin("R4. Bosses: removed by a death cutscene at low HP counts; escaping doesn't");
+	Setup(0x10B);
+	sim::setEm(0, 0x2F, 5000, 71, true);
+	sim::setEmMaxHp(0, 5000);
+	Tick(3);
+	size_t m = cl.got.size();
+	sim::setEm(0, 0x2F, 120, 71, true); // nearly dead
+	Tick(3);
+	sim::setEm(0, 0x2F, 120, 71, false); // cutscene removes it before HP 0 is seen
+	Tick(3);
+	Expect(Has(ChecksSince(m), L_DEL_LAGO), "Del Lago counted");
+	Setup(0x221);
+	sim::setEm(0, 0x2C, 9000, 72, true);
+	sim::setEmMaxHp(0, 9000);
+	Tick(3);
+	size_t m2 = cl.got.size();
+	sim::setEm(0, 0x2C, 6000, 72, true);
+	Tick(3);
+	sim::setRoom(0x222); // took the elevator
+	sim::setEm(0, 0, 0, 0, false);
+	Tick(5);
+	Expect(!Has(ChecksSince(m2), L_VERDUGO), "escaped Verdugo -> no check");
+	// dying next to a nearly dead boss doesn't count it either
+	Setup(0x10B);
+	sim::setEm(0, 0x2F, 5000, 73, true);
+	sim::setEmMaxHp(0, 5000);
+	Tick(3);
+	sim::setEm(0, 0x2F, 50, 73, true);
+	Tick(3);
+	size_t m3 = cl.got.size();
+	sim::setHp(0);
+	sim::setEm(0, 0x2F, 50, 73, false);
+	Tick(5);
+	Expect(!Has(ChecksSince(m3), L_DEL_LAGO), "player died -> no boss check");
+	End();
+}
+
+void R5()
+{
+	Begin("R5. A key item Leon already holds: the room flag alone sends the check");
+	Setup(0x105);
+	sim::gameAdd(59, 1); // Insignia Key received from the multiworld earlier
+	ap::Resnapshot();
+	Tick(5);
+	size_t m = cl.got.size();
+	sim::setRoomItemFlag(4); // the vanilla one is picked up; the game merges it, the count stays 1
+	Tick(ap::kFlagBeforeFrames + ap::kDecideFrames + 20);
+	Expect(Has(ChecksSince(m), L_INSIGNIA_KEY), "Insignia Key location checked");
+	Expect(sim::count(59) == 1, "Leon keeps his key");
+	End();
+}
+
+void R6()
+{
+	Begin("R6. Pickup flag that lands after walking through a door still counts");
+	Setup(0x106);
+	size_t m = cl.got.size();
+	Drop(4, 10);              // picked up with no flag yet
+	sim::setRoom(0x107);      // straight through the door
+	Tick(20);
+	sim::setRoomItemFlagIn(0x106, 9);
+	Settle();
+	Expect(ChecksSince(m).size() == 1, "counted for the room just left");
+	End();
+}
+
+void R7()
+{
+	Begin("R7. Leaving the village with item checks behind: warning");
+	Setup(0x11F);
+	size_t c0 = sim::conLines().size();
+	sim::setRoom(0x200);
+	Tick(5);
+	Expect(ConContains(c0, "item checks left behind in the village"), "warning logged");
+	End();
+}
+
+void R8()
+{
+	Begin("R8. A location holding its own vanilla item: check sent, item kept");
+	json sd = slotData;
+	for (auto& l : sd["locations"])
+		if (l.value("id", int64_t(0)) == L_SHOTGUN)
+			l["keep"] = 1;
+	json saved = slotData;
+	slotData = sd;
+	Setup(0x101);
+	slotData = saved;
+	size_t m = cl.got.size();
+	Pickup(44, 1);
+	Tick(5);
+	Expect(Has(ChecksSince(m), L_SHOTGUN), "Shotgun location checked");
+	Expect(sim::count(44) == 1, "Shotgun kept");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -1475,6 +1667,7 @@ int main()
 	H1(); H2(); H3(); H4(); H5(); H6(); H7(); H8(); H9(); H10(); H11();
 	P1(); P2(); P3(); P4(); P5(); P6(); P7();
 	Q1(); Q2(); Q3(); Q4();
+	R1(); R2(); R3(); R4(); R5(); R6(); R7(); R8();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

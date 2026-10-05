@@ -87,9 +87,14 @@ class TestData(RE4TestBase):
                 self.assertTrue(0 <= item["g"] < 272, item)
 
     def test_every_key_item_once(self) -> None:
+        from .. import LOCKED_VANILLA
         pool = Counter(i.name for i in self.multiworld.itempool if i.player == self.player)
         for name in self.world.item_name_groups["Key Items"]:
-            self.assertEqual(pool[name], 1, name)
+            self.assertEqual(pool[name], 0 if name in LOCKED_VANILLA else 1, name)
+        for name in LOCKED_VANILLA:  # placed on their own spots instead
+            locs = [l for l in self.multiworld.get_locations(self.player) if l.item and l.item.name == name]
+            self.assertEqual(len(locs), 1, name)
+            self.assertTrue(locs[0].locked, name)
 
     def test_pickup_rooms_are_real(self) -> None:
         for loc in LOCATIONS:
@@ -110,7 +115,7 @@ class TestMerchantCheckOnly(RE4TestBase):
 
     def test_one_item_per_location(self) -> None:
         mine = [i for i in self.multiworld.itempool if i.player == self.player]
-        locs = [l for l in self.multiworld.get_locations(self.player) if l.address is not None]
+        locs = [l for l in self.multiworld.get_locations(self.player) if l.address is not None and not l.locked]
         self.assertEqual(len(mine), len(locs))
 
 
@@ -248,3 +253,33 @@ class TestMerchantKeptNotInPool(RE4TestBase):
         for name in ("Tactical Vest", "Stock (TMP)", "Stock (Red9)"):
             self.assertEqual(pool[name], 0, name)
         self.assertGreaterEqual(pool["Red9"], 1)
+
+
+class TestFillerOnlyChecks(RE4TestBase):
+    def test_bosses_handgun_special_caps(self) -> None:
+        from BaseClasses import LocationProgressType
+        for loc in self.multiworld.get_locations(self.player):
+            if loc.name.startswith("Defeat ") and loc.address is not None or loc.name == "Merchant: Buy Handgun" or \
+                    loc.name.endswith(("Ada Wong Cap", "Bella Sisters Cap", "Don Pedro Cap", "J.J Cap")):
+                self.assertEqual(loc.progress_type, LocationProgressType.EXCLUDED, loc.name)
+
+
+class TestKeepLocations(RE4TestBase):
+    def test_holy_beast_pieces_kept(self) -> None:
+        from ..data_loader import LOCATION_NAME_TO_ID
+        data = self.world.fill_slot_data()
+        for name in ("5-3 Pillared Platform: Piece of the Holy Beast, Panther",
+                     "5-3 Tower Roof: Piece of the Holy Beast, Eagle", "5-3 Tower Roof: Piece of the Holy Beast, Serpent"):
+            self.assertIn(LOCATION_NAME_TO_ID[name], data["keep_locations"], name)
+        for entry in data["locations"]:
+            if entry.get("keep"):
+                self.assertFalse(entry.get("c"), "consumable spots never keep (they're type-agnostic)")
+
+
+class TestVanillaKeyItemsKept(RE4TestBase):
+    options = {"shuffle_key_items": False}
+
+    def test_keep(self) -> None:
+        from ..data_loader import LOCATION_NAME_TO_ID
+        keep = set(self.world.fill_slot_data()["keep_locations"])
+        self.assertIn(LOCATION_NAME_TO_ID["1-2 Chief's House: Insignia Key"], keep)
