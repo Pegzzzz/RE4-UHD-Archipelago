@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.6
 - A received item that can't fit in a full case is never dropped when the game doesn't bring up the organize
   screen: it waits, a toast says to make room, and it's offered again every few seconds. (An item you leave behind
   in the organize screen yourself is still skipped, as before.)

@@ -47,7 +47,7 @@ namespace ap
 {
 	constexpr uint16_t kPort = 46400;
 	constexpr int kProtocolVersion = 2; // 2: checks/goal carry the seed tag, received items carry their location
-	constexpr const char* kModVersion = "0.5.5"; // the APWorld release this build belongs to (checked by the client)
+	constexpr const char* kModVersion = "0.5.6"; // the APWorld release this build belongs to (checked by the client)
 
 	constexpr uint32_t kSaveMagic = 0x52345041; // 'AP4R'
 	constexpr int kSlotBits = 28;   // 32 slots (28..59) = 1024 location bits
