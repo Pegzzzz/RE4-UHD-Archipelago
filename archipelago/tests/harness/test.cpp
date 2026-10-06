@@ -2047,6 +2047,26 @@ void W2()
 	End();
 }
 
+void W3()
+{
+	Begin("W3. Case full and the organize screen never comes up: the item waits and is retried, never lost");
+	Setup(0x101);
+	sim::setCaseFull(true);
+	sim::setIgnoreSubScreenOpen(true); // the game doesn't show the organize screen at all
+	size_t c0 = sim::conLines().size();
+	SetItems({ I_RIFLE });
+	Tick(120);
+	Expect(sim::saveWork(62) == 0 && sim::count(46) == 0, "index not advanced, nothing given");
+	Expect(ConContains(c0, "didn't open") && RenderContains("case is full"), "logged and told to make room");
+	Tick(400);
+	Expect(sim::saveWork(62) == 0, "still waiting after a failed retry");
+	sim::setIgnoreSubScreenOpen(false);
+	sim::setCaseFull(false);
+	Tick(400);
+	Expect(sim::count(46) == 1 && sim::saveWork(62) == 1, "delivered on the retry once there's room");
+	End();
+}
+
 int main()
 {
 	setvbuf(stdout, nullptr, _IONBF, 0);
@@ -2081,6 +2101,7 @@ int main()
 	U1(); U2(); U3(); U4(); U5(); U6();
 	V1(); V2(); V3();
 	W1(); W2();
+	W3();
 
 	printf("\n================ SUMMARY ================\n");
 	for (auto& r : results)

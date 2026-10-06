@@ -172,8 +172,10 @@ namespace ap
 	std::vector<Removal> pendingRemovals;
 
 	// A received item that went to the "case full" screen and hasn't appeared in the inventory yet
-	struct PendingGrant { bool active = false; uint16_t id = 0; uint32_t index = 0; uint64_t closedSince = 0; };
+	struct PendingGrant { bool active = false; uint16_t id = 0; uint32_t index = 0; uint64_t closedSince = 0; int screenFrames = 0; };
 	PendingGrant pendingGrant;
+	uint64_t grantRetryAfter = 0; // the organize screen didn't come up: try that item again after this frame
+	bool warnedCaseFull = false;
 
 	struct TrackedEm { uint32_t guid; uint8_t id; int16_t lastHp = 0; int16_t maxHp = 0; bool dying = false; };
 	std::unordered_map<uint32_t, TrackedEm> trackedBosses; // key: index in EmMgr
@@ -1281,6 +1283,7 @@ namespace ap
 		// 1. a received item that went through the "case full" screen
 		if (pendingGrant.active && pendingGrant.id == id)
 		{
+			warnedCaseFull = false;
 			SetAppliedIndex(pendingGrant.index + 1);
 			Send({ {"cmd", "received"}, {"received", pendingGrant.index + 1} });
 			pendingGrant = {};
@@ -1705,7 +1708,7 @@ namespace ap
 				if (SubScreenWk->get_item_id_2F6 == gid || (SubScreenWk->open_flag_2C & SS_OPEN_PZZL))
 				{
 					// case full: the game shows the organize screen and adds the item when the player places it
-					pendingGrant = { true, gid, index, 0 };
+					pendingGrant = { true, gid, index, 0, 0 };
 					done = false;
 				}
 				else if ((info.type_2 == ITEM_TYPE_KEY_ITEM || info.type_2 == ITEM_TYPE_IMPORTANT) && before == 0)
@@ -1781,16 +1784,37 @@ namespace ap
 	{
 		if (pendingGrant.active)
 		{
-			// organize screen closed but the item never landed: the player left it behind
+			if (SubScreenWk->open_flag_2C & SS_OPEN_PZZL)
+				pendingGrant.screenFrames++;
 			if (SafeForInventory())
 			{
 				if (!pendingGrant.closedSince)
 					pendingGrant.closedSince = frame;
 				else if (frame - pendingGrant.closedSince > kGrantGiveUpFrames)
 				{
-					Log("Received item was left behind in the organize screen");
-					SetAppliedIndex(pendingGrant.index + 1);
-					Send({ {"cmd", "received"}, {"received", pendingGrant.index + 1} });
+					if (pendingGrant.screenFrames >= 5)
+					{
+						// the organize screen was shown and closed without placing it: the player left it behind
+						Log("Received item #" + std::to_string(pendingGrant.index) + " (" + ItemName(pendingGrant.id) +
+							") was left behind in the organize screen");
+						SetAppliedIndex(pendingGrant.index + 1);
+						Send({ {"cmd", "received"}, {"received", pendingGrant.index + 1} });
+						warnedCaseFull = false;
+					}
+					else
+					{
+						// the organize screen never came up (the game was busy): never lose the item, try again
+						Log("Organize screen didn't open for received " + std::string(ItemName(pendingGrant.id)) +
+							"; trying again in a few seconds");
+						if (SubScreenWk->get_item_id_2F6 == pendingGrant.id)
+							SubScreenWk->get_item_id_2F6 = 0;
+						grantRetryAfter = frame + 300;
+						if (!warnedCaseFull)
+						{
+							warnedCaseFull = true;
+							AddToast(std::string("Your case is full: make room for ") + ItemName(pendingGrant.id));
+						}
+					}
 					pendingGrant = {};
 				}
 			}
@@ -1812,6 +1836,8 @@ namespace ap
 		if (index >= received.size())
 			return;
 		if (index == refusedIndex && frame - refusedFrame < 300)
+			return;
+		if (grantRetryAfter && frame < grantRetryAfter)
 			return;
 		// found at a location that holds its own vanilla item: Leon kept that copy, so nothing to deliver
 		{

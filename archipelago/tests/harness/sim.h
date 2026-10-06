@@ -33,6 +33,7 @@ namespace sim
 	void setStatus(int idx, bool on);
 	void setChar(uint8_t c);              // ItemMgr->m_char_13
 	void setCaseFull(bool full);          // PutInCase always fails
+	void setIgnoreSubScreenOpen(bool i);  // SubScreenOpen does nothing (the game was busy)
 	void setDeferredSubScreenOpen(bool d);// SubScreenOpen takes effect on the next game frame
 	uint16_t getItemId();
 	void setGetItem(uint16_t id, uint16_t num);

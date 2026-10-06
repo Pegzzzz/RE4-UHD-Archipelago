@@ -33,6 +33,7 @@ namespace
 
 	bool caseFull = false;
 	bool deferredOpen = false;
+	bool ignoreOpen = false;
 	uint32_t pendingOpenFlag = 0;
 	int sndCount = 0;
 	std::vector<std::string> gCon, gRender;
@@ -138,6 +139,8 @@ namespace
 
 	void OpenSubScreen(uint32_t f)
 	{
+		if (ignoreOpen)
+			return;
 		if (deferredOpen)
 			pendingOpenFlag |= f;
 		else
@@ -280,6 +283,7 @@ namespace sim
 		memset(items, 0, sizeof(items));
 		caseFull = false;
 		deferredOpen = false;
+		ignoreOpen = false;
 		pendingOpenFlag = 0;
 		gOptionOpen = false;
 
@@ -327,6 +331,7 @@ namespace sim
 	void setChar(uint8_t c) { MGR()->m_char_13 = c; }
 	void setCaseFull(bool f) { caseFull = f; }
 	void setDeferredSubScreenOpen(bool d) { deferredOpen = d; }
+	void setIgnoreSubScreenOpen(bool i) { ignoreOpen = i; }
 	uint16_t getItemId() { return SS()->get_item_id_2F6; }
 	void setGetItem(uint16_t id, uint16_t num) { SS()->get_item_id_2F6 = id; SS()->get_item_num_2F8 = num; }
 

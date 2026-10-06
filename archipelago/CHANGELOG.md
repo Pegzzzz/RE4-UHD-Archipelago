@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+- A received item that can't fit in a full case is never dropped when the game doesn't bring up the organize
+  screen: it waits, a toast says to make room, and it's offered again every few seconds. (An item you leave behind
+  in the organize screen yourself is still skipped, as before.)
+
 ## 0.5.5
 - New `enemy_drop_checks` (0-30 per area, default 0): enemies can drop important items. Every drop picked up (ammo,
   herbs, grenades, pesetas, random barrel contents) sends the area's next drop check; the drop is kept. These
