@@ -258,6 +258,11 @@ Type these in the Resident Evil 4 UHD Client:
 **"The game mod is out of date"** (in game or in the client)
 You updated the APWorld but not the game mod. Close the game, type `/setup` in the client, start the game again.
 
+**"Couldn't start the randomizer: [WinError 740] The requested operation requires elevation"**
+re_duke's randomizer asks for administrator rights. The settings are already written: open the randomizer's
+`.exe` in the game folder yourself, accept the admin prompt, and click Generate Seed. (Since 0.5.7 the client
+shows the admin prompt itself.)
+
 **"Easy isn't supported"**
 Start a New Game on Normal or Professional.
 

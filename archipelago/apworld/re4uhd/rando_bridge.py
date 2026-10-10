@@ -221,9 +221,30 @@ def apply_profile(rando: str, settings: Dict[str, object]) -> List[str]:
     return unknown
 
 
-def launch_rando(rando: str) -> subprocess.Popen:
+ERROR_ELEVATION_REQUIRED = 740
+
+
+def _shell_execute_elevated(exe: str, cwd: str) -> None:
+    import ctypes
+    # "runas" shows the Windows admin prompt; a result of 32 or less is an error (e.g. the prompt was declined)
+    result = ctypes.windll.shell32.ShellExecuteW(None, "runas", exe, None, cwd, 1)
+    if result <= 32:
+        raise OSError(f"Windows didn't start it as administrator (code {result}); "
+                      f"open {exe} yourself and accept the admin prompt")
+
+
+def launch_rando(rando: str, elevate=None) -> Optional[subprocess.Popen]:
     # the randomizer resolves its files relative to its own folder (./Tools, ../Bin32)
-    return subprocess.Popen([os.path.join(rando, RANDO_EXE)], cwd=rando)
+    exe = os.path.join(rando, RANDO_EXE)
+    try:
+        return subprocess.Popen([exe], cwd=rando)
+    except OSError as e:
+        # the randomizer asks for administrator rights (or the game is under Program Files): Popen can't show the
+        # admin prompt (WinError 740), so ask Windows to start it the way a double-click would
+        if getattr(e, "winerror", None) != ERROR_ELEVATION_REQUIRED:
+            raise
+        (elevate or _shell_execute_elevated)(exe, rando)
+        return None
 
 
 def latest_seedlog(rando: str) -> Optional[str]:

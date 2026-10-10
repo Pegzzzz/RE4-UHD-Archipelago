@@ -379,3 +379,22 @@ class TestNoConfigWithoutSlot(unittest.TestCase):
             await ctx.shutdown()
 
         asyncio.run(run())
+
+
+class TestLaunchElevation(unittest.TestCase):
+    def test_admin_prompt_when_elevation_required(self) -> None:
+        import subprocess
+        from unittest import mock
+        err = OSError("The requested operation requires elevation")
+        err.winerror = rb.ERROR_ELEVATION_REQUIRED
+        calls = []
+        with mock.patch.object(subprocess, "Popen", side_effect=err):
+            self.assertIsNone(rb.launch_rando("C:/game/rando", elevate=lambda exe, cwd: calls.append((exe, cwd))))
+        self.assertEqual(calls, [(os.path.join("C:/game/rando", rb.RANDO_EXE), "C:/game/rando")])
+
+    def test_other_errors_still_raise(self) -> None:
+        import subprocess
+        from unittest import mock
+        with mock.patch.object(subprocess, "Popen", side_effect=FileNotFoundError("missing")):
+            with self.assertRaises(FileNotFoundError):
+                rb.launch_rando("C:/game/rando", elevate=lambda exe, cwd: self.fail("no admin prompt for this"))
